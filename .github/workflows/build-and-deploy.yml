@@ -25,12 +25,8 @@ jobs:
       - name: Build and Deploy Process
         id: deploy_process
         run: |
-          echo "Starting deployment process..."
-          
-          # Install Composer dependencies
-          echo "Installing Composer dependencies..."
-          composer install --prefer-dist --no-progress --no-suggest || exit 1
-          
+          echo "Starting deployment v1 process..."
+
           # Install Node dependencies
           echo "Installing Node dependencies..."
           npm install || exit 1
@@ -38,16 +34,6 @@ jobs:
           # Build assets with npm
           echo "Running npm run build..."
           npm run build || exit 1
-          
-          # Run PHPCBF for PHP code quality check - show errors but do not fail the build
-          echo "Running PHPCBF for code quality check..."
-          set +e
-          ./vendor/bin/phpcbf . -d memory_limit=1024M
-          result=$?
-          if [ $result -ne 0 ]; then
-            echo "PHPCBF found some issues but continuing deployment..."
-          fi
-          set -e
 
           # Prepare build artifacts by excluding specified files and folders
           echo "Preparing build artifacts..."
