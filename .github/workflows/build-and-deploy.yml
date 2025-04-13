@@ -63,11 +63,15 @@ jobs:
           
           # Deploy build artifacts to the master-build branch
           echo "Deploying artifacts to the master-build branch..."
+          echo "Logging: Initializing git repository..."
           git init
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
+          echo "Logging: Adding build artifacts to git..."
           git add .
+          echo "Logging: Committing changes..."
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
+          echo "Logging: Creating master-build branch..."
           git branch -M master-build
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push --force origin master-build
