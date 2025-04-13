@@ -6,40 +6,67 @@ on:
       - master
 
 jobs:
+  # Job to set up PHP; runs concurrently with setup_node
+  setup_php:
+    runs-on: macos-latest
+    outputs:
+      php_setup: done
+    steps:
+      - name: Checkout Code (for PHP setup)
+        uses: actions/checkout@v3
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+      - name: Mark PHP Setup Complete
+        run: echo "PHP environment setup complete."
+  
+  # Job to set up Node; runs concurrently with setup_php
+  setup_node:
+    runs-on: macos-latest
+    outputs:
+      node_setup: done
+    steps:
+      - name: Checkout Code (for Node setup)
+        uses: actions/checkout@v3
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Mark Node Setup Complete
+        run: echo "Node environment setup complete."
+  
+  # Job to install WP-CLI; waits for both PHP and Node to be set up
+  install_wpcli:
+    needs: [setup_php, setup_node]
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install WP-CLI using Homebrew
+        run: |
+          echo "Installing WP-CLI using Homebrew..."
+          brew install wp-cli
+  
+  # Build and Deploy job; runs after WP-CLI is installed
   build_deploy:
+    needs: install_wpcli
     runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-  setup_php:
-    runs-on: macos-latest
-    steps:
+      # Re-run the environment setups in the build job so that the runner is properly configured
       - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
-
-  setup_node:
-    runs-on: macos-latest
-    steps:
+      
       - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
           node-version: '22'
 
-  install_wp_cli:
-    runs-on: macos-latest
-    steps:
-      - name: Install WP-CLI
-        run: |
-          echo "Installing WP-CLI using Homebrew..."
-          brew install wp-cli
-
-  build_deploy_process:
-    needs: [setup_php, setup_node, install_wp_cli]
-    runs-on: macos-latest
-    steps:
       - name: Build and Deploy Process
         id: deploy_process
         run: |
@@ -67,17 +94,9 @@ jobs:
           fi
           set -e
 
-          # Prepare build artifacts by excluding specified files and folders
+          # Prepare build artifacts by removing unnecessary files and folders
           echo "Preparing build artifacts..."
-          rm -r vendor
-          rm -r node_modules
-          rm -r .github
-          rm -r .git
-          rm -r .gitignore
-          rm -r package-lock.json
-          rm -r package.json
-          rm -r composer.json
-          rm -r composer.lock
+          rm -rf vendor node_modules .github .git .gitignore package-lock.json package.json composer.json composer.lock
           
           # Deploy build artifacts to the master-build branch
           echo "Deploying artifacts to the master-build branch..."
