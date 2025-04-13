@@ -6,94 +6,57 @@ on:
       - master
 
 jobs:
-  setup_php:
+  build_deploy:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      
       - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
-      - name: Install Composer Dependencies
-        run: |
-          echo "Installing Composer dependencies..."
-          composer install --prefer-dist --no-progress --no-suggest || exit 1
-      - name: Upload Composer Vendor
-        uses: actions/upload-artifact@v3
-        with:
-          name: vendor
-          path: vendor/
-
-  setup_node:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      
       - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-      - name: Install Node Dependencies
+      
+      - name: Install Dependencies Concurrently
         run: |
-          echo "Installing Node dependencies..."
-          npm install || exit 1
-      - name: Upload Node Modules
-        uses: actions/upload-artifact@v3
-        with:
-          name: node_modules
-          path: node_modules/
-
-  install_wpcli:
-    needs: [setup_php, setup_node]
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Install WP-CLI using Homebrew
+          echo "Starting concurrent dependency installation..."
+          # Run Composer install in the background
+          composer install --prefer-dist --no-progress --no-suggest &
+          COMPOSER_PID=$!
+          # Run NPM install in the background
+          npm install &
+          NPM_PID=$!
+          # Wait for Composer installation and capture its exit code
+          wait $COMPOSER_PID
+          COMPOSER_EXIT=$?
+          echo "Composer install exit code: $COMPOSER_EXIT"
+          # Wait for NPM installation and capture its exit code
+          wait $NPM_PID
+          NPM_EXIT=$?
+          echo "npm install exit code: $NPM_EXIT"
+          if [ $COMPOSER_EXIT -ne 0 ] || [ $NPM_EXIT -ne 0 ]; then
+            echo "One of the dependency installations failed. Exiting."
+            exit 1
+          fi
+          echo "Dependency installation complete."
+      
+      - name: Install WP-CLI
         run: |
           echo "Installing WP-CLI using Homebrew..."
           brew install wp-cli
-
-  build_deploy:
-    needs: install_wpcli
-    runs-on: macos-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Setup PHP Environment
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
       
-      - name: Setup Node Environment
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-      
-      - name: Download Composer Vendor
-        uses: actions/download-artifact@v3
-        with:
-          name: vendor
-          path: .
-      
-      - name: Download Node Modules
-        uses: actions/download-artifact@v3
-        with:
-          name: node_modules
-          path: .
-
-      - name: Build and Deploy Process
-        id: deploy_process
+      - name: Build Assets
         run: |
-          echo "Starting deployment v1.3 process..."
-          
-          # Build assets with npm (using pre-installed node_modules)
           echo "Running npm run build..."
           npm run build || exit 1
-          
-          # Run PHPCBF for PHP code quality check - display errors but do not fail the build
+      
+      - name: Run PHPCBF for PHP Code Quality Check
+        run: |
           echo "Running PHPCBF for code quality check..."
           set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
@@ -102,22 +65,24 @@ jobs:
             echo "PHPCBF found some issues but continuing deployment..."
           fi
           set -e
-
-          # Prepare build artifacts by removing unnecessary files and directories
+      
+      - name: Prepare Build Artifacts
+        run: |
           echo "Preparing build artifacts..."
           rm -rf vendor node_modules .github .git .gitignore package-lock.json package.json composer.json composer.lock
-          
-          # Deploy build artifacts to the master-build branch
+      
+      - name: Deploy Build Artifacts
+        run: |
           echo "Deploying artifacts to the master-build branch..."
-          echo "Logging: Initializing git repository..."
+          echo "Initializing git repository..."
           git init
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
-          echo "Logging: Adding build artifacts to git..."
+          echo "Adding build artifacts..."
           git add .
-          echo "Logging: Committing changes..."
+          echo "Committing changes..."
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
-          echo "Logging: Creating master-build branch..."
+          echo "Creating master-build branch..."
           git branch -M master-build
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git push --force origin master-build
