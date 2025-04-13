@@ -51,20 +51,24 @@ jobs:
 
           # Prepare build artifacts by excluding specified files and folders
           echo "Preparing build artifacts..."
-          mkdir -p build
-          rsync -av --delete \
-            --exclude='.gitignore' \
-            --exclude='vendor' \
-            --exclude='node-modules' \
-            --exclude='package.json' \
-            --exclude='package-lock.json' \
-            --exclude='composer.json' \
-            --exclude='.github' \
-            ./ build/
+          rm -r vendor
+          rm -r node_modules
+          rm -r .github
+          rm -r .git
+          rm -r .gitignore
+          rm -r .gitattributes
+          rm -r .env
+          rm -r .env.example
+          rm -r .DS_Store
+          rm -r .idea
+          rm -r .vscode
+          rm -r package-lock.json
+          rm -r package.json
+          rm -r composer.json
+          rm -r composer.lock
           
           # Deploy build artifacts to the master-build branch
           echo "Deploying artifacts to the master-build branch..."
-          cd build
           git init
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
