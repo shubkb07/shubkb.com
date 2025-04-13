@@ -20,12 +20,12 @@ jobs:
       - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Update this if you need a newer version
+          node-version: '22'
 
       - name: Build and Deploy Process
         id: deploy_process
         run: |
-          echo "Starting deployment v1 process..."
+          echo "Starting deployment v1.1 process..."
 
           # Install Node dependencies
           echo "Installing Node dependencies..."
