@@ -56,12 +56,6 @@ jobs:
           rm -r .github
           rm -r .git
           rm -r .gitignore
-          rm -r .gitattributes
-          rm -r .env
-          rm -r .env.example
-          rm -r .DS_Store
-          rm -r .idea
-          rm -r .vscode
           rm -r package-lock.json
           rm -r package.json
           rm -r composer.json
