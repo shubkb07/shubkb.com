@@ -6,37 +6,44 @@ on:
       - master
 
 jobs:
-  # Job to set up PHP; runs concurrently with setup_node
   setup_php:
     runs-on: macos-latest
-    outputs:
-      php_setup: done
     steps:
-      - name: Checkout Code (for PHP setup)
+      - name: Checkout Code
         uses: actions/checkout@v3
       - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
-      - name: Mark PHP Setup Complete
-        run: echo "PHP environment setup complete."
-  
-  # Job to set up Node; runs concurrently with setup_php
+      - name: Install Composer Dependencies
+        run: |
+          echo "Installing Composer dependencies..."
+          composer install --prefer-dist --no-progress --no-suggest || exit 1
+      - name: Upload Composer Vendor
+        uses: actions/upload-artifact@v3
+        with:
+          name: vendor
+          path: vendor/
+
   setup_node:
     runs-on: macos-latest
-    outputs:
-      node_setup: done
     steps:
-      - name: Checkout Code (for Node setup)
+      - name: Checkout Code
         uses: actions/checkout@v3
       - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
           node-version: '22'
-      - name: Mark Node Setup Complete
-        run: echo "Node environment setup complete."
-  
-  # Job to install WP-CLI; waits for both PHP and Node to be set up
+      - name: Install Node Dependencies
+        run: |
+          echo "Installing Node dependencies..."
+          npm install || exit 1
+      - name: Upload Node Modules
+        uses: actions/upload-artifact@v3
+        with:
+          name: node_modules
+          path: node_modules/
+
   install_wpcli:
     needs: [setup_php, setup_node]
     runs-on: macos-latest
@@ -47,8 +54,7 @@ jobs:
         run: |
           echo "Installing WP-CLI using Homebrew..."
           brew install wp-cli
-  
-  # Build and Deploy job; runs after WP-CLI is installed
+
   build_deploy:
     needs: install_wpcli
     runs-on: macos-latest
@@ -56,7 +62,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Re-run the environment setups in the build job so that the runner is properly configured
       - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
@@ -66,25 +71,29 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '22'
+      
+      - name: Download Composer Vendor
+        uses: actions/download-artifact@v3
+        with:
+          name: vendor
+          path: .
+      
+      - name: Download Node Modules
+        uses: actions/download-artifact@v3
+        with:
+          name: node_modules
+          path: .
 
       - name: Build and Deploy Process
         id: deploy_process
         run: |
-          echo "Starting deployment v1.2 process..."
+          echo "Starting deployment v1.3 process..."
           
-          # Install Composer dependencies
-          echo "Installing Composer dependencies..."
-          composer install --prefer-dist --no-progress --no-suggest || exit 1
-          
-          # Install Node dependencies
-          echo "Installing Node dependencies..."
-          npm install || exit 1
-          
-          # Build assets with npm
+          # Build assets with npm (using pre-installed node_modules)
           echo "Running npm run build..."
           npm run build || exit 1
           
-          # Run PHPCBF for PHP code quality check - show errors but do not fail the build
+          # Run PHPCBF for PHP code quality check - display errors but do not fail the build
           echo "Running PHPCBF for code quality check..."
           set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
@@ -94,7 +103,7 @@ jobs:
           fi
           set -e
 
-          # Prepare build artifacts by removing unnecessary files and folders
+          # Prepare build artifacts by removing unnecessary files and directories
           echo "Preparing build artifacts..."
           rm -rf vendor node_modules .github .git .gitignore package-lock.json package.json composer.json composer.lock
           
