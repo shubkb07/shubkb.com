@@ -1,4 +1,4 @@
-name: Build and Deploy to Master-Build on Merge
+name: Example Parallel Workflow
 
 on:
   push:
@@ -6,83 +6,69 @@ on:
       - master
 
 jobs:
-  build_deploy:
-    runs-on: macos-latest
+  # 1. Setup PHP → Composer install → WP-CLI install
+  php_setup:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Check Out Code
         uses: actions/checkout@v3
-      
-      - name: Setup PHP Environment
+
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
-      
-      - name: Setup Node Environment
+
+      - name: Composer Install
+        run: |
+          echo "Installing Composer dependencies..."
+          composer install --prefer-dist --no-progress --no-suggest
+
+      - name: WP-CLI Install
+        run: |
+          echo "Installing WP-CLI..."
+          # Example installation steps for WP-CLI:
+          # For Ubuntu:
+          # sudo apt-get update
+          # sudo apt-get install -y php-cli
+          # curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          # chmod +x wp-cli.phar
+          # sudo mv wp-cli.phar /usr/local/bin/wp
+          echo "WP-CLI installed successfully (placeholder)."
+
+  # 2. Setup Node → npm install
+  node_setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
-      
-      - name: Install Dependencies Concurrently
+          node-version: '16'
+
+      - name: npm Install
         run: |
-          echo "Starting concurrent dependency installation..."
-          # Run Composer install in the background
-          composer install --prefer-dist --no-progress --no-suggest &
-          COMPOSER_PID=$!
-          # Run NPM install in the background
-          npm install &
-          NPM_PID=$!
-          # Wait for Composer installation and capture its exit code
-          wait $COMPOSER_PID
-          COMPOSER_EXIT=$?
-          echo "Composer install exit code: $COMPOSER_EXIT"
-          # Wait for NPM installation and capture its exit code
-          wait $NPM_PID
-          NPM_EXIT=$?
-          echo "npm install exit code: $NPM_EXIT"
-          if [ $COMPOSER_EXIT -ne 0 ] || [ $NPM_EXIT -ne 0 ]; then
-            echo "One of the dependency installations failed. Exiting."
-            exit 1
-          fi
-          echo "Dependency installation complete."
-      
-      - name: Install WP-CLI
+          echo "Installing NPM dependencies..."
+          npm install
+
+  # 3. Build job depends on both the php_setup and node_setup jobs
+  build:
+    needs: [php_setup, node_setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v3
+
+      - name: Final Build Step
         run: |
-          echo "Installing WP-CLI using Homebrew..."
-          brew install wp-cli
-      
-      - name: Build Assets
-        run: |
+          echo "Starting final build..."
+          # If the build requires PHP or Node, you'll want to set them up again 
+          # because each job runs on a fresh runner environment. 
+          # But for simplicity, we assume you only need the existing code to run 'npm run build'.
+          
           echo "Running npm run build..."
-          npm run build || exit 1
-      
-      - name: Run PHPCBF for PHP Code Quality Check
-        run: |
-          echo "Running PHPCBF for code quality check..."
-          set +e
-          ./vendor/bin/phpcbf . -d memory_limit=1024M
-          result=$?
-          if [ $result -ne 0 ]; then
-            echo "PHPCBF found some issues but continuing deployment..."
-          fi
-          set -e
-      
-      - name: Prepare Build Artifacts
-        run: |
-          echo "Preparing build artifacts..."
-          rm -rf vendor node_modules .github .git .gitignore package-lock.json package.json composer.json composer.lock
-      
-      - name: Deploy Build Artifacts
-        run: |
-          echo "Deploying artifacts to the master-build branch..."
-          echo "Initializing git repository..."
-          git init
-          git config user.name "Shubham Kumar Bansal"
-          git config user.email "shub@shubkb.com"
-          echo "Adding build artifacts..."
-          git add .
-          echo "Committing changes..."
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
-          echo "Creating master-build branch..."
-          git branch -M master-build
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push --force origin master-build
+          npm install  # If needed again for the final runner
+          npm run build
+          
+          echo "Build completed successfully!"
