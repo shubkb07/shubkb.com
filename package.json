@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "build": "echo \"Yes Echoed\" && exit 1"
+    "build": "echo \"Yes Echoed\""
   },
   "dependencies": {
     "express": "^5.1.0"
