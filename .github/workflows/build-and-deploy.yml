@@ -1,0 +1,75 @@
+name: Build and Deploy to Master-Build on Merge
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Update this if you need a newer version
+
+      - name: Build and Deploy Process
+        id: deploy_process
+        run: |
+          echo "Starting deployment process..."
+          
+          # Install Composer dependencies
+          echo "Installing Composer dependencies..."
+          composer install --prefer-dist --no-progress --no-suggest || exit 1
+          
+          # Install Node dependencies
+          echo "Installing Node dependencies..."
+          npm install || exit 1
+          
+          # Build assets with npm
+          echo "Running npm run build..."
+          npm run build || exit 1
+          
+          # Run PHPCBF for PHP code quality check - show errors but do not fail the build
+          echo "Running PHPCBF for code quality check..."
+          set +e
+          ./vendor/bin/phpcbf . -d memory_limit=1024M
+          result=$?
+          if [ $result -ne 0 ]; then
+            echo "PHPCBF found some issues but continuing deployment..."
+          fi
+          set -e
+
+          # Prepare build artifacts by excluding specified files and folders
+          echo "Preparing build artifacts..."
+          mkdir -p build
+          rsync -av --delete \
+            --exclude='.gitignore' \
+            --exclude='vendor' \
+            --exclude='node-modules' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='composer.json' \
+            --exclude='.github' \
+            ./ build/
+          
+          # Deploy build artifacts to the master-build branch
+          echo "Deploying artifacts to the master-build branch..."
+          cd build
+          git init
+          git config user.name "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add .
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
+          git branch -M master-build
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --force origin master-build
