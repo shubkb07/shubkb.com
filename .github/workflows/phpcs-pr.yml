@@ -1,0 +1,46 @@
+name: PR PHPCS Report
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  phpcs_report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Install Composer Dependencies
+        run: |
+          # Installing PHP packages using Composer
+          composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run PHPCS
+        id: run_phpcs
+        run: |
+          set -e
+          echo "Running PHPCS to check code style issues..."
+          # Run PHPCS with increased memory limit. Any output (errors/warnings) is captured.
+          PHPCS_OUTPUT=$(./vendor/bin/phpcs . -d memory_limit=1024M 2>&1) || true
+          echo "$PHPCS_OUTPUT" > phpcs_output.txt
+          echo "::set-output name=output::$PHPCS_OUTPUT"
+          echo "PHPCS completed. Check phpcs_output.txt for details."
+
+      - name: Create PR Comment with PHPCS Report
+        if: steps.run_phpcs.outputs.output != ''
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ## PHPCS Report
+            The following code style issues were detected by PHPCS:
+            ```
+            ${{ steps.run_phpcs.outputs.output }}
+            ```

@@ -1,0 +1,25 @@
+{
+    "name": "shub/shubkb",
+    "autoload": {
+        "psr-4": {
+            "Shub\\Shubkb\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "shubkb07",
+            "email": "shub@shubkb.com"
+        }
+    ],
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*",
+        "wp-coding-standards/wpcs": "*",
+        "phpcompatibility/php-compatibility": "*",
+        "phpcompatibility/phpcompatibility-wp": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
