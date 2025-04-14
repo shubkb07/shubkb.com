@@ -73,8 +73,7 @@ jobs:
           # But for simplicity, we assume you only need the existing code to run 'npm run build'.
           
           echo "Running npm run build..."
-          npm install  # If needed again for the final runner
-          # npm run build || exit 1
+          npm run build || exit 1
            
           # Run PHPCBF for PHP code quality check - show errors but do not fail the build
           echo "Running PHPCBF for code quality check..."
