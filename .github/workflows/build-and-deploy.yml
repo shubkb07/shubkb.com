@@ -1,4 +1,4 @@
-name: Example Parallel Workflow
+name: Build and Deploy
 
 on:
   push:
@@ -6,69 +6,117 @@ on:
       - master
 
 jobs:
-  # 1. Setup PHP → Composer install → WP-CLI install
+  # Job to set up PHP, cache & install Composer dependencies, and install WP-CLI via brew.
   php_setup:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
 
-      - name: Setup PHP
+      - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
+
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Composer Install
         run: |
           echo "Installing Composer dependencies..."
           composer install --prefer-dist --no-progress --no-suggest
 
-      - name: WP-CLI Install
+      - name: Install WP-CLI using Homebrew
         run: |
-          echo "Installing WP-CLI..."
-          # Example installation steps for WP-CLI:
-          # For Ubuntu:
-          # sudo apt-get update
-          # sudo apt-get install -y php-cli
-          # curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-          # chmod +x wp-cli.phar
-          # sudo mv wp-cli.phar /usr/local/bin/wp
-          echo "WP-CLI installed successfully (placeholder)."
+          echo "Installing WP-CLI using Homebrew..."
+          brew update && brew install wp-cli
+          echo "WP-CLI installed successfully."
 
-  # 2. Setup Node → npm install
+  # Job to set up Node, cache & install npm dependencies.
   node_setup:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
 
-      - name: Setup Node
+      - name: Setup Node Environment
         uses: actions/setup-node@v3
         with:
           node-version: '22'
+
+      - name: Cache Node Modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
       - name: npm Install
         run: |
           echo "Installing NPM dependencies..."
           npm install
 
-  # 3. Build job depends on both the php_setup and node_setup jobs
+  # Final build job depends on php_setup and node_setup.
   build:
     needs: [php_setup, node_setup]
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
 
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+
+      - name: Setup Node Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Cache Node Modules (Build)
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: npm Install (Build)
+        run: |
+          echo "Installing Node dependencies for build..."
+          npm install
+
       - name: Final Build Step
         run: |
           echo "Starting final build..."
-          # If the build requires PHP or Node, you'll want to set them up again 
-          # because each job runs on a fresh runner environment. 
-          # But for simplicity, we assume you only need the existing code to run 'npm run build'.
-          
           echo "Running npm run build..."
-          npm install  # If needed again for the final runner
-          npm run build
+          npm run build || exit 1
           
-          echo "Build completed successfully!"
+          echo "Running PHPCBF for code quality check..."
+          set +e
+          ./vendor/bin/phpcbf . -d memory_limit=1024M
+          result=$?
+          if [ $result -ne 0 ]; then
+            echo "PHPCBF found some issues but continuing deployment..."
+          fi
+          set -e
+          
+          echo "Preparing build artifacts..."
+          rm -rf vendor node_modules .github .git .gitignore package-lock.json package.json composer.json composer.lock
+          
+          echo "Deploying artifacts to the master-build branch..."
+          git init
+          git config user.name "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add .
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
+          git branch -M master-build
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --force origin master-build

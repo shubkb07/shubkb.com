@@ -1,0 +1,11 @@
+{
+    "name": "shub/wisesync",
+    "type": "plugin",
+    "authors": [
+        {
+            "name": "shubkb07",
+            "email": "shub@shubkb.com"
+        }
+    ],
+    "require": {}
+}

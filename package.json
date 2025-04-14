@@ -16,14 +16,15 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build:blocks:plugin:wisesync && npm run build:blocks:theme:papersync",
-    "build:blocks:plugin:wisesync": "wp-scripts  --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./plugins/wisesync/blocks/src --output-path=./plugins/wisesync/blocks/build",
-    "build:blocks:theme:papersync": "wp-scripts  --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./themes/papersync/blocks/src --output-path=./themes/papersync/blocks/build"
+    "build:blocks:plugin:wisesync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./plugins/wisesync/blocks/src --output-path=./plugins/wisesync/blocks/build",
+    "build:blocks:theme:papersync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./themes/papersync/blocks/src --output-path=./themes/papersync/blocks/build"
   },
   "dependencies": {
     "express": "^5.1.0"
   },
   "devDependencies": {
     "@wordpress/api-fetch": "^7.22.0",
+    "@wordpress/blocks": "^14.11.0",
     "@wordpress/components": "^29.8.0",
     "@wordpress/compose": "^7.22.0",
     "@wordpress/element": "^6.22.0",
