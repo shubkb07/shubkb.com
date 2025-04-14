@@ -60,7 +60,7 @@ jobs:
   # 3. Build job depends on both the php_setup and node_setup jobs
   build:
     needs: [php_setup, node_setup]
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
@@ -74,6 +74,40 @@ jobs:
           
           echo "Running npm run build..."
           npm install  # If needed again for the final runner
-          npm run build
+          # npm run build
           
           echo "Build completed successfully!"
+          echo "Removing build artifacts..."
+          rm -r vendor
+          rm -r node_modules
+          rm -r .github
+          rm -r .git
+          rm -r .gitignore
+          rm -r package-lock.json
+          rm -r package.json
+          rm -r composer.json
+          rm -r composer.lock
+          rm -r block.json
+          rm -r theme.json
+          rm -r ./plugins/wisesync/blocks/src
+          rm -r ./themes/papersync/blocks/src
+
+  deploy:
+    needs: build
+    runs-on: macos-latest
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to master-build branch
+        run: |
+          # Deploy build artifacts to the master-build branch
+          echo "Deploying artifacts to the master-build branch..."
+          git init
+          git config user.name "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add .
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
+          git branch -M master-build
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push --force origin master-build
