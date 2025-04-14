@@ -1,0 +1,68 @@
+.wp-block-anfco-award-slider {
+
+	.anfco-award-slider {
+
+		&.splide {
+			visibility: visible;
+
+			.splide__list {
+				display: flex;
+				flex-wrap: nowrap;
+				overflow-x: scroll;
+			}
+
+			.splide__slide {
+				max-width: 24%;
+				margin-right: 1%;
+			}
+
+			.emp-quote-content-box {
+				padding: 0;
+				margin-top: 60px;
+			}
+		}
+
+		&.style-2.splide {
+
+			.splide__slide {
+				max-width: 33.33%;
+			}
+		}
+
+	}
+
+	.no-post-found {
+		border: 2px dashed var(--wp--preset--color--tertiary-light);
+		border-radius: 4px;
+		flex: 0 0 100%;
+		font-weight: 700;
+		max-width: 100%;
+		padding: 100px 20px;
+		text-align: center;
+
+		@media (min-width: 1120px) {
+			padding: 100px;
+		}
+	}
+
+	.anfco-awards-section {
+		visibility: visible;
+
+		.anfco-awards-list {
+			display: flex;
+			flex-wrap: nowrap;
+			overflow-x: scroll;
+			justify-content: normal;
+
+			.anfco-awards-list-item {
+				max-width: 24%;
+				margin-right: 1%;
+			}
+		}
+
+		.emp-quote-content-box {
+			padding: 0;
+			margin-top: 60px;
+		}
+	}
+}
