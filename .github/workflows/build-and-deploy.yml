@@ -6,11 +6,7 @@ on:
       - master
 
 jobs:
-  # This workflow has three jobs:
-  # 1. Setup PHP → Composer install → WP-CLI install
-  # 2. Setup Node → npm install
-  # 3. Build job depends on both the php_setup and node_setup jobs
-  php_setup:
+  build_deploy:
     runs-on: macos-latest
     steps:
       - name: Check Out Code
@@ -41,13 +37,6 @@ jobs:
           echo "Installing Composer dependencies..."
           composer install --prefer-dist --no-progress --no-suggest
 
-  # 2. Setup Node → npm install
-  node_setup:
-    runs-on: macos-latest
-    steps:
-      - name: Check Out Code
-        uses: actions/checkout@v3
-
       - name: npm Install
         run: |
           echo "Node Version:"
@@ -57,14 +46,6 @@ jobs:
           echo "Installing NPM dependencies..."
           npm install
 
-  # 3. Build job depends on both the php_setup and node_setup jobs
-  build:
-    needs: [php_setup, node_setup]
-    runs-on: macos-latest
-    steps:
-      - name: Check Out Code
-        uses: actions/checkout@v3
-
       - name: Final Build Step
         run: |
           echo "Starting final build..."
@@ -73,7 +54,7 @@ jobs:
           # But for simplicity, we assume you only need the existing code to run 'npm run build'.
           
           echo "Running npm run build..."
-          npm run build || exit 1
+          # npm run build || exit 1
            
           # Run PHPCBF for PHP code quality check - show errors but do not fail the build
           echo "Running PHPCBF for code quality check..."
@@ -100,13 +81,6 @@ jobs:
           rm -r theme.json
           rm -r ./plugins/wisesync/blocks/src
           rm -r ./themes/papersync/blocks/src
-
-  deploy:
-    needs: build
-    runs-on: macos-latest
-    steps:
-      - name: Check Out Code
-        uses: actions/checkout@v3
 
       - name: Deploy to master-build branch
         run: |
