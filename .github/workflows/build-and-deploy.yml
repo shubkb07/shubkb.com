@@ -74,12 +74,22 @@ jobs:
           
           echo "Running npm run build..."
           npm install  # If needed again for the final runner
-          # npm run build
+          # npm run build || exit 1
+           
+          # Run PHPCBF for PHP code quality check - show errors but do not fail the build
+          echo "Running PHPCBF for code quality check..."
+          set +e
+          ./vendor/bin/phpcbf . -d memory_limit=1024M
+          result=$?
+          if [ $result -ne 0 ]; then
+            echo "PHPCBF found some issues but continuing deployment..."
+          fi
+          set -e
           
           echo "Build completed successfully!"
           echo "Removing build artifacts..."
-          rm -r vendor
           rm -r node_modules
+          rm -r vendor
           rm -r .github
           rm -r .git
           rm -r .gitignore
