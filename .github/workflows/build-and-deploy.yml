@@ -16,6 +16,13 @@ jobs:
       - name: Check Out Code
         uses: actions/checkout@v3
 
+      - name: Setup PHP
+        run: |
+          echo "Setting up PHP..."
+          # Example installation steps for PHP:
+          # For macOS:
+          brew install php
+
       - name: WP-CLI Install
         run: |
           echo "PHP Version:"
