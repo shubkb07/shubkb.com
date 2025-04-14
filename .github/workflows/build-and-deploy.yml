@@ -19,9 +19,12 @@ jobs:
       - name: Setup PHP
         run: |
           echo "Setting up PHP..."
-          # Example installation steps for PHP:
-          # For macOS:
           brew install php
+
+      - name: Setup Composer
+        run: |
+          echo "Setting up Composer..."
+          brew install composer
 
       - name: WP-CLI Install
         run: |
