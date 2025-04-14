@@ -1,49 +1,45 @@
 {
-	"$schema": "./../../../../../block.json",
+	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 2,
-	"name": "wisesync/sync-header",
-	"title": "WiseSync Header",
-	"category": "widgets",
-	"icon": "admin-site-alt3",
-	"keywords": [
-		"header",
-		"wisesync"
-	],
-	"version": "1.0.0",
-	"editorScript": "file:./index.js",
-	"editorStyle": "file:./index.css",
-	"style": "file:./style.css",
+	"name": "anfco/award-slider",
+	"version": "0.1.0",
+	"title": "Award Slider Block",
+	"category": "anfco-blocks",
+	"icon": "awards",
+	"description": "Award slider block.",
 	"supports": {
-		"align": true,
-		"anchor": true,
-		"customClassName": true,
-		"html": false,
-		"reusableBlock": false
+		"html": false
 	},
 	"attributes": {
-		"headerText": {
-			"type": "string",
-			"default": "WiseSync Header"
+		"posts": {
+			"type": "array",
+			"default": []
 		},
-		"headerLink": {
-			"type": "string",
-			"default": "#"
+		"searchTitle": {
+			"type": "string"
 		},
-		"headerImage": {
+		"items": {
+			"type": "number",
+			"default": 4
+		},
+		"postType": {
 			"type": "string",
-			"default": ""
+			"default": "post"
+		},
+		"order": {
+			"type": "string",
+			"default": "asc"
 		}
 	},
+	"textdomain": "anfco",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"viewScript": "anfco-award-slider",
+	"style": "anfco-award-slider-style",
 	"example": {
+		"viewportWidth": 1440,
 		"attributes": {
-			"headerText": "WiseSync Header",
-			"headerLink": "#",
-			"headerImage": "https://example.com/image.jpg"
+			"items": 4
 		}
-	},
-	"blockTypes": [
-		"core/paragraph",
-		"core/image",
-		"core/heading"
-	]
+	}
 }

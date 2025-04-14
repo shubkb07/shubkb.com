@@ -1,0 +1,49 @@
+{
+	"$schema": "./../../../../../block.json",
+	"apiVersion": 2,
+	"name": "wisesync/sync-header",
+	"title": "WiseSync Header",
+	"category": "widgets",
+	"icon": "admin-site-alt3",
+	"keywords": [
+		"header",
+		"wisesync"
+	],
+	"version": "1.0.0",
+	"editorScript": "file:./index.js",
+	"editorStyle": "file:./index.css",
+	"style": "file:./style.css",
+	"supports": {
+		"align": true,
+		"anchor": true,
+		"customClassName": true,
+		"html": false,
+		"reusableBlock": false
+	},
+	"attributes": {
+		"headerText": {
+			"type": "string",
+			"default": "WiseSync Header"
+		},
+		"headerLink": {
+			"type": "string",
+			"default": "#"
+		},
+		"headerImage": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"example": {
+		"attributes": {
+			"headerText": "WiseSync Header",
+			"headerLink": "#",
+			"headerImage": "https://example.com/image.jpg"
+		}
+	},
+	"blockTypes": [
+		"core/paragraph",
+		"core/image",
+		"core/heading"
+	]
+}
