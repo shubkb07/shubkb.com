@@ -25,12 +25,13 @@ jobs:
           if git ls-remote --exit-code --heads origin installs; then
             echo "✅ installs branch exists"
             git fetch origin installs
-            git diff origin/installs HEAD -- composer.json package.json > changes.diff || true
-            if test -s changes.diff; then
-              echo "changed=true" >> $GITHUB_OUTPUT
-            else
-              echo "changed=false" >> $GITHUB_OUTPUT
+
+            CHANGED=false
+            if ! git diff --quiet origin/installs HEAD -- composer.json package.json; then
+              CHANGED=true
             fi
+
+            echo "changed=$CHANGED" >> $GITHUB_OUTPUT
             echo "install_branch_exists=true" >> $GITHUB_OUTPUT
           else
             echo "🚫 installs branch does NOT exist"
@@ -50,6 +51,9 @@ jobs:
 
       - name: Restore or Install Dependencies
         run: |
+          echo "Install branch exists: ${{ steps.check_changes.outputs.install_branch_exists }}"
+          echo "Dependencies changed: ${{ steps.check_changes.outputs.changed }}"
+
           if [[ "${{ steps.check_changes.outputs.changed }}" == "true" ]]; then
             echo "🧪 Installing fresh dependencies..."
             composer install --prefer-dist --no-progress --no-suggest
