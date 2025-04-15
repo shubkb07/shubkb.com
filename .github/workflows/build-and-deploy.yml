@@ -16,27 +16,26 @@ jobs:
         id: last_commit
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      - name: Check for dependency file changes or installs branch
+      - name: Check for installs branch and file changes
         id: check_changes
         run: |
           git fetch origin || echo "No remote origin yet."
 
-          # Check if installs branch exists
+          echo "install_branch_exists=false" >> $GITHUB_OUTPUT
+          echo "changed=true" >> $GITHUB_OUTPUT
+
           if git ls-remote --exit-code --heads origin installs; then
-            echo "✅ installs branch exists"
-            git fetch origin installs
-
-            CHANGED=false
-            if ! git diff --quiet origin/installs HEAD -- composer.json package.json; then
-              CHANGED=true
-            fi
-
-            echo "changed=$CHANGED" >> $GITHUB_OUTPUT
             echo "install_branch_exists=true" >> $GITHUB_OUTPUT
+            git clone --single-branch --branch installs https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git installs-cache
+
+            if cmp -s composer.json installs-cache/_composer.json && cmp -s package.json installs-cache/_package.json; then
+              echo "No changes in dependency files"
+              echo "changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "Changes detected in composer.json or package.json"
+            fi
           else
             echo "🚫 installs branch does NOT exist"
-            echo "changed=true" >> $GITHUB_OUTPUT
-            echo "install_branch_exists=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Setup PHP
@@ -51,8 +50,8 @@ jobs:
 
       - name: Restore or Install Dependencies
         run: |
-          echo "Install branch exists: ${{ steps.check_changes.outputs.install_branch_exists }}"
-          echo "Dependencies changed: ${{ steps.check_changes.outputs.changed }}"
+          echo "Dependencies changed? ${{ steps.check_changes.outputs.changed }}"
+          echo "Install branch exists? ${{ steps.check_changes.outputs.install_branch_exists }}"
 
           if [[ "${{ steps.check_changes.outputs.changed }}" == "true" ]]; then
             echo "🧪 Installing fresh dependencies..."
@@ -65,6 +64,8 @@ jobs:
             cp -r node_modules installs_branch/
             cp composer.lock installs_branch/
             cp package-lock.json installs_branch/
+            cp composer.json installs_branch/_composer.json
+            cp package.json installs_branch/_package.json
 
             cd installs_branch
             git init
@@ -76,12 +77,11 @@ jobs:
             git commit -m "Update installs cache: $(date +'%Y-%m-%d %H:%M:%S')"
             git push --force origin installs
           else
-            echo "📥 Restoring vendor/node_modules from installs branch..."
-            git clone --single-branch --branch installs https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git cache_installs
-            cp -r cache_installs/vendor . || echo "vendor not found"
-            cp -r cache_installs/node_modules . || echo "node_modules not found"
-            cp cache_installs/composer.lock . || echo "composer.lock not found"
-            cp cache_installs/package-lock.json . || echo "package-lock.json not found"
+            echo "📥 Restoring from installs branch cache..."
+            cp -r installs-cache/vendor . || echo "vendor not found"
+            cp -r installs-cache/node_modules . || echo "node_modules not found"
+            cp installs-cache/composer.lock . || echo "composer.lock not found"
+            cp installs-cache/package-lock.json . || echo "package-lock.json not found"
           fi
 
       - name: npm Build and PHPCBF
