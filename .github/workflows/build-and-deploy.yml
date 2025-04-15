@@ -77,10 +77,18 @@ jobs:
           rm -r package.json
           rm -r composer.json
           rm -r composer.lock
+          rm -r phpcs.xml
           rm -r block.json
           rm -r theme.json
+          rm -r .eslintignore
+          rm -r .eslintrc
+          rm -r .stylelintignore
+          rm -r .stylelintrc-css.json
+          rm -r .stylelintrc.json
           rm -r ./plugins/wisesync/blocks/src
           rm -r ./themes/papersync/blocks/src
+          find . -type d -name 'src' -exec rm -rf {} +
+
 
       - name: Deploy to master-build branch
         run: |
