@@ -90,13 +90,28 @@ jobs:
 
       - name: Deploy to master-build branch
         run: |
-          # Deploy build artifacts to the master-build branch
           echo "Deploying artifacts to the master-build branch..."
+          # Initialize a new git repository in the current build directory
           git init
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
-          git add .
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
-          git branch -M master-build
+          
+          # Add remote origin (if it doesn't exist, it's fine)
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push --force origin master-build
+          
+          # Fetch the existing master-build branch from remote, if any
+          git fetch origin master-build || echo "Branch master-build does not exist remotely. Will create a new one."
+          
+          # Check out the master-build branch, or create it if it doesn't exist
+          if git rev-parse --verify origin/master-build > /dev/null 2>&1; then
+            git checkout -B master-build origin/master-build
+          else
+            git checkout -B master-build
+          fi
+          
+          # Stage new changes and commit them
+          git add .
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          
+          # Push normally (without --force) to add your commit on top of the last one
+          git push origin master-build
