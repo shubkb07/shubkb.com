@@ -96,22 +96,24 @@ jobs:
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
           
-          # Add remote origin (if it doesn't exist, it's fine)
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          # Add remote origin (ignore error if it already exists)
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git || true
           
-          # Fetch the existing master-build branch from remote, if any
-          git fetch origin master-build || echo "Branch master-build does not exist remotely. Will create a new one."
-          
-          # Check out the master-build branch, or create it if it doesn't exist
+          # Fetch the existing master-build branch from remote (if exists)
+          git fetch origin master-build || echo "Branch master-build does not exist remotely. Creating new branch."
+
+          # If the remote branch exists, check it out and clean up untracked files
           if git rev-parse --verify origin/master-build > /dev/null 2>&1; then
-            git checkout -B master-build origin/master-build
+            git checkout master-build
+            git reset --hard origin/master-build
+            git clean -fd
           else
-            git checkout -B master-build
+            git checkout -b master-build
           fi
-          
-          # Stage new changes and commit them
+
+          # Stage new changes and commit
           git add .
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit."
           
-          # Push normally (without --force) to add your commit on top of the last one
+          # Push normally (without forcing)
           git push origin master-build
