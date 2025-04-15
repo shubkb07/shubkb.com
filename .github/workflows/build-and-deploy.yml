@@ -16,12 +16,21 @@ jobs:
         id: last_commit
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      - name: Check for dependency file changes
+      - name: Check for dependency file changes or installs branch
         id: check_changes
         run: |
-          git fetch origin installs || echo "No installs branch yet."
-          git diff origin/installs HEAD -- composer.json package.json > changes.diff || true
-          echo "changed=$(test -s changes.diff && echo true || echo false)" >> $GITHUB_OUTPUT
+          git fetch origin || echo "No remote origin yet."
+
+          if git ls-remote --exit-code --heads origin installs; then
+            echo "✅ installs branch exists"
+            git fetch origin installs
+            git diff origin/installs HEAD -- composer.json package.json > changes.diff || true
+            echo "changed=$(test -s changes.diff && echo true || echo false)" >> $GITHUB_OUTPUT
+            echo "install_branch_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "🚫 installs branch does NOT exist"
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "install_branch_exists=false" >> $GITHUB_OUTPUT
 
       - name: Setup PHP
         run: |
@@ -33,15 +42,14 @@ jobs:
           echo "Setting up Composer..."
           brew install composer
 
-      - name: Restore or Update Vendor/Node Modules
+      - name: Restore or Install Dependencies
         run: |
           if [[ "${{ steps.check_changes.outputs.changed }}" == "true" ]]; then
-            echo "Detected changes in composer.json or package.json. Installing dependencies..."
-
+            echo "🧪 Installing fresh dependencies..."
             composer install --prefer-dist --no-progress --no-suggest
             npm install
 
-            echo "Pushing updated vendor and node_modules to installs branch..."
+            echo "📦 Saving to installs branch..."
             mkdir installs_branch
             cp -r vendor installs_branch/
             cp -r node_modules installs_branch/
@@ -58,8 +66,7 @@ jobs:
             git commit -m "Update installs cache: $(date +'%Y-%m-%d %H:%M:%S')"
             git push --force origin installs
           else
-            echo "No dependency file changes. Restoring from installs branch..."
-
+            echo "📥 Restoring vendor/node_modules from installs branch..."
             git clone --single-branch --branch installs https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git cache_installs
             cp -r cache_installs/vendor . || echo "vendor not found"
             cp -r cache_installs/node_modules . || echo "node_modules not found"
