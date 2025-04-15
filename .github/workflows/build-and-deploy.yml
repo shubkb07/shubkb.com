@@ -8,6 +8,7 @@ on:
 jobs:
   build_deploy:
     runs-on: macos-latest
+
     steps:
       - name: Check Out Code
         uses: actions/checkout@v3
@@ -16,27 +17,23 @@ jobs:
         id: last_commit
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      - name: Check for installs branch and file changes
-        id: check_changes
-        run: |
-          git fetch origin || echo "No remote origin yet."
+      - name: Cache node_modules and npm
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
 
-          echo "install_branch_exists=false" >> $GITHUB_OUTPUT
-          echo "changed=true" >> $GITHUB_OUTPUT
-
-          if git ls-remote --exit-code --heads origin installs; then
-            echo "install_branch_exists=true" >> $GITHUB_OUTPUT
-            git clone --single-branch --branch installs https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git installs-cache
-
-            if cmp -s composer.json installs-cache/_composer.json && cmp -s package.json installs-cache/_package.json; then
-              echo "No changes in dependency files"
-              echo "changed=false" >> $GITHUB_OUTPUT
-            else
-              echo "Changes detected in composer.json or package.json"
-            fi
-          else
-            echo "🚫 installs branch does NOT exist"
-          fi
+      - name: Cache vendor
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
 
       - name: Setup PHP
         run: |
@@ -48,45 +45,17 @@ jobs:
           echo "Setting up Composer..."
           brew install composer
 
-      - name: Restore or Install Dependencies
+      - name: Install Dependencies
         run: |
-          echo "Dependencies changed? ${{ steps.check_changes.outputs.changed }}"
-          echo "Install branch exists? ${{ steps.check_changes.outputs.install_branch_exists }}"
+          echo "Installing PHP dependencies (Composer)..."
+          composer install --prefer-dist --no-progress --no-suggest
 
-          if [[ "${{ steps.check_changes.outputs.changed }}" == "true" ]]; then
-            echo "🧪 Installing fresh dependencies..."
-            composer install --prefer-dist --no-progress --no-suggest
-            npm install
+          echo "Installing Node dependencies (npm)..."
+          npm ci
 
-            echo "📦 Saving to installs branch..."
-            mkdir installs_branch
-            cp -r vendor installs_branch/
-            cp -r node_modules installs_branch/
-            cp composer.lock installs_branch/
-            cp package-lock.json installs_branch/
-            cp composer.json installs_branch/_composer.json
-            cp package.json installs_branch/_package.json
-
-            cd installs_branch
-            git init
-            git config user.name "Shubham Kumar Bansal"
-            git config user.email "shub@shubkb.com"
-            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-            git checkout -b installs
-            git add .
-            git commit -m "Update installs cache: $(date +'%Y-%m-%d %H:%M:%S')"
-            git push --force origin installs
-          else
-            echo "📥 Restoring from installs branch cache..."
-            cp -r installs-cache/vendor . || echo "vendor not found"
-            cp -r installs-cache/node_modules . || echo "node_modules not found"
-            cp installs-cache/composer.lock . || echo "composer.lock not found"
-            cp installs-cache/package-lock.json . || echo "package-lock.json not found"
-          fi
-
-      - name: npm Build and PHPCBF
+      - name: Build and Lint
         run: |
-          echo "Running npm run build..."
+          echo "Running npm build..."
           npm run build || exit 1
 
           echo "Running PHPCBF..."
@@ -98,7 +67,7 @@ jobs:
           fi
           set -e
 
-          echo "Cleaning up..."
+          echo "Cleaning up build..."
           rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
           rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
