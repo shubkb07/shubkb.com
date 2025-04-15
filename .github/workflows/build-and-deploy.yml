@@ -87,8 +87,6 @@ jobs:
           rm -r .stylelintrc.json
           rm -r ./plugins/wisesync/blocks/src
           rm -r ./themes/papersync/blocks/src
-          find . -type d -name 'src' -exec rm -rf {} +
-
 
       - name: Deploy to master-build branch
         run: |
