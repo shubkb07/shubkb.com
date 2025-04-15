@@ -9,9 +9,8 @@ jobs:
   build_deploy:
     runs-on: macos-latest
     steps:
-      - name: Check Out Source Code (master branch)
+      - name: Check Out Code
         uses: actions/checkout@v3
-        # This checks out the 'master' branch code triggered by the push
 
       - name: Setup PHP
         run: |
@@ -28,7 +27,6 @@ jobs:
           echo "PHP Version:"
           php -v
           echo "Installing WP-CLI..."
-          # Assuming brew install wp-cli is correct for your setup
           brew install wp-cli
           echo "WP-CLI installed successfully."
 
@@ -46,107 +44,51 @@ jobs:
           echo "Installing NPM dependencies..."
           npm install
 
-      # --- Build Step (Generates artifacts based on master branch code) ---
-      - name: Build Artifacts
+      - name: Final Build Step
         run: |
-          echo "Starting build..."
+          echo "Starting final build..."
+          echo "Running npm run build..."
           npm run build || exit 1
-          echo "Build completed successfully!"
-
-      # --- Deployment Preparation ---
-      - name: Prepare for Deployment Branch Checkout
-        run: |
-           # Configure Git user early, needed for checkout/commit later
-           git config user.name "Shubham Kumar Bansal"
-           git config user.email "shub@shubkb.com"
-
-           # Fetch the target branch to ensure it exists locally for checkout
-           # Use || true to prevent failure if the branch doesn't exist remotely yet
-           git fetch origin master-build || true
-
-      - name: Check Out Deployment Branch (master-build)
-        # Use a separate action to cleanly check out the target branch
-        # This replaces the working directory content with the master-build branch
-        uses: actions/checkout@v3
-        with:
-          ref: master-build # Try to check out the existing master-build branch
-          path: deploy_temp # Check out to a temporary directory
-
-      - name: Overlay New Build Artifacts
-        run: |
-          # Remove old content from the target directory *except* the .git folder
-          # Use find to avoid deleting the .git directory itself
-          find deploy_temp/* -not -path "deploy_temp/.git/*" -not -name ".git" -delete
-
-          # Copy *new* build artifacts (from the initial workspace) to the target directory
-          # Adjust the source paths if your build outputs to a specific subfolder (e.g., 'dist/', 'build/')
-          # This assumes build artifacts are in the root of the workspace after `npm run build`
-          # and after potential PHPCBF changes (if any)
-          echo "Copying new build artifacts..."
-          shopt -s dotglob # Ensure hidden files (like .htaccess if any) are copied
-          cp -R ./* deploy_temp/
-          shopt -u dotglob
-
-      # --- Final Deployment Steps (on master-build branch) ---
-      - name: Run PHPCBF and Clean Up Sources (inside deploy directory)
-        working-directory: deploy_temp # Run subsequent steps inside the deployment directory
-        run: |
-          # Check if PHPCBF is installed and run it (adjust path if necessary)
-          # Note: Composer dependencies were installed in the *source* checkout,
-          # they might not be present here unless copied or reinstalled.
-          # Easiest might be to copy the vendor dir if needed, or skip PHPCBF here
-          # if it only checks source code which is being removed anyway.
-          # Assuming PHPCBF checks files that ARE part of the build output:
-          # cp -R ../vendor ./vendor # <-- Uncomment and adjust if vendor is needed
-
-          # echo "Running PHPCBF for code quality check..."
-          # set +e
-          # ./vendor/bin/phpcbf . -d memory_limit=1024M # Adjust path if vendor copied
-          # result=$?
-          # if [ $result -ne 0 ]; then
-          #   echo "PHPCBF found some issues but continuing deployment..."
-          # fi
-          # set -e
-
-          echo "Removing source/intermediate files..."
-          # CRITICAL: Be VERY careful with rm -rf. Only remove files NOT needed in the final build branch.
-          # DO NOT REMOVE the .git directory here.
-          rm -rf node_modules
-          rm -rf vendor # Remove if you didn't copy it above for PHPCBF
-          rm -rf .github
-          rm -f .gitignore # Use -f in case it doesn't exist
-          rm -f package-lock.json
-          rm -f package.json
-          rm -f composer.json
-          rm -f composer.lock
-          rm -f phpcs.xml
-          # Keep block.json and theme.json if they ARE build artifacts
-          # rm -f block.json
-          # rm -f theme.json
-          rm -f .eslintignore
-          rm -f .eslintrc
-          rm -f .stylelintignore
-          rm -f .stylelintrc-css.json
-          rm -f .stylelintrc.json
-          # Remove source directories if they exist and are not part of the build output
-          rm -rf ./plugins/wisesync/blocks/src
-          rm -rf ./themes/papersync/blocks/src
-          # Add any other files/directories that are source-only
-
-      - name: Commit and Push to master-build
-        working-directory: deploy_temp # Ensure commands run in the correct directory
-        run: |
-          # Check if there are any changes to commit
-          if [[ -z $(git status --porcelain) ]]; then
-            echo "No changes detected in build artifacts. Skipping commit."
-          else
-            echo "Staging changes..."
-            git add .
-            echo "Committing changes..."
-            git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
-
-            echo "Pushing to master-build branch..."
-            # Push normally without --force
-            # Use -u to set upstream for the first push if the branch was created locally
-            git push -u origin master-build
+           
+          echo "Running PHPCBF for code quality check..."
+          set +e
+          ./vendor/bin/phpcbf . -d memory_limit=1024M
+          result=$?
+          if [ $result -ne 0 ]; then
+            echo "PHPCBF found some issues but continuing deployment..."
           fi
+          set -e
+          
+          echo "Build completed successfully!"
+          echo "Removing build artifacts..."
+          rm -r node_modules
+          rm -r vendor
+          rm -r .github
+          rm -r .git
+          rm -r .gitignore
+          rm -r package-lock.json
+          rm -r package.json
+          rm -r composer.json
+          rm -r composer.lock
+          rm -r phpcs.xml
+          rm -r block.json
+          rm -r theme.json
+          rm -r .eslintignore
+          rm -r .eslintrc
+          rm -r .stylelintignore
+          rm -r .stylelintrc-css.json
+          rm -r .stylelintrc.json
+          rm -r ./plugins/wisesync/blocks/src
+          rm -r ./themes/papersync/blocks/src
+
+      - name: Deploy to master-build branch
+        run: |
+          echo "Deploying artifacts to the master-build branch..."
+          git init
+          git config user.name "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add .
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
+          git branch -M master-build
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git push origin master-build
