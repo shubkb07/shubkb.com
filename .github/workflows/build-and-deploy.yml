@@ -21,16 +21,22 @@ jobs:
         run: |
           git fetch origin || echo "No remote origin yet."
 
+          # Check if installs branch exists
           if git ls-remote --exit-code --heads origin installs; then
             echo "✅ installs branch exists"
             git fetch origin installs
             git diff origin/installs HEAD -- composer.json package.json > changes.diff || true
-            echo "changed=$(test -s changes.diff && echo true || echo false)" >> $GITHUB_OUTPUT
+            if test -s changes.diff; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
             echo "install_branch_exists=true" >> $GITHUB_OUTPUT
           else
             echo "🚫 installs branch does NOT exist"
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "install_branch_exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Setup PHP
         run: |
