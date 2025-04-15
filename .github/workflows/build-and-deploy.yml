@@ -81,14 +81,24 @@ jobs:
           rm -r ./plugins/wisesync/blocks/src
           rm -r ./themes/papersync/blocks/src
 
-      - name: Deploy to master-build branch
-        run: |
-          echo "Deploying artifacts to the master-build branch..."
-          git init
-          git config user.name "Shubham Kumar Bansal"
-          git config user.email "shub@shubkb.com"
-          git add .
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')"
-          git branch -M master-build
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git push origin master-build
+          - name: Deploy to master-build branch
+          run: |
+            echo "Deploying artifacts to the master-build branch..."
+  
+            # Save current build output in temp folder
+            mkdir /tmp/build
+            cp -r . /tmp/build
+  
+            # Clone master-build branch (shallow to save time)
+            git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
+  
+            # Copy new build into it
+            cp -r /tmp/build/* deploy/
+            cd deploy
+  
+            # Commit and push
+            git config user.name "Shubham Kumar Bansal"
+            git config user.email "shub@shubkb.com"
+            git add .
+            git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+            git push origin master-build
