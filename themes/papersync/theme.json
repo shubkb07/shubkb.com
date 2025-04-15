@@ -1,0 +1,34 @@
+{
+	"$schema": "./../../theme.json",
+	"version": 3,
+	"settings": {
+		"color": {
+			"custom": true,
+			"customGradient": true
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "#ffffff",
+			"text": "#000000"
+		},
+		"typography": {
+			"fontSize": "16px",
+			"lineHeight": "1.5"
+		},
+		"spacing": {
+			"padding": {
+				"top": "20px",
+				"right": "20px",
+				"bottom": "20px",
+				"left": "20px"
+			},
+			"margin": {
+				"top": "20px",
+				"right": "20px",
+				"bottom": "20px",
+				"left": "20px"
+			}
+		}
+	}
+}
