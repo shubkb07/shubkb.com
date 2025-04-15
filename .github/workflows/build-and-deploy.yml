@@ -86,10 +86,10 @@ jobs:
           echo "Deploying artifacts to the master-build branch..."
 
           # Create a temporary directory for the build
-          sudo mkdir /build
+          mkdir /tmp/build
 
           # move to build folder
-          cd /build
+          cd /tmp/build
 
           # Clone master-build branch (shallow to save time)
           git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
@@ -99,12 +99,15 @@ jobs:
           ls -al
 
           # Move back to the root directory
-          cd ..
+          cd ./../../
 
           # Move the build artifacts to the temporary directory
           echo "Moving build artifacts to the temporary directory..."
           mv plugins /build/plugins
           mv themes /build/themes
+
+          # Move to the build directory
+          cd /tmp/build
 
           # Commit and push
           git config user.name "Shubham Kumar Bansal"
