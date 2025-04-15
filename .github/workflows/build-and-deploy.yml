@@ -103,8 +103,8 @@ jobs:
 
           # Move the build artifacts to the temporary directory
           echo "Moving build artifacts to the temporary directory..."
-          mv plugins /tmp/build/plugins
-          mv themes /tmp/build/themes
+          mv plugins /tmp/build
+          mv themes /tmp/build
 
           # Move to the build directory
           cd /tmp/build
