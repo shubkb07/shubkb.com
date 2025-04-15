@@ -13,8 +13,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Load Composer autoload if available.
-if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
-	require_once __DIR__ . '/vendor/autoload.php';
+if ( file_exists( WSYNC_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
+	require_once WSYNC_PLUGIN_DIR . '/vendor/autoload.php';
 }
 
 /**
@@ -23,5 +23,12 @@ if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
  * @param string $class_name The name of the class to autoload.
  */
 function wisesync_autoload( $class_name ) {
-
 }
+
+spl_autoload_register( 'wisesync_autoload' );
+
+// Load Options files.
+require_once WSYNC_PLUGIN_DIR . 'includes/options.php';
+
+// Load Blocks files.
+require_once WSYNC_PLUGIN_DIR . 'includes/block.php';
