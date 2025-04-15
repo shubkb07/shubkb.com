@@ -92,11 +92,20 @@ jobs:
           cd /tmp/build
 
           # Clone master-build branch (shallow to save time)
-          git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
+          git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git .
 
           # List Files and Directories
           echo "Listing files and directories in the current directory:"
           ls -al
+
+          # remove directories plugins and themes, if they exist
+          echo "Removing existing plugins and themes directories..."
+          rm -rf plugins
+          rm -rf themes
+
+          echo "Creating plugins and themes directories..."
+          mkdir plugins
+          mkdir themes
 
           # Move back to the root directory
           cd ./../../
