@@ -49,7 +49,7 @@ jobs:
           echo "Starting final build..."
           echo "Running npm run build..."
           npm run build || exit 1
-           
+
           echo "Running PHPCBF for code quality check..."
           set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
@@ -58,53 +58,32 @@ jobs:
             echo "PHPCBF found some issues but continuing deployment..."
           fi
           set -e
-          
+
           echo "Build completed successfully!"
-          echo "Removing build artifacts..."
-          rm -r node_modules
-          rm -r vendor
-          rm -r .github
-          rm -r .git
-          rm -r .gitignore
-          rm -r package-lock.json
-          rm -r package.json
-          rm -r composer.json
-          rm -r composer.lock
-          rm -r phpcs.xml
-          rm -r block.json
-          rm -r theme.json
-          rm -r .eslintignore
-          rm -r .eslintrc
-          rm -r .stylelintignore
-          rm -r .stylelintrc-css.json
-          rm -r .stylelintrc.json
-          rm -r ./plugins/wisesync/blocks/src
-          rm -r ./themes/papersync/blocks/src
+          echo "Cleaning up unnecessary files..."
+          rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
+          rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
+          rm -rf ./plugins/wisesync/blocks/src
+          rm -rf ./themes/papersync/blocks/src
 
       - name: Deploy to master-build branch
         run: |
           echo "Deploying to master-build branch..."
 
-          # Store plugins/themes only
-          mkdir deploy-build
-          cp -r plugins deploy-build/
-          cp -r themes deploy-build/
+          # Clone the existing branch cleanly
+          git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
 
-          cd deploy-build
+          # Replace contents of plugins and themes in the cloned repo
+          echo "Replacing plugins and themes..."
+          rm -rf deploy/plugins
+          rm -rf deploy/themes
+          cp -r plugins deploy/
+          cp -r themes deploy/
 
-          git init
+          # Go into cloned repo and push changes
+          cd deploy
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-
-          # Fetch remote branch
-          git fetch origin master-build
-          git checkout -b master-build origin/master-build
-
-          # Copy new content over old
-          cp -r ../plugins ./ || echo "No plugins found"
-          cp -r ../themes ./ || echo "No themes found"
-
           git add .
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
           git push origin master-build
