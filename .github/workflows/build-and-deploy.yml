@@ -12,6 +12,17 @@ jobs:
       - name: Check Out Code
         uses: actions/checkout@v3
 
+      - name: Save Last Commit Message
+        id: last_commit
+        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+
+      - name: Check for dependency file changes
+        id: check_changes
+        run: |
+          git fetch origin installs || echo "No installs branch yet."
+          git diff origin/installs HEAD -- composer.json package.json > changes.diff || true
+          echo "changed=$(test -s changes.diff && echo true || echo false)" >> $GITHUB_OUTPUT
+
       - name: Setup PHP
         run: |
           echo "Setting up PHP..."
@@ -22,45 +33,55 @@ jobs:
           echo "Setting up Composer..."
           brew install composer
 
-      - name: WP-CLI Install
+      - name: Restore or Update Vendor/Node Modules
         run: |
-          echo "PHP Version:"
-          php -v
-          echo "Installing WP-CLI..."
-          brew install wp-cli
-          echo "WP-CLI installed successfully."
+          if [[ "${{ steps.check_changes.outputs.changed }}" == "true" ]]; then
+            echo "Detected changes in composer.json or package.json. Installing dependencies..."
 
-      - name: Composer Install
-        run: |
-          echo "Installing Composer dependencies..."
-          composer install --prefer-dist --no-progress --no-suggest
+            composer install --prefer-dist --no-progress --no-suggest
+            npm install
 
-      - name: npm Install
-        run: |
-          echo "Node Version:"
-          node -v
-          echo "NPM Version:"
-          npm -v
-          echo "Installing NPM dependencies..."
-          npm install
+            echo "Pushing updated vendor and node_modules to installs branch..."
+            mkdir installs_branch
+            cp -r vendor installs_branch/
+            cp -r node_modules installs_branch/
+            cp composer.lock installs_branch/
+            cp package-lock.json installs_branch/
 
-      - name: Final Build Step
+            cd installs_branch
+            git init
+            git config user.name "Shubham Kumar Bansal"
+            git config user.email "shub@shubkb.com"
+            git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+            git checkout -b installs
+            git add .
+            git commit -m "Update installs cache: $(date +'%Y-%m-%d %H:%M:%S')"
+            git push --force origin installs
+          else
+            echo "No dependency file changes. Restoring from installs branch..."
+
+            git clone --single-branch --branch installs https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git cache_installs
+            cp -r cache_installs/vendor . || echo "vendor not found"
+            cp -r cache_installs/node_modules . || echo "node_modules not found"
+            cp cache_installs/composer.lock . || echo "composer.lock not found"
+            cp cache_installs/package-lock.json . || echo "package-lock.json not found"
+          fi
+
+      - name: npm Build and PHPCBF
         run: |
-          echo "Starting final build..."
           echo "Running npm run build..."
           npm run build || exit 1
 
-          echo "Running PHPCBF for code quality check..."
+          echo "Running PHPCBF..."
           set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
           result=$?
           if [ $result -ne 0 ]; then
-            echo "PHPCBF found some issues but continuing deployment..."
+            echo "PHPCBF found some issues but continuing..."
           fi
           set -e
 
-          echo "Build completed successfully!"
-          echo "Cleaning up unnecessary files..."
+          echo "Cleaning up..."
           rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
           rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
@@ -70,20 +91,17 @@ jobs:
         run: |
           echo "Deploying to master-build branch..."
 
-          # Clone the existing branch cleanly
           git clone --single-branch --branch master-build https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
 
-          # Replace contents of plugins and themes in the cloned repo
-          echo "Replacing plugins and themes..."
           rm -rf deploy/plugins
           rm -rf deploy/themes
           cp -r plugins deploy/
           cp -r themes deploy/
 
-          # Go into cloned repo and push changes
           cd deploy
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
+
           git add .
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes to commit"
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit"
           git push origin master-build
