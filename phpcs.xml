@@ -51,5 +51,5 @@
 	<exclude-pattern>plugins/wp-dark-mode/</exclude-pattern>
 	<exclude-pattern>plugins/wp-mail-smtp/</exclude-pattern>
 	<exclude-pattern>plugins/wp-rocket/</exclude-pattern>
-	<exclude-pattern>themes/twentytwentyfour/</exclude-pattern>
+	<exclude-pattern>themes/twentytwentyfive/</exclude-pattern>
 </ruleset>

@@ -11,17 +11,28 @@
     "url": "git+https://github.com/shubkb07/shubkb.com.git"
   },
   "license": "ISC",
-  "author": "",
-  "type": "commonjs",
-  "main": "index.js",
+  "author": "Shubham Kumar Bansal <shub@shubkb.com>",
   "scripts": {
     "build": "npm run build:blocks:plugin:wisesync && npm run build:blocks:theme:papersync",
     "build:blocks:plugin:wisesync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./plugins/wisesync/blocks/src --output-path=./plugins/wisesync/blocks/build",
-    "build:blocks:theme:papersync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./themes/papersync/blocks/src --output-path=./themes/papersync/blocks/build"
+    "build:blocks:theme:papersync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./themes/papersync/blocks/src --output-path=./themes/papersync/blocks/build",
+    "wp:lint:js": "wp-scripts lint-js",
+    "wp:lint:js:src": "wp-scripts lint-js ./src",
+    "wp:lint:pkg-json": "wp-scripts lint-pkg-json",
+    "wp:lint:pkg-json:src": "wp-scripts lint-pkg-json ./src",
+    "wp:lint:md:docs": "wp-scripts lint-md-docs",
+    "wp:lint:style": "wp-scripts lint-style",
+    "wp:lint:css:src": "wp-scripts lint-style 'src/**/*.css'",
+    "lint:css": "stylelint **/*.css",
+    "lint-fix:css": "stylelint **/*.css --fix",
+    "lint:scss:css": "stylelint **/*.scss,**/*.css",
+    "lint-fix:scss:css": "stylelint **/*.scss,**/*.css --fix",
+    "lint:scss": "stylelint **/*.scss",
+    "lint-fix:scss": "stylelint **/*.scss --fix",
+    "lint:js": "eslint .",
+    "lint-fix:js": "eslint . --fix"
   },
-  "dependencies": {
-    "express": "^5.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@wordpress/api-fetch": "^7.22.0",
     "@wordpress/blocks": "^14.11.0",
