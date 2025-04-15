@@ -86,7 +86,7 @@ jobs:
           echo "Deploying artifacts to the master-build branch..."
 
           # Create a temporary directory for the build
-          mkdir /build
+          sudo mkdir /build
 
           # move to build folder
           cd /build
