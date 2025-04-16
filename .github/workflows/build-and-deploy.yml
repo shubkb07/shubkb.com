@@ -1,4 +1,4 @@
-name: 💥 Build & Deploy Workflow (Super Cached & Optimized)
+name: Build & Deploy Workflow (Optimized No-Homebrew)
 
 on:
   push:
@@ -19,14 +19,8 @@ jobs:
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
       #####################################
-      # ♻️ Restore All Caches (before installs)
+      # ♻️ Restore Caches (npm + composer)
       #####################################
-
-      - name: ♻️ Restore Homebrew Cache
-        uses: actions/cache@v3
-        with:
-          path: /usr/local/Homebrew
-          key: homebrew-${{ runner.os }}-2025-04-15
 
       - name: ♻️ Restore NPM + node_modules Cache
         uses: actions/cache@v3
@@ -94,7 +88,7 @@ jobs:
           set -e
 
       #####################################
-      # 💾 Save All Caches AFTER install
+      # 💾 Save Caches AFTER install
       #####################################
 
       - name: 💾 Save Composer vendor Cache
@@ -115,26 +109,18 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      - name: 💾 Save Homebrew Cache (After Install)
-        uses: actions/cache@v3
-        with:
-          path: /usr/local/Homebrew
-          key: homebrew-${{ runner.os }}-2025-04-15
-
       #####################################
-      # 🧼 Cleanup after caches
+      # 🧼 Cleanup
       #####################################
 
       - name: 🧼 Cleanup Unnecessary Files
         run: |
           echo "🧹 Cleaning up unnecessary build files..."
-          rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
-          rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
           rm -rf ./themes/papersync/blocks/src
 
       #####################################
-      # 🚀 Deploy to master-build branch
+      # 🚀 Deploy
       #####################################
 
       - name: 🚀 Deploy to `master-build` Branch
