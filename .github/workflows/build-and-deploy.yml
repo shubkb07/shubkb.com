@@ -1,4 +1,4 @@
-name: Build & Deploy Workflow (Optimized No-Homebrew)
+name: Build & Deploy Workflow
 
 on:
   push:
