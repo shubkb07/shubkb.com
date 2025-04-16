@@ -1,4 +1,4 @@
-name: Build & Deploy Workflow (Super Cached)
+name: 💥 Build & Deploy Workflow (Super Cached & Optimized)
 
 on:
   push:
@@ -19,8 +19,14 @@ jobs:
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
       #####################################
-      # 🧪 Restore Caches
+      # ♻️ Restore All Caches (before installs)
       #####################################
+
+      - name: ♻️ Restore Homebrew Cache
+        uses: actions/cache@v3
+        with:
+          path: /usr/local/Homebrew
+          key: homebrew-${{ runner.os }}-2025-04-15
 
       - name: ♻️ Restore NPM + node_modules Cache
         uses: actions/cache@v3
@@ -40,29 +46,20 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-
 
-      - name: ♻️ Restore Homebrew Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /usr/local/Homebrew
-            /usr/local/Cellar
-            /usr/local/bin/brew
-          key: homebrew-${{ runner.os }}-2025-04-15
-
       #####################################
       # ⚙️ Environment Setup
       #####################################
 
       - name: ⚙️ Install PHP & Composer via Homebrew
         run: |
-          echo "🔧 Checking PHP installation..."
+          echo "🔧 Installing PHP..."
           brew install php || echo "✅ PHP already installed"
-          
-          echo "📦 Checking Composer installation..."
+
+          echo "📦 Installing Composer..."
           brew install composer || echo "✅ Composer already installed"
 
       #####################################
-      # 📦 Dependency Installation
+      # 📥 Install Dependencies
       #####################################
 
       - name: 📥 Install Project Dependencies
@@ -97,7 +94,7 @@ jobs:
           set -e
 
       #####################################
-      # 💾 Save Caches AFTER install
+      # 💾 Save All Caches AFTER install
       #####################################
 
       - name: 💾 Save Composer vendor Cache
@@ -118,29 +115,26 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      - name: 💾 Save Homebrew Cache
+      - name: 💾 Save Homebrew Cache (After Install)
         uses: actions/cache@v3
         with:
-          path: |
-            /usr/local/Homebrew
-            /usr/local/Cellar
-            /usr/local/bin/brew
+          path: /usr/local/Homebrew
           key: homebrew-${{ runner.os }}-2025-04-15
 
       #####################################
-      # 🧼 Cleanup after cache is saved
+      # 🧼 Cleanup after caches
       #####################################
 
       - name: 🧼 Cleanup Unnecessary Files
         run: |
           echo "🧹 Cleaning up unnecessary build files..."
-          # rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
-          # rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
+          rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
+          rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
           rm -rf ./themes/papersync/blocks/src
 
       #####################################
-      # 🚀 Deployment to master-build
+      # 🚀 Deploy to master-build branch
       #####################################
 
       - name: 🚀 Deploy to `master-build` Branch
