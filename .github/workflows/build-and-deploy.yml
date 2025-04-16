@@ -1,4 +1,4 @@
-name: Build & Deploy Workflow
+name: 💥 Build & Deploy Workflow (Parallel Optimized)
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
         id: last_commit
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      - name: ♻️ Restore npm Cache (node_modules + .npm)
+      - name: 🧠 Restore npm cache
         uses: actions/cache@v3
         with:
           path: |
@@ -28,15 +28,7 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      - name: ♻️ Restore Composer Cache (vendor/)
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-${{ runner.os }}-
-
-      - name: ⚙️ Setup PHP Environment
+      - name: ⚙️ Setup PHP
         run: |
           echo "🔧 Installing PHP..."
           brew install php
@@ -46,7 +38,7 @@ jobs:
           echo "📦 Installing Composer..."
           brew install composer
 
-      - name: 📥 Install Project Dependencies
+      - name: 📥 Install Dependencies
         run: |
           echo "📦 Installing Composer dependencies..."
           composer install --prefer-dist --no-progress --no-suggest
@@ -58,6 +50,22 @@ jobs:
             echo "⚠️ package-lock.json not found, using npm install instead"
             npm install
           fi
+
+      - name: 💾 Save Composer (vendor) cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      - name: 💾 Save node_modules (after install)
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: npm-post-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-post-${{ runner.os }}-
 
       - name: 🛠️ Build Assets & Lint PHP
         run: |
