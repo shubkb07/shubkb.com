@@ -1,4 +1,4 @@
-name: 💥 Build & Deploy Workflow (Parallel Optimized)
+name: Build & Deploy Workflow (Super Cached)
 
 on:
   push:
@@ -18,7 +18,11 @@ jobs:
         id: last_commit
         run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
 
-      - name: 🧠 Restore npm cache
+      #####################################
+      # 🧪 Restore Caches
+      #####################################
+
+      - name: ♻️ Restore NPM + node_modules Cache
         uses: actions/cache@v3
         with:
           path: |
@@ -28,17 +32,40 @@ jobs:
           restore-keys: |
             npm-${{ runner.os }}-
 
-      - name: ⚙️ Setup PHP
-        run: |
-          echo "🔧 Installing PHP..."
-          brew install php
+      - name: ♻️ Restore Composer vendor Cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
 
-      - name: ⚙️ Setup Composer
-        run: |
-          echo "📦 Installing Composer..."
-          brew install composer
+      - name: ♻️ Restore Homebrew Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/Homebrew
+            /usr/local/Cellar
+            /usr/local/bin/brew
+          key: homebrew-${{ runner.os }}-2025-04-15
 
-      - name: 📥 Install Dependencies
+      #####################################
+      # ⚙️ Environment Setup
+      #####################################
+
+      - name: ⚙️ Install PHP & Composer via Homebrew
+        run: |
+          echo "🔧 Checking PHP installation..."
+          brew install php || echo "✅ PHP already installed"
+          
+          echo "📦 Checking Composer installation..."
+          brew install composer || echo "✅ Composer already installed"
+
+      #####################################
+      # 📦 Dependency Installation
+      #####################################
+
+      - name: 📥 Install Project Dependencies
         run: |
           echo "📦 Installing Composer dependencies..."
           composer install --prefer-dist --no-progress --no-suggest
@@ -51,21 +78,9 @@ jobs:
             npm install
           fi
 
-      - name: 💾 Save Composer (vendor) cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-${{ runner.os }}-
-
-      - name: 💾 Save node_modules (after install)
-        uses: actions/cache@v3
-        with:
-          path: node_modules
-          key: npm-post-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-post-${{ runner.os }}-
+      #####################################
+      # 🛠️ Build + Lint
+      #####################################
 
       - name: 🛠️ Build Assets & Lint PHP
         run: |
@@ -81,11 +96,52 @@ jobs:
           fi
           set -e
 
-          echo "🧼 Cleaning up build artifacts..."
+      #####################################
+      # 💾 Save Caches AFTER install
+      #####################################
+
+      - name: 💾 Save Composer vendor Cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      - name: 💾 Save node_modules + .npm Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: 💾 Save Homebrew Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/Homebrew
+            /usr/local/Cellar
+            /usr/local/bin/brew
+          key: homebrew-${{ runner.os }}-2025-04-15
+
+      #####################################
+      # 🧼 Cleanup after cache is saved
+      #####################################
+
+      - name: 🧼 Cleanup Unnecessary Files
+        run: |
+          echo "🧹 Cleaning up unnecessary build files..."
           rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
           rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
           rm -rf ./themes/papersync/blocks/src
+
+      #####################################
+      # 🚀 Deployment to master-build
+      #####################################
 
       - name: 🚀 Deploy to `master-build` Branch
         run: |
