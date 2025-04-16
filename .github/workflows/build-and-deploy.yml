@@ -134,8 +134,8 @@ jobs:
       - name: 🧼 Cleanup Unnecessary Files
         run: |
           echo "🧹 Cleaning up unnecessary build files..."
-          rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
-          rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
+          # rm -rf node_modules vendor .github .git .gitignore package-lock.json package.json composer.json composer.lock phpcs.xml block.json theme.json
+          # rm -rf .eslintignore .eslintrc .stylelintignore .stylelintrc-css.json .stylelintrc.json
           rm -rf ./plugins/wisesync/blocks/src
           rm -rf ./themes/papersync/blocks/src
 
