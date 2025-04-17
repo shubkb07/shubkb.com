@@ -33,4 +33,7 @@ define( 'WSYNC_PLUGIN_TEXTDOMAIN', 'wisesync' );
 define( 'WSYNC_PLUGIN_PREFIX', 'wisesync_' );
 
 // Load Plugin Files.
-require_once WSYNC_PLUGIN_DIR . 'includes/autoload.php';
+require_once WSYNC_PLUGIN_DIR . 'autoload.php';
+
+// Load Plugin.
+require_once WSYNC_PLUGIN_DIR . 'includes/load.php';

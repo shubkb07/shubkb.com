@@ -8,12 +8,21 @@ on:
 
 jobs:
   build_and_deploy:
-    name: 🔧 Build & 🚀 Deploy on Push to Master/Dev
-    runs-on: macos-latest
+    name: 🔧 Build & 🚀 Deploy
+    runs-on: ubuntu-latest # Ubuntu is faster than macOS
 
     steps:
+      - name: Running Version 1.0 of Build and Deploy Workflow
+        run: |
+          echo "Running Version 1.0 of Build and Deploy Workflow"
+          echo "Running on ${{ runner.os }}"
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Repository: ${{ github.repository }}"
+
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 1 # Shallow clone for speed
 
       - name: 📝 Get Last Commit Message
         id: last_commit
@@ -34,10 +43,38 @@ jobs:
           fi
 
       #####################################
-      # ♻️ Restore Caches (npm + composer)
+      # ⚙️ Setup PHP & Node
+      #####################################
+      
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: composer:v2
+          coverage: none
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      #####################################
+      # ♻️ Restore Caches
       #####################################
 
-      - name: ♻️ Restore NPM + node_modules Cache
+      - name: ♻️ Get Composer Cache Directory
+        id: composer-cache-dir
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: ♻️ Cache Composer dependencies
+        uses: actions/cache@v3
+        id: composer-cache
+        with:
+          path: ${{ steps.composer-cache-dir.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
+
+      - name: ♻️ Cache NPM + node_modules
         uses: actions/cache@v3
         with:
           path: |
@@ -46,83 +83,52 @@ jobs:
           key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ github.ref_name }}-
-
-      - name: ♻️ Restore Composer vendor Cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-${{ runner.os }}-${{ github.ref_name }}-
-
-      #####################################
-      # ⚙️ Environment Setup
-      #####################################
-
-      - name: ⚙️ Install PHP & Composer via Homebrew
-        run: |
-          echo "🔧 Installing PHP..."
-          brew install php || echo "✅ PHP already installed"
-
-          echo "📦 Installing Composer..."
-          brew install composer || echo "✅ Composer already installed"
 
       #####################################
       # 📥 Install Dependencies
       #####################################
 
-      - name: 📥 Install Project Dependencies
+      - name: 📥 Install Dependencies (Parallel)
         run: |
-          echo "📦 Installing Composer dependencies..."
-          composer install --prefer-dist --no-progress --no-suggest
-
-          echo "📦 Installing NPM dependencies..."
+          # Install dependencies in parallel
+          composer install --prefer-dist --no-progress --no-interaction &
           if [ -f package-lock.json ]; then
-            npm ci
+            npm ci &
           else
-            echo "⚠️ package-lock.json not found, using npm install instead"
-            npm install
+            npm install &
           fi
+          wait
 
       #####################################
       # 🛠️ Build + Lint
       #####################################
 
-      - name: 🛠️ Build Assets & Lint PHP
-        run: |
-          echo "🏗️ Running npm build script..."
-          npm run build || exit 1
+      - name: 🛠️ Build Assets
+        run: npm run build
 
+      - name: 🧹 Auto-fix PHP Code Style
+        run: |
           echo "🧹 Running PHPCBF to auto-fix code style..."
           set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
-          result=$?
-          if [ $result -ne 0 ]; then
-            echo "ℹ️ PHPCBF fixed some issues. Continuing..."
-          fi
+          phpcbf_status=$?
           set -e
-
-      #####################################
-      # 💾 Save Caches AFTER install
-      #####################################
-
-      - name: 💾 Save Composer vendor Cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: composer-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('composer.lock') }}
-          restore-keys: |
-            composer-${{ runner.os }}-${{ github.ref_name }}-
-
-      - name: 💾 Save node_modules + .npm Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.npm
-            node_modules
-          key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            npm-${{ runner.os }}-${{ github.ref_name }}-
+          
+          # PHPCBF exit codes:
+          # 0: No fixable errors detected
+          # 1: Fixable errors were fixed
+          # 2: Some errors could not be fixed
+          # 3: Configuration error
+          if [ $phpcbf_status -eq 0 ]; then
+            echo "✅ No fixable errors detected"
+          elif [ $phpcbf_status -eq 1 ]; then
+            echo "✅ Fixed all fixable errors"
+          elif [ $phpcbf_status -eq 2 ]; then
+            echo "⚠️ Some errors could not be fixed but continuing workflow"
+          else
+            echo "❌ PHPCBF configuration error"
+            exit $phpcbf_status
+          fi
 
       #####################################
       # 🧼 Cleanup
@@ -141,21 +147,25 @@ jobs:
       - name: 🚀 Deploy to Target Build Branch
         run: |
           echo "🚚 Preparing deployment to $TARGET_BRANCH branch..."
-          git clone --single-branch --branch $TARGET_BRANCH https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git deploy
-
-          echo "📁 Updating build files in deploy directory..."
-          rm -rf deploy/plugins
-          rm -rf deploy/themes
+          git config --global user.name "Shubham Kumar Bansal"
+          git config --global user.email "shub@shubkb.com"
+          
+          # Use sparse checkout for faster clone of target branch
+          mkdir -p deploy
+          cd deploy
+          git init
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git config core.sparsecheckout true
+          git pull origin $TARGET_BRANCH
+          
+          # Update build files
+          cd ..
+          rm -rf deploy/plugins deploy/themes
           cp -r plugins deploy/
           cp -r themes deploy/
-
+          
+          # Commit and push changes
           cd deploy
-          git config user.name "Shubham Kumar Bansal"
-          git config user.email "shub@shubkb.com"
-
-          echo "📝 Committing build changes..."
           git add .
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }}" || echo "✅ No changes to commit"
-
-          echo "🚀 Pushing to $TARGET_BRANCH branch..."
-          git push origin $TARGET_BRANCH
+          git push origin HEAD:$TARGET_BRANCH
