@@ -43,7 +43,7 @@ jobs:
           fi
 
       #####################################
-      # ⚙️ Setup PHP & Node concurrently
+      # ⚙️ Setup PHP & Node
       #####################################
       
       - name: 🐘 Setup PHP
@@ -57,10 +57,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-          cache: 'npm'
 
       #####################################
-      # ♻️ Restore & Install Dependencies
+      # ♻️ Restore Caches
       #####################################
 
       - name: ♻️ Get Composer Cache Directory
@@ -75,11 +74,29 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
+      - name: ♻️ Cache NPM + node_modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            node_modules
+          key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-${{ github.ref_name }}-
+
+      #####################################
+      # 📥 Install Dependencies
+      #####################################
+
       - name: 📥 Install Dependencies (Parallel)
         run: |
           # Install dependencies in parallel
           composer install --prefer-dist --no-progress --no-interaction &
-          npm ci &
+          if [ -f package-lock.json ]; then
+            npm ci &
+          else
+            npm install &
+          fi
           wait
 
       #####################################
@@ -90,9 +107,28 @@ jobs:
         run: npm run build
 
       - name: 🧹 Auto-fix PHP Code Style
-        continue-on-error: true
         run: |
+          echo "🧹 Running PHPCBF to auto-fix code style..."
+          set +e
           ./vendor/bin/phpcbf . -d memory_limit=1024M
+          phpcbf_status=$?
+          set -e
+          
+          # PHPCBF exit codes:
+          # 0: No fixable errors detected
+          # 1: Fixable errors were fixed
+          # 2: Some errors could not be fixed
+          # 3: Configuration error
+          if [ $phpcbf_status -eq 0 ]; then
+            echo "✅ No fixable errors detected"
+          elif [ $phpcbf_status -eq 1 ]; then
+            echo "✅ Fixed all fixable errors"
+          elif [ $phpcbf_status -eq 2 ]; then
+            echo "⚠️ Some errors could not be fixed but continuing workflow"
+          else
+            echo "❌ PHPCBF configuration error"
+            exit $phpcbf_status
+          fi
 
       #####################################
       # 🧼 Cleanup
