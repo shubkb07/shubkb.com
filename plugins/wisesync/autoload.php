@@ -12,6 +12,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+error_log( 'WiseSync Autoloading...' );
+
 // Load Composer autoload if available.
 if ( file_exists( WSYNC_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 	require_once WSYNC_PLUGIN_DIR . '/vendor/autoload.php';
