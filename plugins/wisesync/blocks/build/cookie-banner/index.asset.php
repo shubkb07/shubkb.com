@@ -1,4 +1,4 @@
 <?php return array(
-	'dependencies' => array( 'wp-blocks' ),
-	'version'      => '6c08c7a3ad7ee944238e',
+	'dependencies' => array( 'react-jsx-runtime', 'wp-block-editor', 'wp-blocks', 'wp-components', 'wp-i18n' ),
+	'version'      => 'e93f0612610aa05f0ecb',
 );
