@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest # Ubuntu is faster than macOS
 
     steps:
-      - name: Running Version 1.0 of Build and Deploy Workflow
+      - name: Running Version 1.1 of Build and Deploy Workflow
         run: |
           echo "Running Version 1.0 of Build and Deploy Workflow"
           echo "Running on ${{ runner.os }}"
@@ -26,7 +26,9 @@ jobs:
 
       - name: 📝 Get Last Commit Message
         id: last_commit
-        run: echo "message=$(git log -1 --pretty=%B)" >> $GITHUB_OUTPUT
+        run: |
+          sanitized_message=$(git log -1 --pretty=%B | tr '\n' ' ' | tr -d '\r')
+          echo "message=$sanitized_message" >> $GITHUB_OUTPUT
 
       - name: Set Target Branch
         id: set_target_branch
@@ -159,7 +161,7 @@ jobs:
           git pull origin $TARGET_BRANCH
           
           # Update build files
-          cd ..
+          cd .. 
           rm -rf deploy/plugins deploy/themes
           cp -r plugins deploy/
           cp -r themes deploy/
