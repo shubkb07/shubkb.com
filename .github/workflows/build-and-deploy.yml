@@ -55,6 +55,16 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-${{ github.ref_name }}-
 
+      - name: ♻️ Restore Homebrew Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/Homebrew
+            /opt/homebrew
+          key: brew-${{ runner.os }}-${{ github.ref_name }}
+          restore-keys: |
+            brew-${{ runner.os }}-
+
       #####################################
       # ⚙️ Environment Setup
       #####################################
@@ -123,6 +133,14 @@ jobs:
           key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ github.ref_name }}-
+
+      - name: 💾 Save Homebrew Cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            /usr/local/Homebrew
+            /opt/homebrew
+          key: brew-${{ runner.os }}-${{ github.ref_name }}
 
       #####################################
       # 🧼 Cleanup
