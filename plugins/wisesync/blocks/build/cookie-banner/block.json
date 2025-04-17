@@ -4,7 +4,7 @@
   "name": "sync/cookie-banner",
   "version": "1.0.0",
   "title": "Cookie Banner",
-  "category": "anfco-blocks",
+  "category": "sync-advance-blocks",
   "icon": "awards",
   "description": "Award slider block.",
   "supports": {

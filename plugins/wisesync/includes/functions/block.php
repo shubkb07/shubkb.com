@@ -18,6 +18,7 @@ if ( ! function_exists( 'register_sync_blocks_category' ) ) {
 	 * @return array Modified categories.
 	 */
 	function register_sync_blocks_category( $categories ) {
+		print_r( $categories );
 		return array_merge(
 			array(
 				array(
