@@ -12,6 +12,9 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      - name: Running Workflow on Push to Master/Dev version 1.0.0
+        run: echo "Running Build & Deploy workflow on push to master/dev branch..."
+
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
 
