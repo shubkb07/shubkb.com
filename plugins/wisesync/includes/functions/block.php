@@ -69,3 +69,39 @@ function register_sync_block_type( $dir ) {
 		register_block_type( $block_json );
 	}
 }
+
+/**
+ * Only allow our block in the Site Editor.
+ *
+ * @param bool|string[]           $allowed_block_types  Array of block slugs or `true` to allow all.
+ * @param WP_Block_Editor_Context $editor_context       The current block editor context.
+ * @return bool|string[]                                Filtered allowed blocks.
+ */
+function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
+	// Change this to the name you used in your block.json "name" property.
+	$our_block = 'sync/cookie-bannera';
+
+	// 1) If we're in the Site Editor (Full Site Editing), leave everything allowed.
+	if ( 'core/edit-site' === $editor_context->name ) {
+		return true;
+	}
+
+	// 2) Otherwise (post or page editors), strip out our block.
+	// If WP gave us `true` (meaning “all blocks”), grab the registry first.
+	if ( true === $allowed_block_types ) {
+		if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
+			return $allowed_block_types; // bail if something’s very wrong.
+		}
+		$registered          = WP_Block_Type_Registry::get_instance()->get_all_registered();
+		$allowed_block_types = array_keys( $registered );
+	}
+
+	// Remove our block from the allowed list.
+	if ( is_array( $allowed_block_types ) ) {
+		$allowed_block_types = array_diff( $allowed_block_types, array( $our_block ) );
+	}
+
+	return $allowed_block_types;
+}
+
+add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
