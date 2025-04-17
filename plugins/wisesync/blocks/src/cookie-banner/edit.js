@@ -2,7 +2,6 @@ import { __ } from '@wordpress/i18n';
 import { 
     InspectorControls, 
     useBlockProps, 
-    RichText 
 } from '@wordpress/block-editor';
 import {
     PanelBody,
@@ -12,12 +11,10 @@ import {
     ToggleControl,
     RangeControl,
     TabPanel,
-    Button,
     Placeholder,
     ExternalLink,
     Notice
 } from '@wordpress/components';
-import { useSelect } from '@wordpress.data';
 import './editor.scss';
 
 export default function Edit({ attributes, setAttributes, context }) {
