@@ -12,8 +12,15 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Running Workflow on Push to Master/Dev version 1.0.0
-        run: echo "Running Build & Deploy workflow on push to master/dev branch..."
+      - name: Running Version 1.0 of Build and Deploy Wordflow on ${{ runner.os }} - ${{ github.event_name }}
+        run: |
+          echo "Running Version 1.0 of Build and Deploy Workflow"
+          echo "Running on ${{ runner.os }}"
+          echo "Event Name: ${{ github.event_name }}"
+          echo "Event Repository: ${{ github.event.repository.name }}"
+          echo "Event Repository URL: ${{ github.event.repository.html_url }}"
+          echo "Event Repository Full Name: ${{ github.event.repository.full_name }}"
+          echo "Event Repository Owner: ${{ github.event.repository.owner.login }}"
 
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
@@ -57,16 +64,6 @@ jobs:
           key: composer-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('composer.lock') }}
           restore-keys: |
             composer-${{ runner.os }}-${{ github.ref_name }}-
-
-      - name: ♻️ Restore Homebrew Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /usr/local/Homebrew
-            /opt/homebrew
-          key: brew-${{ runner.os }}-${{ github.ref_name }}
-          restore-keys: |
-            brew-${{ runner.os }}-
 
       #####################################
       # ⚙️ Environment Setup
@@ -136,14 +133,6 @@ jobs:
           key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             npm-${{ runner.os }}-${{ github.ref_name }}-
-
-      - name: 💾 Save Homebrew Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            /usr/local/Homebrew
-            /opt/homebrew
-          key: brew-${{ runner.os }}-${{ github.ref_name }}
 
       #####################################
       # 🧼 Cleanup
