@@ -1,9 +1,9 @@
 {
   "$schema": "./../../../../../block.json",
   "apiVersion": 3,
-  "name": "sync/cookie-banner",
+  "name": "sync/cookie-bannera",
   "version": "1.0.0",
-  "title": "Cookie Banner",
+  "title": "Cookie Bannera",
   "category": "sync-advance-blocks",
   "icon": "privacy",
   "description": "GDPR compliant cookie consent banner with customizable settings",
