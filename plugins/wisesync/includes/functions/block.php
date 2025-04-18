@@ -81,18 +81,13 @@ function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
 	// Change this to the name you used in your block.json "name" property.
 	$our_block = 'sync/cookie-bannera';
 
-	$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER[ 'HTTPS' ] ? 'https://' : 'http://';
-	$url .= $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ];
-	error_log( 'URL: ' . $url );
-	// error_log( 'allowed_block_types_all' );
-	// error_log( strval( get_current_screen() ) );
-	error_log( strval( 'name' ) );
-	error_log( $editor_context->name );
-
 	// 1) If we're in the Site Editor (Full Site Editing), leave everything allowed.
 	if ( 'core/edit-site' === $editor_context->name ) {
 		return true;
 	}
+
+	error_log( 'before' );
+	error_log( print_r( $allowed_block_types, true ) );
 
 	// 2) Otherwise (post or page editors), strip out our block.
 	// If WP gave us `true` (meaning “all blocks”), grab the registry first.
@@ -103,6 +98,9 @@ function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
 		$registered          = WP_Block_Type_Registry::get_instance()->get_all_registered();
 		$allowed_block_types = array_keys( $registered );
 	}
+
+	error_log( 'after' );
+	error_log( print_r( $allowed_block_types, true ) );
 
 	// Remove our block from the allowed list.
 	if ( is_array( $allowed_block_types ) ) {
