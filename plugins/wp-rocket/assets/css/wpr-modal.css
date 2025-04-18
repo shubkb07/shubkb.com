@@ -1,4 +1,4 @@
-﻿.wpr-modal {
+.wpr-modal {
 	display: none;
 }
 
@@ -61,7 +61,7 @@
 .wpr-modal-confirm {
 	background: #F56F46;
 	border: none;
-	box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	color: #fff;
 	transition: box-shadow 500ms ease-in;
 }

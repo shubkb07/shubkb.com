@@ -108,6 +108,9 @@ jobs:
       - name: 🛠️ Build Assets
         run: npm run build
 
+      - name: 🛠️ Lint Fix Assets
+        run: npm run lint:fix
+
       - name: 🧹 Auto-fix PHP Code Style
         run: |
           echo "🧹 Running PHPCBF to auto-fix code style..."

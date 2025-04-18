@@ -3,6 +3,7 @@
  */
 
 .wp-block-sync-cookie-banner {
+
     .components-placeholder {
         padding: 16px;
     }
@@ -112,6 +113,7 @@
     }
 
     .cookie-banner-tabs {
+
         .components-tab-panel__tabs {
             margin-bottom: 16px;
         }
@@ -122,6 +124,7 @@
     }
 
     &.minimized-banner {
+
         .cookie-banner-preview {
             margin-bottom: 30px;
         }
@@ -135,7 +138,7 @@
     padding-bottom: 60px; /* Space for floating button */
     
     .cookie-banner-mock {
-        background-color: #ffffff;
+        background-color: #fff;
         border-radius: 4px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         padding: 20px;
@@ -215,7 +218,7 @@
                 }
                 
                 &.primary {
-                    color: #ffffff;
+                    color: #fff;
                 }
                 
                 &.secondary {
