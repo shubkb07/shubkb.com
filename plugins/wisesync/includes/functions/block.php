@@ -81,6 +81,9 @@ function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
 	// Change this to the name you used in your block.json "name" property.
 	$our_block = 'sync/cookie-bannera';
 
+	$url  = isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER[ 'HTTPS' ] ? 'https://' : 'http://';
+	$url .= $_SERVER[ 'HTTP_HOST' ] . $_SERVER[ 'REQUEST_URI' ];
+	error_log( 'URL: ' . $url );
 	error_log( 'allowed_block_types_all' );
 	error_log( strval( get_current_screen() ) );
 	error_log( strval( 'name' ) );
