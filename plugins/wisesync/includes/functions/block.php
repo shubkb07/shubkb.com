@@ -107,6 +107,9 @@ function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
 		$allowed_block_types = array_diff( $allowed_block_types, array( $our_block ) );
 	}
 
+	error_log( 'at last' );
+	error_log( print_r( $allowed_block_types, true ) );
+
 	return $allowed_block_types;
 }
 
