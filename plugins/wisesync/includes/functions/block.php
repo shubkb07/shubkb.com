@@ -84,7 +84,12 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 	// Get current template being edited.
 	$current_template = null;
 
-	error_log( 'Current Context: ' . print_r( $block_editor_context ) );
+	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
+	error_log( 'Current post ID: ' . $block_editor_context->post->ID );
+	error_log( 'Current post name: ' . $block_editor_context->post->post_name );
+	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
+	error_log( 'Current post status: ' . $block_editor_context->post->post_status );
+	error_log( 'Context' . print_r( $block_editor_context->post, true ) );
 
 	if ( true === $allowed_blocks ) {
 		$all_blocks     = WP_Block_Type_Registry::get_instance()->get_all_registered();
