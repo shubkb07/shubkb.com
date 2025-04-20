@@ -7,9 +7,6 @@
   "category": "sync-advance-blocks",
   "icon": "privacy",
   "description": "All compliant cookie consent banner with customizable settings",
-  "parent": [
-    "core/template-part/footer"
-  ],
   "supports": {
     "html": false,
     "multiple": false,
