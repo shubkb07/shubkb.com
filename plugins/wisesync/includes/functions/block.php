@@ -88,6 +88,12 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 	// Get current template being edited.
 	$current_template = null;
 
+	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
+	error_log( 'Current post ID: ' . $block_editor_context->post->ID );
+	error_log( 'Current post name: ' . $block_editor_context->post->post_name );
+	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
+	error_log( 'Current post status: ' . $block_editor_context->post->post_status );
+
 	if ( isset( $block_editor_context->post ) ) {
 		// Get the current template name if we're in the template editor.
 		if ( 'wp_template_part' === $block_editor_context->post->post_type ) {
