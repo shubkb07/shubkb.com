@@ -51,9 +51,6 @@ function register_sync_block_type( $dir ) {
 		return;
 	}
 
-	$screen = get_current_screen();
-	error_log( 'Current screen: ' . print_r( $screen, true ) );
-
 	// Get the subdirectory names.
 	$subdirs = glob( $dir . '/*', GLOB_ONLYDIR );
 	if ( ! $subdirs ) {
