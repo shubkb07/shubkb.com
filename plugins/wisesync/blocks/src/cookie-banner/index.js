@@ -9,7 +9,6 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './index.css';
 
 /**
  * Register the block
