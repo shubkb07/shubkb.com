@@ -93,7 +93,7 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 	error_log( 'Current post name: ' . $block_editor_context->post->post_name );
 	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
 	error_log( 'Current post status: ' . $block_editor_context->post->post_status );
-	error_log( 'Current Blocks: ' . print_r( $block_editor_context->post->blocks, true ) );
+	error_log( 'Current Blocks: ' . print_r( $allowed_blocks, true ) );
 
 	if ( isset( $block_editor_context->post ) ) {
 		// Get the current template name if we're in the template editor.
@@ -126,7 +126,7 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 		}
 	}
 
-	error_log( 'Blocks After: ' . print_r( $block_editor_context->post->blocks, true ) );
+	error_log( 'Blocks After: ' . print_r( $allowed_blocks, true ) );
 
 	return $allowed_blocks;
 }
