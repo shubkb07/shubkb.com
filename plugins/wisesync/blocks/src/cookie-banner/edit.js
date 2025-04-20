@@ -13,34 +13,34 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 
 	const blockProps = useBlockProps();
 
-	// Check if block is inside a footer template part
-	const { isInFooter } = useSelect( ( select ) => {
+	// Check if block is inside a template part with area="footer"
+	const { isInFooterTemplatePart } = useSelect( ( select ) => {
 		const { getBlockParents, getBlocksByClientId } = select( blockEditorStore );
 
 		const parentBlockIds = getBlockParents( clientId );
-		let isFooter = false;
+		let isFooterArea = false;
 
-		// Check each parent block to see if it's a template part with area="footer"
+		// Check if any parent block is a template part with area="footer"
 		for ( const parentId of parentBlockIds ) {
 			const parentBlocks = getBlocksByClientId( [ parentId ] );
 			if ( parentBlocks && parentBlocks.length ) {
 				const parentBlock = parentBlocks[ 0 ];
 				if ( parentBlock.name === 'core/template-part' &&
-                    parentBlock.attributes &&
-                    parentBlock.attributes.area === 'footer' ) {
-					isFooter = true;
+					parentBlock.attributes &&
+					parentBlock.attributes.area === 'footer' ) {
+					isFooterArea = true;
 					break;
 				}
 			}
 		}
 
 		return {
-			isInFooter: isFooter,
+			isInFooterTemplatePart: isFooterArea,
 		};
 	}, [ clientId ] );
 
-	// If not in a footer template part, show a notice
-	if ( ! isInFooter ) {
+	// If not in a template part with area="footer", show a notice
+	if ( ! isInFooterTemplatePart ) {
 		return (
 			<div { ...blockProps } className="wisesync-cookie-banner-warning">
 				<div className="components-placeholder">
@@ -48,7 +48,7 @@ export default function Edit( { attributes, setAttributes, clientId } ) {
 						{ __( 'Cookie Banner', 'wisesync' ) }
 					</div>
 					<div className="components-placeholder__instructions">
-						{ __( 'This block can only be used in footer template parts.', 'wisesync' ) }
+						{ __( 'This block can only be used in template parts with area="footer".', 'wisesync' ) }
 					</div>
 				</div>
 			</div>
