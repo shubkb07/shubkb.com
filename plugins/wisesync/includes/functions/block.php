@@ -94,22 +94,10 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 
 	error_log( 'Current Blocks: ' . print_r( $allowed_blocks, true ) );
 
-	if ( isset( $block_editor_context->post ) ) {
-		// Get the current template name if we're in the template editor.
-		if ( 'wp_template_part' === $block_editor_context->post->post_type ) {
-			$current_template = $block_editor_context->post->post_name;
-		}
-	}
-
-	// If we're not in the footer template, remove our block from allowed blocks.
-	if ( 'footer' !== $current_template ) {
-		if ( is_array( $allowed_blocks ) ) {
-			$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
-			// If the block is found, remove it from the allowed blocks.
-			if ( false !== $key ) {
-				unset( $allowed_blocks[ $key ] );
-			}
-		}
+	$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
+	// If the block is found, remove it from the allowed blocks.
+	if ( false !== $key ) {
+		unset( $allowed_blocks[ $key ] );
 	}
 
 	error_log( 'Blocks After: ' . print_r( $allowed_blocks, true ) );
