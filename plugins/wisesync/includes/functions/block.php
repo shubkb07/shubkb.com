@@ -84,7 +84,7 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 	// Get current template being edited.
 	$current_template = null;
 
-	error_log( 'Current Context: ' . print_r( $block_editor_context );
+	error_log( 'Current Context: ' . print_r( $block_editor_context ) );
 
 	if ( true === $allowed_blocks ) {
 		$all_blocks     = WP_Block_Type_Registry::get_instance()->get_all_registered();
