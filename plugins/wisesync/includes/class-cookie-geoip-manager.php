@@ -100,162 +100,162 @@ class WSYNC_Cookie_GeoIP_Manager {
 		// Apply country-specific rules
 		$country_code = $geo_data['countryCode'];
 
-		 // Country-specific configurations
-        switch ( $country_code ) {
-            // EU Countries
-            case 'AT':
-            case 'BE':
-            case 'BG':
-            case 'HR':
-            case 'CY':
-            case 'CZ':
-            case 'DK':
-            case 'EE':
-            case 'FI':
-            case 'FR':
-            case 'DE':
-            case 'GR':
-            case 'HU':
-            case 'IE':
-            case 'IT':
-            case 'LV':
-            case 'LT':
-            case 'LU':
-            case 'MT':
-            case 'NL':
-            case 'PL':
-            case 'PT':
-            case 'RO':
-            case 'SK':
-            case 'SI':
-            case 'ES':
-            case 'SE':
-                // GDPR + ePrivacy Directive
-                $config['bannerText']      = 'This site uses cookies for analytics and marketing. Please accept or customize your settings.';
-                $config['expirationDays']  = 180;
-                $config['requiredConsent'] = 'opt-in';
-                break;
+		// Country-specific configurations
+		switch ( $country_code ) {
+			// EU Countries
+			case 'AT':
+			case 'BE':
+			case 'BG':
+			case 'HR':
+			case 'CY':
+			case 'CZ':
+			case 'DK':
+			case 'EE':
+			case 'FI':
+			case 'FR':
+			case 'DE':
+			case 'GR':
+			case 'HU':
+			case 'IE':
+			case 'IT':
+			case 'LV':
+			case 'LT':
+			case 'LU':
+			case 'MT':
+			case 'NL':
+			case 'PL':
+			case 'PT':
+			case 'RO':
+			case 'SK':
+			case 'SI':
+			case 'ES':
+			case 'SE':
+				// GDPR + ePrivacy Directive
+				$config['bannerText']      = 'This site uses cookies for analytics and marketing. Please accept or customize your settings.';
+				$config['expirationDays']  = 180;
+				$config['requiredConsent'] = 'opt-in';
+				break;
 
-            // United Kingdom
-            case 'GB':
-                // UK GDPR + PECR
-                $config['bannerText']      = 'This site uses cookies for analytics and marketing. Under UK GDPR, please accept or customize your settings.';
-                $config['expirationDays']  = 180;
-                $config['requiredConsent'] = 'opt-in';
-                break;
+			// United Kingdom
+			case 'GB':
+				// UK GDPR + PECR
+				$config['bannerText']      = 'This site uses cookies for analytics and marketing. Under UK GDPR, please accept or customize your settings.';
+				$config['expirationDays']  = 180;
+				$config['requiredConsent'] = 'opt-in';
+				break;
 
-            // United States
-            case 'US':
-                // Default US config (less strict than GDPR)
-                $config['bannerText']        = 'We use cookies to enhance your experience. By continuing to browse, you agree to our use of cookies.';
-                $config['requiredConsent']   = 'opt-out';
-                $config['expirationDays']    = 365;
-                $config['showDoNotSellLink'] = true;
+			// United States
+			case 'US':
+				// Default US config (less strict than GDPR)
+				$config['bannerText']        = 'We use cookies to enhance your experience. By continuing to browse, you agree to our use of cookies.';
+				$config['requiredConsent']   = 'opt-out';
+				$config['expirationDays']    = 365;
+				$config['showDoNotSellLink'] = true;
 
-                // Check for California
-                if ( $this->is_california( $geo_data ) ) {
-                    $config['bannerText']        = 'This site uses cookies. Under the CCPA/CPRA, California residents have specific rights regarding personal information.';
-                    $config['requiredConsent']   = 'opt-out';
-                    $config['expirationDays']    = 365;
-                    $config['showDoNotSellLink'] = true;
-                }
+				// Check for California
+				if ( $this->is_california( $geo_data ) ) {
+					$config['bannerText']        = 'This site uses cookies. Under the CCPA/CPRA, California residents have specific rights regarding personal information.';
+					$config['requiredConsent']   = 'opt-out';
+					$config['expirationDays']    = 365;
+					$config['showDoNotSellLink'] = true;
+				}
 
-                // Check for Colorado, Connecticut, Virginia, Utah or other states with specific privacy laws
-                if ( $this->is_privacy_law_state( $geo_data ) ) {
-                    $config['showDoNotSellLink'] = true;
-                    $config['requiredConsent']   = 'opt-out';
-                }
-                break;
+				// Check for Colorado, Connecticut, Virginia, Utah or other states with specific privacy laws
+				if ( $this->is_privacy_law_state( $geo_data ) ) {
+					$config['showDoNotSellLink'] = true;
+					$config['requiredConsent']   = 'opt-out';
+				}
+				break;
 
-            // Canada
-            case 'CA':
-                // PIPEDA
-                $config['bannerText']      = 'This site uses cookies. Under PIPEDA, your continued use implies consent, but you can customize your preferences.';
-                $config['requiredConsent'] = 'implied';
-                $config['expirationDays']  = 365;
-                break;
+			// Canada
+			case 'CA':
+				// PIPEDA
+				$config['bannerText']      = 'This site uses cookies. Under PIPEDA, your continued use implies consent, but you can customize your preferences.';
+				$config['requiredConsent'] = 'implied';
+				$config['expirationDays']  = 365;
+				break;
 
-            // Brazil
-            case 'BR':
-                // LGPD
-                $config['bannerText']      = 'This site uses cookies. Under LGPD, we need your consent for non-essential cookies.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
+			// Brazil
+			case 'BR':
+				// LGPD
+				$config['bannerText']      = 'This site uses cookies. Under LGPD, we need your consent for non-essential cookies.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
 
-            // Japan
-            case 'JP':
-                // APPI
-                $config['bannerText']      = 'This site uses cookies. Under APPI, we need your consent for third-party cookies.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
+			// Japan
+			case 'JP':
+				// APPI
+				$config['bannerText']      = 'This site uses cookies. Under APPI, we need your consent for third-party cookies.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
 
-            // Singapore
-            case 'SG':
-                // PDPA
-                $config['bannerText']      = 'This site uses cookies. Under PDPA, your continued use implies consent.';
-                $config['requiredConsent'] = 'implied';
-                $config['expirationDays']  = 365;
-                break;
+			// Singapore
+			case 'SG':
+				// PDPA
+				$config['bannerText']      = 'This site uses cookies. Under PDPA, your continued use implies consent.';
+				$config['requiredConsent'] = 'implied';
+				$config['expirationDays']  = 365;
+				break;
 
-            // Australia
-            case 'AU':
-                // Privacy Act
-                $config['bannerText']      = 'This site uses cookies. Under the Privacy Act, your continued use implies consent.';
-                $config['requiredConsent'] = 'implied';
-                $config['expirationDays']  = 365;
-                break;
+			// Australia
+			case 'AU':
+				// Privacy Act
+				$config['bannerText']      = 'This site uses cookies. Under the Privacy Act, your continued use implies consent.';
+				$config['requiredConsent'] = 'implied';
+				$config['expirationDays']  = 365;
+				break;
 
-            // India
-            case 'IN':
-                // DPDP Act
-                $config['bannerText']      = 'This site uses cookies. Under the DPDP Act, we need your consent for non-essential cookies.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
+			// India
+			case 'IN':
+				// DPDP Act
+				$config['bannerText']      = 'This site uses cookies. Under the DPDP Act, we need your consent for non-essential cookies.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
 
-            // China
-            case 'CN':
-                // PIPL
-                $config['bannerText']      = 'This site uses cookies. Under PIPL, we need your explicit consent for all data processing.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 180;
-                break;
+			// China
+			case 'CN':
+				// PIPL
+				$config['bannerText']      = 'This site uses cookies. Under PIPL, we need your explicit consent for all data processing.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 180;
+				break;
 
-            // South Korea
-            case 'KR':
-                // PIPA
-                $config['bannerText']      = 'This site uses cookies. Under PIPA, we need your explicit consent for data processing.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 180;
-                break;
+			// South Korea
+			case 'KR':
+				// PIPA
+				$config['bannerText']      = 'This site uses cookies. Under PIPA, we need your explicit consent for data processing.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 180;
+				break;
 
-            // South Africa
-            case 'ZA':
-                // POPIA
-                $config['bannerText']      = 'This site uses cookies. Under POPIA, we need your consent for non-essential cookies.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
+			// South Africa
+			case 'ZA':
+				// POPIA
+				$config['bannerText']      = 'This site uses cookies. Under POPIA, we need your consent for non-essential cookies.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
 
-            // United Arab Emirates / Saudi Arabia
-            case 'AE':
-            case 'SA':
-                // UAE PDPL / Saudi PDPL
-                $config['bannerText']      = 'This site uses cookies. Under local data protection law, we need your consent for personal data processing.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
+			// United Arab Emirates / Saudi Arabia
+			case 'AE':
+			case 'SA':
+				// UAE PDPL / Saudi PDPL
+				$config['bannerText']      = 'This site uses cookies. Under local data protection law, we need your consent for personal data processing.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
 
-            // Default for all other countries
-            default:
-                // Best practice: opt-in for all non-essential cookies
-                $config['bannerText']      = 'This site uses cookies to enhance your experience. Please let us know which cookies we can store.';
-                $config['requiredConsent'] = 'opt-in';
-                $config['expirationDays']  = 365;
-                break;
-        }
+			// Default for all other countries
+			default:
+				// Best practice: opt-in for all non-essential cookies
+				$config['bannerText']      = 'This site uses cookies to enhance your experience. Please let us know which cookies we can store.';
+				$config['requiredConsent'] = 'opt-in';
+				$config['expirationDays']  = 365;
+				break;
+		}
 
 		// Add country information
 		$config['visitorCountryCode'] = $geo_data['countryCode'];
@@ -274,9 +274,9 @@ class WSYNC_Cookie_GeoIP_Manager {
 		$country_name = isset( $_SERVER['GEOIP_COUNTRY_NAME'] ) ? $_SERVER['GEOIP_COUNTRY_NAME'] : '';
 		$region_code  = isset( $_SERVER['GEOIP_REGION'] ) ? $_SERVER['GEOIP_REGION'] : '';
 		$region_name  = isset( $_SERVER['GEOIP_REGION_NAME'] ) ? $_SERVER['GEOIP_REGION_NAME'] : '';
-		$city        = isset( $_SERVER['GEOIP_CITY'] ) ? $_SERVER['GEOIP_CITY'] : '';
-		$postal_code = isset( $_SERVER['GEOIP_POSTAL_CODE'] ) ? $_SERVER['GEOIP_POSTAL_CODE'] : '';
-		
+		$city         = isset( $_SERVER['GEOIP_CITY'] ) ? $_SERVER['GEOIP_CITY'] : '';
+		$postal_code  = isset( $_SERVER['GEOIP_POSTAL_CODE'] ) ? $_SERVER['GEOIP_POSTAL_CODE'] : '';
+
 		return array(
 			'countryCode' => $country_code,
 			'countryName' => $country_name,
@@ -321,12 +321,39 @@ class WSYNC_Cookie_GeoIP_Manager {
 	 */
 	public function is_gdpr_country( $country_code ) {
 		$gdpr_countries = array(
-			'AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR',
-			'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 'MT', 'NL',
-			'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE', 'GB', 'NO', 'IS',
+			'AT',
+			'BE',
+			'BG',
+			'HR',
+			'CY',
+			'CZ',
+			'DK',
+			'EE',
+			'FI',
+			'FR',
+			'DE',
+			'GR',
+			'HU',
+			'IE',
+			'IT',
+			'LV',
+			'LT',
+			'LU',
+			'MT',
+			'NL',
+			'PL',
+			'PT',
+			'RO',
+			'SK',
+			'SI',
+			'ES',
+			'SE',
+			'GB',
+			'NO',
+			'IS',
 			'LI',
 		);
-		
+
 		return in_array( $country_code, $gdpr_countries, true );
 	}
 }
