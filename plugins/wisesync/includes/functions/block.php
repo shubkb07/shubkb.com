@@ -69,7 +69,7 @@ function register_sync_block_type( $dir ) {
 		register_block_type( $block_json );
 	}
 
-	add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
+	// add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
 }
 
 /**
