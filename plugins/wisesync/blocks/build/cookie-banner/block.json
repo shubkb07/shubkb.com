@@ -17,7 +17,7 @@
       "default": "We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking \"Accept All\", you consent to our use of cookies."
     }
   },
-  "parent": [
+  "ancestor": [
     "core/template-part"
   ],
   "supports": {
@@ -26,9 +26,9 @@
   },
   "textdomain": "wisesync",
   "editorScript": "file:./index.js",
-  "editorStyle": "file:./index.css",
+  "editorStyle": "file:./editor.scss",
   "viewScript": "file:./view.js",
-  "style": "file:./style.css",
+  "style": "file:./style.scss",
   "example": {
     "attributes": {
       "bannerTitle": "Cookie Consent",
