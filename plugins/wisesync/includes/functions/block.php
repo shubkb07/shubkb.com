@@ -51,6 +51,9 @@ function register_sync_block_type( $dir ) {
 		return;
 	}
 
+	$screen = get_current_screen();
+	error_log( 'Current screen: ' . print_r( $screen, true ) );
+
 	// Get the subdirectory names.
 	$subdirs = glob( $dir . '/*', GLOB_ONLYDIR );
 	if ( ! $subdirs ) {
@@ -68,65 +71,4 @@ function register_sync_block_type( $dir ) {
 		// Register the block type.
 		register_block_type( $block_json );
 	}
-
-	add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
-}
-
-/**
- * Only allow our block in the Site Editor.
- *
- * @param bool|string[]           $allowed_blocks       Array of block slugs or `true` to allow all.
- * @param WP_Block_Editor_Context $block_editor_context The current block editor context.
- * @return bool|string[]                                Filtered allowed blocks.
- */
-function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) {
-	// If no context is available, return all blocks.
-	if ( ! isset( $block_editor_context->post ) ) {
-		return $allowed_blocks;
-	}
-
-	// Get current template being edited.
-	$current_template = null;
-
-	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
-	error_log( 'Current post ID: ' . $block_editor_context->post->ID );
-	error_log( 'Current post name: ' . $block_editor_context->post->post_name );
-	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
-	error_log( 'Current post status: ' . $block_editor_context->post->post_status );
-	error_log( 'Current Blocks: ' . print_r( $allowed_blocks, true ) );
-
-	if ( isset( $block_editor_context->post ) ) {
-		// Get the current template name if we're in the template editor.
-		if ( 'wp_template_part' === $block_editor_context->post->post_type ) {
-			$current_template = $block_editor_context->post->post_name;
-		}
-	}
-
-	// If we're not in the footer template, remove our block from allowed blocks.
-	if ( 'footer' !== $current_template ) {
-		if ( is_array( $allowed_blocks ) ) {
-			$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
-			// If the block is found, remove it from the allowed blocks.
-			if ( false !== $key ) {
-				unset( $allowed_blocks[ $key ] );
-			}
-		}
-	}
-
-	// Check if the block already exists in the content.
-	if ( isset( $block_editor_context->post->post_content ) ) {
-		if ( strpos( $block_editor_context->post->post_content, '"name":"sync/cookie-banner"' ) !== false ) {
-			// Block already exists, remove it from allowed blocks.
-			if ( is_array( $allowed_blocks ) ) {
-				$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
-				if ( false !== $key ) {
-					unset( $allowed_blocks[ $key ] );
-				}
-			}
-		}
-	}
-
-	error_log( 'Blocks After: ' . print_r( $allowed_blocks, true ) );
-
-	return $allowed_blocks;
 }
