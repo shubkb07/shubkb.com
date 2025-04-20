@@ -68,49 +68,56 @@ function register_sync_block_type( $dir ) {
 		// Register the block type.
 		register_block_type( $block_json );
 	}
+
+	add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
 }
 
 /**
  * Only allow our block in the Site Editor.
  *
- * @param bool|string[]           $allowed_block_types  Array of block slugs or `true` to allow all.
- * @param WP_Block_Editor_Context $editor_context       The current block editor context.
+ * @param bool|string[]           $allowed_blocks       Array of block slugs or `true` to allow all.
+ * @param WP_Block_Editor_Context $block_editor_context The current block editor context.
  * @return bool|string[]                                Filtered allowed blocks.
  */
-function sync_allowed_block_types_all( $allowed_block_types, $editor_context ) {
-	// Change this to the name you used in your block.json "name" property.
-	$our_block = 'sync/cookie-bannera';
-
-	// 1) If we're in the Site Editor (Full Site Editing), leave everything allowed.
-	if ( 'core/edit-site' === $editor_context->name ) {
-		return true;
+function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) {
+	// If no context is available, return all blocks.
+	if ( ! isset( $block_editor_context->post ) ) {
+		return $allowed_blocks;
 	}
 
-	error_log( 'before' );
-	error_log( print_r( $allowed_block_types, true ) );
+	// Get current template being edited.
+	$current_template = null;
 
-	// 2) Otherwise (post or page editors), strip out our block.
-	// If WP gave us `true` (meaning “all blocks”), grab the registry first.
-	if ( true === $allowed_block_types ) {
-		if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
-			return $allowed_block_types; // bail if something’s very wrong.
+	if ( isset( $block_editor_context->post ) ) {
+		// Get the current template name if we're in the template editor.
+		if ( 'wp_template_part' === $block_editor_context->post->post_type ) {
+			$current_template = $block_editor_context->post->post_name;
 		}
-		$registered          = WP_Block_Type_Registry::get_instance()->get_all_registered();
-		$allowed_block_types = array_keys( $registered );
 	}
 
-	error_log( 'after' );
-	error_log( print_r( $allowed_block_types, true ) );
-
-	// Remove our block from the allowed list.
-	if ( is_array( $allowed_block_types ) ) {
-		$allowed_block_types = array_diff( $allowed_block_types, array( $our_block ) );
+	// If we're not in the footer template, remove our block from allowed blocks.
+	if ( 'footer' !== $current_template ) {
+		if ( is_array( $allowed_blocks ) ) {
+			$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
+			// If the block is found, remove it from the allowed blocks.
+			if ( false !== $key ) {
+				unset( $allowed_blocks[ $key ] );
+			}
+		}
 	}
 
-	error_log( 'at last' );
-	error_log( print_r( $allowed_block_types, true ) );
+	// Check if the block already exists in the content.
+	if ( isset( $block_editor_context->post->post_content ) ) {
+		if ( strpos( $block_editor_context->post->post_content, '"name":"sync/cookie-banner"' ) !== false ) {
+			// Block already exists, remove it from allowed blocks.
+			if ( is_array( $allowed_blocks ) ) {
+				$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
+				if ( false !== $key ) {
+					unset( $allowed_blocks[ $key ] );
+				}
+			}
+		}
+	}
 
-	return $allowed_block_types;
+	return $allowed_blocks;
 }
-
-add_filter( 'allowed_block_types_all', 'sync_allowed_block_types_all', 10, 2 );
