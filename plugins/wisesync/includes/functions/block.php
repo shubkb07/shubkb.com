@@ -81,15 +81,11 @@ function register_sync_block_type( $dir ) {
  */
 function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) {
 
-	// Get current template being edited.
-	$current_template = null;
+	$post = isset( $block_editor_context->post ) ? $block_editor_context->post : null;
 
-	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
-	error_log( 'Current post ID: ' . $block_editor_context->post->ID );
-	error_log( 'Current post name: ' . $block_editor_context->post->post_name );
-	error_log( 'Current post type: ' . $block_editor_context->post->post_type );
-	error_log( 'Current post status: ' . $block_editor_context->post->post_status );
-	error_log( 'Context' . print_r( $block_editor_context->post, true ) );
+	if ( ! $post ) {
+		return $allowed_blocks;
+	}
 
 	if ( true === $allowed_blocks ) {
 		$all_blocks     = WP_Block_Type_Registry::get_instance()->get_all_registered();
@@ -98,22 +94,10 @@ function sync_allowed_block_types_all( $allowed_blocks, $block_editor_context ) 
 
 	error_log( 'Current Blocks: ' . print_r( $allowed_blocks, true ) );
 
-	if ( isset( $block_editor_context->post ) ) {
-		// Get the current template name if we're in the template editor.
-		if ( 'wp_template_part' === $block_editor_context->post->post_type ) {
-			$current_template = $block_editor_context->post->post_name;
-		}
-	}
-
-	// If we're not in the footer template, remove our block from allowed blocks.
-	if ( 'footer' !== $current_template ) {
-		if ( is_array( $allowed_blocks ) ) {
-			$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
-			// If the block is found, remove it from the allowed blocks.
-			if ( false !== $key ) {
-				unset( $allowed_blocks[ $key ] );
-			}
-		}
+	$key = array_search( 'sync/cookie-banner', $allowed_blocks, true );
+	// If the block is found, remove it from the allowed blocks.
+	if ( false !== $key ) {
+		unset( $allowed_blocks[ $key ] );
 	}
 
 	error_log( 'Blocks After: ' . print_r( $allowed_blocks, true ) );
