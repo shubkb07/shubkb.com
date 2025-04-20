@@ -7,15 +7,6 @@
   "category": "sync-advance-blocks",
   "icon": "privacy",
   "description": "Multi Country Complaince Cookie Consent Banner with customizable settings",
-  "supports": {
-    "html": false,
-    "multiple": false,
-    "inserter": true,
-    "align": [
-      "wide",
-      "full"
-    ]
-  },
   "attributes": {
     "bannerTitle": {
       "type": "string",
@@ -26,15 +17,18 @@
       "default": "We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking \"Accept All\", you consent to our use of cookies."
     }
   },
+  "parent": [
+    "core/template-part"
+  ],
+  "supports": {
+    "multiple": false,
+    "html": false
+  },
   "textdomain": "wisesync",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
   "viewScript": "file:./view.js",
   "style": "file:./style.css",
-  "usesContext": [
-    "postType",
-    "queryId"
-  ],
   "example": {
     "attributes": {
       "bannerTitle": "Cookie Consent",
