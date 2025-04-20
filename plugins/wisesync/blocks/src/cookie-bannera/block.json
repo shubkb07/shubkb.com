@@ -1,169 +1,18 @@
 {
 	"$schema": "./../../../../../schema-block.json",
 	"apiVersion": 3,
-	"name": "sync/cookie-bannera",
+	"name": "sync/cookie-banner",
 	"version": "1.0.0",
-	"title": "Cookie Bannera",
+	"title": "Cookie Banner",
 	"category": "sync-advance-blocks",
 	"icon": "privacy",
-	"description": "GDPR compliant cookie consent banner with customizable settings",
+	"description": "All compliant cookie consent banner with customizable settings",
 	"supports": {
 		"html": false,
 		"multiple": false,
-		"inserter": true,
 		"align": ["wide", "full"]
 	},
 	"attributes": {
-		"bannerTitle": {
-			"type": "string",
-			"default": "Cookie Consent"
-		},
-		"bannerDescription": {
-			"type": "string",
-			"default": "We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking \"Accept All\", you consent to our use of cookies."
-		},
-		"privacyPolicyLink": {
-			"type": "string",
-			"default": ""
-		},
-		"privacyPolicyText": {
-			"type": "string",
-			"default": "Privacy Policy"
-		},
-		"termsLink": {
-			"type": "string",
-			"default": ""
-		},
-		"termsText": {
-			"type": "string",
-			"default": "Terms of Service"
-		},
-		"acceptAllText": {
-			"type": "string",
-			"default": "Accept All"
-		},
-		"rejectAllText": {
-			"type": "string",
-			"default": "Reject All"
-		},
-		"customizeText": {
-			"type": "string",
-			"default": "Customize"
-		},
-		"savePreferencesText": {
-			"type": "string",
-			"default": "Save Preferences"
-		},
-		"necessaryCookiesTitle": {
-			"type": "string",
-			"default": "Necessary"
-		},
-		"necessaryCookiesDescription": {
-			"type": "string",
-			"default": "Necessary cookies are absolutely essential for the website to function properly. These cookies ensure basic functionalities and security features of the website."
-		},
-		"functionalCookiesTitle": {
-			"type": "string",
-			"default": "Functional"
-		},
-		"functionalCookiesDescription": {
-			"type": "string",
-			"default": "Functional cookies help to perform certain functionalities like sharing the content of the website on social media platforms, collect feedback, and other third-party features."
-		},
-		"analyticalCookiesTitle": {
-			"type": "string",
-			"default": "Analytics"
-		},
-		"analyticalCookiesDescription": {
-			"type": "string",
-			"default": "Analytical cookies are used to understand how visitors interact with the website. These cookies help provide information on metrics such as the number of visitors, bounce rate, traffic source, etc."
-		},
-		"advertisingCookiesTitle": {
-			"type": "string",
-			"default": "Advertising"
-		},
-		"advertisingCookiesDescription": {
-			"type": "string",
-			"default": "Advertising cookies are used to provide visitors with relevant ads and marketing campaigns. These cookies track visitors across websites and collect information to provide customized ads."
-		},
-		"trackingCookiesTitle": {
-			"type": "string",
-			"default": "Tracking"
-		},
-		"trackingCookiesDescription": {
-			"type": "string",
-			"default": "Tracking cookies help us understand how you interact with our website and allow us to improve user experience."
-		},
-		"bannerPosition": {
-			"type": "string",
-			"default": "bottom"
-		},
-		"floatingButtonPosition": {
-			"type": "string",
-			"default": "bottom-right"
-		},
-		"cookieExpiration": {
-			"type": "number",
-			"default": 365
-		},
-		"primaryColor": {
-			"type": "string",
-			"default": "#0073aa"
-		},
-		"textColor": {
-			"type": "string",
-			"default": "#333333"
-		},
-		"backgroundColor": {
-			"type": "string",
-			"default": "#ffffff"
-		},
-		"showOnlyInSiteEditor": {
-			"type": "boolean",
-			"default": true
-		},
-		"privacyPolicyVersion": {
-			"type": "string",
-			"default": ""
-		},
-		"termsVersion": {
-			"type": "string",
-			"default": ""
-		},
-		"checkVersionChanges": {
-			"type": "boolean",
-			"default": true
-		},
-		"enabledCookieTypes": {
-			"type": "object",
-			"default": {
-				"necessary": true,
-				"functional": true,
-				"analytical": true,
-				"advertising": true,
-				"tracking": true
-			}
-		},
-		"showBanner": {
-			"type": "boolean",
-			"default": true
-		},
-		"showDoNotSellLink": {
-			"type": "boolean",
-			"default": false
-		},
-		"doNotSellLink": {
-			"type": "string",
-			"default": ""
-		},
-		"doNotSellText": {
-			"type": "string",
-			"default": "Do Not Sell or Share My Personal Information"
-		},
-		"consentModel": {
-			"type": "string",
-			"default": "opt-in"
-		}
 	},
 	"textdomain": "wisesync",
 	"editorScript": "file:./index.js",
