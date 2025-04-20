@@ -22,7 +22,8 @@
   ],
   "supports": {
     "multiple": false,
-    "html": false
+    "html": false,
+    "inserter": true
   },
   "textdomain": "wisesync",
   "editorScript": "file:./index.js",
