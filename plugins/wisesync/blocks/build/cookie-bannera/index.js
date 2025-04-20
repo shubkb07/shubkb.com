@@ -4,7 +4,7 @@
 		i = window.wp.blockEditor,
 		o = window.wp.components,
 		s = window.ReactJSXRuntime,
-		l = JSON.parse( '{"UU":"sync/cookie-bannera"}' ); ( 0, e.registerBlockType )( l.UU, { edit( { attributes: e, setAttributes: l, context: t } ) {
+		l = JSON.parse( '{"UU":"sync/cookie-banner"}' ); ( 0, e.registerBlockType )( l.UU, { edit( { attributes: e, setAttributes: l, context: t } ) {
 		const { bannerTitle: a, bannerDescription: c, privacyPolicyLink: r, privacyPolicyText: d, termsLink: y, termsText: h, acceptAllText: _, rejectAllText: p, customizeText: x, savePreferencesText: C, necessaryCookiesTitle: b, necessaryCookiesDescription: g, functionalCookiesTitle: w, functionalCookiesDescription: m, analyticalCookiesTitle: k, analyticalCookiesDescription: u, advertisingCookiesTitle: j, advertisingCookiesDescription: v, trackingCookiesTitle: T, trackingCookiesDescription: P, bannerPosition: N, floatingButtonPosition: f, cookieExpiration: B, primaryColor: S, textColor: D, backgroundColor: O, showOnlyInSiteEditor: L, privacyPolicyVersion: A, termsVersion: R, checkVersionChanges: E, enabledCookieTypes: F, showBanner: z, showDoNotSellLink: V, doNotSellLink: I, doNotSellText: U, consentModel: G } = e,
 			M = ( 0, i.useBlockProps )(),
 			{ postType: $ } = t,
