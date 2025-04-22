@@ -339,3 +339,9 @@ function deRegisterEvent(eventName) {
   }
   throw new Error(`deRegisterEvent: no handler found named "${eventName}".`);
 }
+
+registerEvent("clickHandler", "click", {}, (e, data) => {
+	  console.log("Button clicked!", e);
+  console.log("Button clicked!", data);
+}
+);
