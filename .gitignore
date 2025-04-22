@@ -9,3 +9,6 @@
 /.idea/
 /.vscode/
 /.temp/
+/plugins/wisesync/blocks/build
+/themes/papersync/blocks/build
+/wp-cli.phar
