@@ -1,6 +1,7 @@
 {
 	"extends": [
-		"@wordpress/stylelint-config/scss"
+		"@wordpress/stylelint-config/scss",
+		"@wordpress/stylelint-config"
 	],
 	"rules": {
 		"selector-class-pattern": null,
@@ -9,6 +10,12 @@
 		"at-rule-empty-line-before": null,
 		"selector-pseudo-element-colon-notation": null,
 		"no-descending-specificity": null,
+		"no-duplicate-selectors": null,
+		"function-url-quotes": null,
+		"selector-attribute-quotes": null,
+		"declaration-block-no-duplicate-properties": null,
+		"function-calc-no-unspaced-operator": null,
+		"selector-pseudo-class-no-unknown": null,
 		"value-keyword-case": [
 			"lower",
 			{

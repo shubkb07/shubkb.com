@@ -108,32 +108,8 @@ jobs:
       - name: 🛠️ Build Assets
         run: npm run build
 
-      - name: 🛠️ Lint Fix Assets
+      - name: 🛠️ Lint Fix Assets for JS, CSS, SCSS, Json, Md, and PHP
         run: npm run lint:fix
-
-      - name: 🧹 Auto-fix PHP Code Style
-        run: |
-          echo "🧹 Running PHPCBF to auto-fix code style..."
-          set +e
-          ./vendor/bin/phpcbf . -d memory_limit=1024M
-          phpcbf_status=$?
-          set -e
-          
-          # PHPCBF exit codes:
-          # 0: No fixable errors detected
-          # 1: Fixable errors were fixed
-          # 2: Some errors could not be fixed
-          # 3: Configuration error
-          if [ $phpcbf_status -eq 0 ]; then
-            echo "✅ No fixable errors detected"
-          elif [ $phpcbf_status -eq 1 ]; then
-            echo "✅ Fixed all fixable errors"
-          elif [ $phpcbf_status -eq 2 ]; then
-            echo "⚠️ Some errors could not be fixed but continuing workflow"
-          else
-            echo "❌ PHPCBF configuration error"
-            exit $phpcbf_status
-          fi
 
       #####################################
       # 🧼 Cleanup
