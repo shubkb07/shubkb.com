@@ -101,7 +101,7 @@ jobs:
           fi
           wait
       
-      - name: Install WP-CLI
+      - name: 📥 Install WP-CLI
         run: |
           echo "Installing WP-CLI..."
           curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
