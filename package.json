@@ -44,8 +44,8 @@
     "lint:js:fix:papersync": "eslint ./themes/papersync/**/*.{js,jsx} --fix",
     "wp:phpcs": "php ./vendor/bin/phpcs . -d memory_limit=1024M",
     "wp:phpcs:fix": "php ./vendor/bin/phpcbf . -d memory_limit=1024M",
-    "i18n:linux": "node ./build/i18n.js --linux",
-    "i18n": "node ./build/i18n.js"
+    "i18n:linux": "node ./build/i18n.mjs --linux",
+    "i18n": "node ./build/i18n.mjs"
   },
   "devDependencies": {
     "@wordpress/annotations": "^3.22.0",
