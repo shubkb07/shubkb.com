@@ -1,7 +1,17 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
+import path from 'path';
 
 console.log(process.cwd());
+
+// Process command line arguments
+const args = process.argv.slice(2);
+const isLinux = args.includes('--linux') || args.includes('--linix');
+
+// Set WP_CLI based on command line args
+const WP_CLI = isLinux ? 'wp' : 'php wp-cli.phar';
+
+console.log(`Using WP_CLI command: ${WP_CLI}`);
 
 const locales = [
   { name: "Afrikaans", code: "af", locale: "af" },
@@ -226,7 +236,6 @@ const PLUGIN_PATH = './plugins/wisesync';
 const PLUGIN_DOMAIN = 'wisesync';
 const THEME_PATH = './themes/papersync';
 const THEME_DOMAIN = 'papersync';
-const WP_CLI = 'wp';
 
 // Function to execute commands and log output
 function executeCommand(command) {
