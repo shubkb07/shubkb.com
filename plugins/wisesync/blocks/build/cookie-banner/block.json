@@ -1,45 +1,34 @@
 {
-  "$schema": "./../../../../../block.json",
+  "$schema": "./../../../../../schema-block.json",
   "apiVersion": 3,
   "name": "sync/cookie-banner",
   "version": "1.0.0",
   "title": "Cookie Banner",
   "category": "sync-advance-blocks",
-  "icon": "awards",
-  "description": "Award slider block.",
+  "icon": "privacy",
+  "description": "All compliant cookie consent banner with customizable settings",
   "supports": {
-    "html": false
+    "html": false,
+    "multiple": false,
+    "align": [
+      "wide",
+      "full"
+    ]
   },
-  "attributes": {
-    "posts": {
-      "type": "array",
-      "default": []
-    },
-    "searchTitle": {
-      "type": "string"
-    },
-    "items": {
-      "type": "number",
-      "default": 4
-    },
-    "postType": {
-      "type": "string",
-      "default": "post"
-    },
-    "order": {
-      "type": "string",
-      "default": "asc"
-    }
-  },
-  "textdomain": "anfco",
+  "attributes": {},
+  "textdomain": "wisesync",
   "editorScript": "file:./index.js",
   "editorStyle": "file:./index.css",
-  "viewScript": "anfco-award-slider",
-  "style": "anfco-award-slider-style",
+  "viewScript": "file:./view.js",
+  "style": "file:./style.css",
+  "usesContext": [
+    "postType",
+    "queryId"
+  ],
   "example": {
-    "viewportWidth": 1440,
     "attributes": {
-      "items": 4
+      "bannerTitle": "Cookie Consent",
+      "bannerPosition": "bottom"
     }
   }
 }

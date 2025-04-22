@@ -1,5 +1,5 @@
 {
-  "$schema": "./../../../../../block.json",
+  "$schema": "./../../../../../schema-block.json",
   "apiVersion": 3,
   "name": "sync/cookie-banner",
   "version": "1.0.0",

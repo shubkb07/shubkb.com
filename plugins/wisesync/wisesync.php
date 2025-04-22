@@ -31,6 +31,14 @@ define( 'WSYNC_PLUGIN_NAME', 'WiseSync' );
 define( 'WSYNC_PLUGIN_SLUG', 'wisesync' );
 define( 'WSYNC_PLUGIN_TEXTDOMAIN', 'wisesync' );
 define( 'WSYNC_PLUGIN_PREFIX', 'wisesync_' );
+define( 'WSYNC_PLUGIN_ASSETS_URL', WSYNC_PLUGIN_URL . 'assets/' );
+define( 'WSYNC_PLUGIN_ASSETS_DIR', WSYNC_PLUGIN_DIR . 'assets/' );
+define( 'WSYNC_PLUGIN_JS_URL', WSYNC_PLUGIN_ASSETS_URL . 'js/' );
+define( 'WSYNC_PLUGIN_CSS_URL', WSYNC_PLUGIN_ASSETS_URL . 'css/' );
+define( 'WSYNC_PLUGIN_IMG_URL', WSYNC_PLUGIN_ASSETS_URL . 'img/' );
+define( 'WSYNC_PLUGIN_JS_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'js/' );
+define( 'WSYNC_PLUGIN_CSS_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'css/' );
+define( 'WSYNC_PLUGIN_IMG_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'img/' );
 
 // Load Plugin Files.
 require_once WSYNC_PLUGIN_DIR . 'autoload.php';
