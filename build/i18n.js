@@ -226,7 +226,7 @@ const PLUGIN_PATH = './plugins/wisesync';
 const PLUGIN_DOMAIN = 'wisesync';
 const THEME_PATH = './themes/papersync';
 const THEME_DOMAIN = 'papersync';
-const WP_CLI = 'php wp-cli.phar';
+const WP_CLI = 'wp';
 
 // Function to execute commands and log output
 function executeCommand(command) {

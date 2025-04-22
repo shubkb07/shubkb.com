@@ -100,6 +100,15 @@ jobs:
             npm install &
           fi
           wait
+      
+      - name: Install WP-CLI
+        run: |
+          echo "Installing WP-CLI..."
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          php wp-cli.phar --info
+          chmod +x wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+          wp --info
 
       #####################################
       # 🛠️ Build + Setup i18n/l10n + Lint
