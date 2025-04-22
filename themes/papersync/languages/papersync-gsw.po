@@ -1,0 +1,555 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PaperSync 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/papersync\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-04-22T18:27:15+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Language: \n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: papersync\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "PaperSync"
+msgstr ""
+
+#. Theme URI of the theme
+#. Author URI of the theme
+#: style.css
+msgid "https://shubkb.com"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "All-in-one theme for PaperSync, a platform for sharing and discovering blogs. It offers a clean and modern design, with features like a customizable homepage, easy navigation, and support for various post formats. The theme is optimized for performance and SEO, ensuring fast loading times and better visibility on search engines. With its responsive layout, it provides an excellent user experience across devices, making it ideal for researchers, academics, and anyone interested in the world of research."
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Shubham Kumar Bansal <shub@shubkb.com>"
+msgstr ""
+
+#: theme.json
+msgctxt "Style variation name"
+msgid "papersync"
+msgstr ""
+
+#: theme.json
+msgctxt "Style variation description"
+msgid "All-in-one theme for WordPress with comprehensive styling and template options."
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "White"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Light Gray"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Dark Gray"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Primary"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Secondary"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Tertiary"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Success"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Warning"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Danger"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Info"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Light"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Dark"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Muted"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Accent"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Sunrise"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Sunset"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Ocean"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Forest"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Dusk"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Dawn"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Rainbow"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Pastel Blue"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Neon Pink"
+msgstr ""
+
+#: theme.json
+msgctxt "Gradient name"
+msgid "Cosmic"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Black & White"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Blue & Light"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Brown & Tan"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Warm Sunset"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Cool Dusk"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Retro Vibe"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Forest Shadow"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Ocean Depth"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Neon Glow"
+msgstr ""
+
+#: theme.json
+msgctxt "Duotone name"
+msgid "Pastel Dream"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "1:1"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "4:3"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "3:2"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "16:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "16:10"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "21:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Cinematic 2.39:1"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "9:16 (portrait)"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "3:4"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "5:4"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "4:5"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "18:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "19.5:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "20:9"
+msgstr ""
+
+#: theme.json
+msgctxt "Aspect ratio name"
+msgid "Cinematic 2.20:1"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Extra Soft"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Soft"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Medium"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Hard"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Extra Hard"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Inset"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Button Light"
+msgstr ""
+
+#: theme.json
+msgctxt "Shadow name"
+msgid "Button Heavy"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "None"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "XX-Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "X-Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Medium"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "X-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "XX-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 1"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 2"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 3"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 4"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 5"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 6"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 8"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "Scale 10"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Tiny"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Base"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Medium"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "X-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "XX-Large"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Huge"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Display 1"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Display 2"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "System"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Serif"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Sans Serif"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Monospace"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Cursive"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Fantasy"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Roboto"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Open Sans"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Lato"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Montserrat"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Merriweather"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "Full Width Template"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "Sidebar Right Template"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "Landing Page Template"
+msgstr ""
+
+#: theme.json
+msgctxt "Custom template name"
+msgid "Portfolio Template"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Header"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Footer"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Sidebar"
+msgstr ""
+
+#: theme.json
+msgctxt "Template part name"
+msgid "Post Meta Information"
+msgstr ""
