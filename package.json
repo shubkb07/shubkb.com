@@ -6,7 +6,6 @@
   "bugs": {
     "url": "https://github.com/shubkb07/shubkb.com/issues"
   },
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shubkb07/shubkb.com.git"
