@@ -5,7 +5,7 @@
  * Description: The best WordPress performance plugin.
  * Version: 3.18.3
  * Requires at least: 5.8
- * Requires PHP: 7.3
+ * Requires PHP: 7.4
  * Code Name: Iego
  * Author: WP Media
  * Author URI: https://wp-media.me
