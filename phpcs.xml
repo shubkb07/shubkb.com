@@ -14,9 +14,6 @@
 		<properties>
 			<property name="text_domain" type="array">
 				<!-- List of text domains used in your plugin and theme -->
-				<element value="shubkbPlugin" />
-				<element value="shubkbTheme" />
-				<element value="webauthn-login" />
 				<element value="wisesync" />
 				<element value="papersync" />
 			</property>
