@@ -15,7 +15,8 @@
         "squizlabs/php_codesniffer": "*",
         "wp-coding-standards/wpcs": "*",
         "phpcompatibility/php-compatibility": "*",
-        "phpcompatibility/phpcompatibility-wp": "*"
+        "phpcompatibility/phpcompatibility-wp": "*",
+        "automattic/vipwpcs": "^3.0"
     },
     "config": {
         "allow-plugins": {
