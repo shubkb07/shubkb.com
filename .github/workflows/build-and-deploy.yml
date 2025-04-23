@@ -26,7 +26,7 @@ jobs:
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 # We need at least 2 commits to detect changes
+          fetch-depth: 0 # Fetch all history for proper change detection
 
       - name: 📝 Get Last Commit Message
         id: last_commit
@@ -48,12 +48,51 @@ jobs:
             exit 1
           fi
 
-      - name: 🔍 Detect Changes
+      - name: 🔍 Detect Changes Since Last Deployment
         id: changes
         run: |
-          # Check if package lock files have changed
-          echo "Detecting file changes..."
-          git diff --name-only HEAD^ HEAD > changed_files.txt
+          echo "Detecting file changes since last deployment..."
+          
+          # Get the current commit hash
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          echo "Current commit: $CURRENT_COMMIT"
+          
+          # Clone the target branch to find the last deployed commit
+          mkdir -p temp_deploy
+          cd temp_deploy
+          git init
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin $TARGET_BRANCH
+          
+          # Check if target branch exists and get last deployment commit
+          if git checkout $TARGET_BRANCH 2>/dev/null; then
+            # Get the last commit message to find the original commit hash
+            LAST_DEPLOY_MSG=$(git log -1 --pretty=%B)
+            cd ..
+            rm -rf temp_deploy
+            
+            # Check if we can find a reference to the original commit
+            if [[ $LAST_DEPLOY_MSG =~ SHA:([0-9a-f]{40}) ]]; then
+              LAST_COMMIT=${BASH_REMATCH[1]}
+              echo "Last deployed commit found: $LAST_COMMIT"
+              # Get all changes between last deployed commit and current
+              git diff --name-only $LAST_COMMIT $CURRENT_COMMIT > changed_files.txt
+            else
+              echo "Couldn't find original commit reference in last deploy message, comparing with last 10 commits"
+              # Fall back to comparing with the last 10 commits
+              git diff --name-only HEAD~10..HEAD > changed_files.txt
+            fi
+          else
+            echo "Target branch doesn't exist yet or couldn't be checked out, comparing with last 10 commits"
+            cd ..
+            rm -rf temp_deploy
+            # Fall back to comparing with the last 10 commits
+            git diff --name-only HEAD~10..HEAD > changed_files.txt
+          fi
+          
+          # Print the changed files for debugging
+          echo "Changed files:"
+          cat changed_files.txt
           
           # Set flags based on changed files
           if grep -q "package-lock.json" changed_files.txt; then
@@ -96,7 +135,7 @@ jobs:
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -234,5 +273,6 @@ jobs:
         run: |
           cd deploy
           git add --all
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }}" || echo "✅ No changes to commit"
+          # Add the original commit SHA to the commit message
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "✅ No changes to commit"
           git push origin HEAD:$TARGET_BRANCH
