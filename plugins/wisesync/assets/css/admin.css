@@ -1,0 +1,348 @@
+/* Sync Dashboard Main Styles */
+.sync-dashboard-container {
+    display: flex;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    min-height: 600px;
+    overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sync-sidebar {
+    width: 250px;
+    background: #23282d;
+    color: #eee;
+    transition: all 0.3s ease;
+}
+
+.sync-logo {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sync-logo .dashicons {
+    margin-right: 10px;
+    color: #00b9eb;
+}
+
+.sync-menu {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sync-menu-item {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sync-menu-item-header {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sync-menu-item-header .dashicons,
+.sync-menu-item > span.dashicons {
+    margin-right: 10px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.sync-menu-item > span.dashicons {
+    margin-left: 20px;
+    margin-right: 10px;
+}
+
+.sync-menu-item > span:not(.dashicons) {
+    display: inline-block;
+    padding: 14px 0;
+}
+
+.sync-submenu-arrow {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+}
+
+.sync-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sync-active, 
+.sync-menu-item.sync-active > .sync-menu-item-header {
+    background-color: #0073aa;
+    color: #fff;
+}
+
+.sync-submenu {
+    display: none;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background-color: #32373c;
+}
+
+.sync-submenu-open {
+    display: block;
+}
+
+.sync-has-submenu.sync-submenu-expanded > .sync-menu-item-header > .sync-submenu-arrow {
+    transform: rotate(90deg);
+}
+
+.sync-submenu-item {
+    padding: 10px 20px 10px 48px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.sync-submenu-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sync-submenu-item.sync-active {
+    background-color: #0073aa;
+    color: #fff;
+}
+
+/* Content Area Styles */
+.sync-content {
+    flex: 1;
+    padding: 25px;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+}
+
+.sync-tab-content {
+    display: none;
+}
+
+.sync-tab-active {
+    display: block;
+    animation: syncFadeIn 0.3s ease;
+}
+
+@keyframes syncFadeIn {
+
+    from { opacity: 0; transform: translateY(10px); }
+
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Card Styles */
+.sync-card {
+    background: #fff;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.sync-card h2 {
+    margin-top: 0;
+    color: #23282d;
+    font-size: 18px;
+    font-weight: 600;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sync-card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #23282d;
+}
+
+/* Stats Container */
+.sync-stats-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.sync-stat-card {
+    flex: 1;
+    min-width: 160px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 20px;
+    text-align: center;
+    margin: 0 10px 10px 0;
+}
+
+.sync-stat-icon {
+    font-size: 30px;
+    color: #0073aa;
+    margin-bottom: 10px;
+}
+
+.sync-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: #23282d;
+}
+
+.sync-stat-label {
+    font-size: 14px;
+    color: #757575;
+}
+
+/* Activity List */
+.sync-activity-list {
+    margin-top: 15px;
+}
+
+.sync-activity-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sync-activity-item:last-child {
+    border-bottom: none;
+}
+
+.sync-activity-icon {
+    margin-right: 15px;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #0073aa;
+}
+
+.sync-activity-title {
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.sync-activity-time {
+    font-size: 12px;
+    color: #757575;
+}
+
+/* Form Styles */
+.sync-form-group {
+    margin-bottom: 20px;
+}
+
+.sync-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.sync-input, 
+.sync-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.sync-input:focus,
+.sync-select:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+    outline: none;
+}
+
+.sync-checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.sync-checkbox {
+    margin-right: 10px;
+}
+
+.sync-button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.sync-button-primary {
+    background-color: #0073aa;
+    color: #fff;
+    border-color: #0073aa;
+}
+
+.sync-button-primary:hover {
+    background-color: #006291;
+    border-color: #006291;
+}
+
+/* Responsive Design */
+@media (max-width: 782px) {
+
+    .sync-dashboard-container {
+        flex-direction: column;
+    }
+    
+    .sync-sidebar {
+        width: 100%;
+    }
+    
+    .sync-stats-container {
+        flex-direction: column;
+    }
+    
+    .sync-stat-card {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+}
+
+/* Notification Styles */
+.sync-notification {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: #fff;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+}
+
+.sync-notification-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.sync-notification-success {
+    background-color: #46b450;
+}
+
+.sync-notification-error {
+    background-color: #dc3232;
+}
+
+.sync-notification-warning {
+    background-color: #ffb900;
+}
+
+.sync-notification-info {
+    background-color: #00a0d2;
+}
