@@ -8,7 +8,7 @@
  * @since   1.0.0
  */
 
-use WiseSync\Sync_Settings;
+use Sync\Sync_Settings;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
