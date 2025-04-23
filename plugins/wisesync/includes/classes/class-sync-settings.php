@@ -41,180 +41,170 @@ class Sync_Settings {
 	 */
 	public function settings_page() {
 		?>
-		<div class="wrap">
-		<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-		
-		<div class="sync-dashboard-container">
-			<!-- Side Menu -->
-			<div class="sync-sidebar">
-				<div class="sync-logo">
-					<span class="dashicons dashicons-sort"></span>
-					<span>Sync Dashboard</span>
-				</div>
-				
-				<ul class="sync-menu">
-					<li class="sync-menu-item sync-active" data-tab="overview">
-						<span class="dashicons dashicons-dashboard"></span>
-						<span>Overview</span>
-					</li>
-					
-					<li class="sync-menu-item" data-tab="settings">
-						<span class="dashicons dashicons-admin-settings"></span>
-						<span>Settings</span>
-					</li>
-					
-					<li class="sync-menu-item sync-has-submenu">
-						<div class="sync-menu-item-header">
-							<span class="dashicons dashicons-admin-tools"></span>
-							<span>Tools</span>
-							<span class="sync-submenu-arrow dashicons dashicons-arrow-right"></span>
-						</div>
-						<ul class="sync-submenu">
-							<li class="sync-submenu-item" data-tab="import-tool">Import</li>
-							<li class="sync-submenu-item" data-tab="export-tool">Export</li>
-							<li class="sync-submenu-item" data-tab="logs">Logs</li>
-						</ul>
-					</li>
-					
-					<li class="sync-menu-item" data-tab="status">
-						<span class="dashicons dashicons-chart-bar"></span>
-						<span>Status</span>
-					</li>
-					
-					<li class="sync-menu-item sync-has-submenu">
-						<div class="sync-menu-item-header">
-							<span class="dashicons dashicons-admin-users"></span>
-							<span>Users</span>
-							<span class="sync-submenu-arrow dashicons dashicons-arrow-right"></span>
-						</div>
-						<ul class="sync-submenu">
-							<li class="sync-submenu-item" data-tab="user-permissions">Permissions</li>
-							<li class="sync-submenu-item" data-tab="user-activity">Activity</li>
-						</ul>
-					</li>
-					
-					<li class="sync-menu-item" data-tab="help">
-						<span class="dashicons dashicons-editor-help"></span>
-						<span>Help</span>
-					</li>
-				</ul>
-			</div>
-			
-			<!-- Content Area -->
-			<div class="sync-content">
-				<div class="sync-tab-content sync-tab-active" id="sync-overview">
-					<div class="sync-card">
-						<h2>Welcome to Sync Dashboard</h2>
-						<p>This is your central control panel for all synchronization operations.</p>
-						
-						<div class="sync-stats-container">
-							<div class="sync-stat-card">
-								<div class="sync-stat-icon dashicons dashicons-backup"></div>
-								<div class="sync-stat-number">128</div>
-								<div class="sync-stat-label">Total Syncs</div>
-							</div>
-							
-							<div class="sync-stat-card">
-								<div class="sync-stat-icon dashicons dashicons-clock"></div>
-								<div class="sync-stat-number">24m</div>
-								<div class="sync-stat-label">Last Sync</div>
-							</div>
-							
-							<div class="sync-stat-card">
-								<div class="sync-stat-icon dashicons dashicons-yes-alt"></div>
-								<div class="sync-stat-number">99%</div>
-								<div class="sync-stat-label">Success Rate</div>
-							</div>
-						</div>
-					</div>
-					
-					<div class="sync-card">
-						<h3>Recent Activity</h3>
-						<div class="sync-activity-list">
-							<div class="sync-activity-item">
-								<div class="sync-activity-icon dashicons dashicons-yes"></div>
-								<div class="sync-activity-details">
-									<div class="sync-activity-title">Sync Completed</div>
-									<div class="sync-activity-time">10 minutes ago</div>
-								</div>
-							</div>
-							
-							<div class="sync-activity-item">
-								<div class="sync-activity-icon dashicons dashicons-update"></div>
-								<div class="sync-activity-details">
-									<div class="sync-activity-title">Settings Updated</div>
-									<div class="sync-activity-time">2 hours ago</div>
-								</div>
-							</div>
-							
-							<div class="sync-activity-item">
-								<div class="sync-activity-icon dashicons dashicons-warning"></div>
-								<div class="sync-activity-details">
-									<div class="sync-activity-title">Sync Warning</div>
-									<div class="sync-activity-time">Yesterday</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				
-				<!-- Other tab contents -->
-				<div class="sync-tab-content" id="sync-settings">
-					<div class="sync-card">
-						<h2>Sync Settings</h2>
-						<form class="sync-settings-form">
-							<div class="sync-form-group">
-								<label for="sync-interval">Sync Interval</label>
-								<select id="sync-interval" name="sync-interval" class="sync-select">
-									<option value="hourly">Hourly</option>
-									<option value="daily">Daily</option>
-									<option value="weekly">Weekly</option>
-								</select>
-							</div>
-							
-							<div class="sync-form-group">
-								<label for="sync-api-key">API Key</label>
-								<input type="text" id="sync-api-key" name="sync-api-key" class="sync-input">
-							</div>
-							
-							<div class="sync-form-group">
-								<label for="sync-endpoint">Endpoint URL</label>
-								<input type="url" id="sync-endpoint" name="sync-endpoint" class="sync-input">
-							</div>
-							
-							<div class="sync-form-group">
-								<label class="sync-checkbox-label">
-									<input type="checkbox" name="sync-notifications" class="sync-checkbox">
-									Enable email notifications
-								</label>
-							</div>
-							
-							<button type="submit" class="sync-button sync-button-primary">Save Settings</button>
-						</form>
-					</div>
-				</div>
-				
-				<!-- Additional tab contents would be added here -->
-				<div class="sync-tab-content" id="sync-import-tool">
-					<div class="sync-card">
-						<h2>Import Tool</h2>
-						<p>Upload data for synchronization.</p>
-						<!-- Import tool content -->
-					</div>
-				</div>
-				
-				<div class="sync-tab-content" id="sync-export-tool">
-					<div class="sync-card">
-						<h2>Export Tool</h2>
-						<p>Export your synchronized data.</p>
-						<!-- Export tool content -->
-					</div>
-				</div>
-				
-				<!-- Additional tab contents for other menu items -->
-			</div>
-		</div>
-	</div>
+		<div class="sync-container">
+  <!-- Main navigation with logo and mobile menu toggle -->
+  <header class="sync-header">
+    <div class="sync-logo">
+      <span class="sync-logo-icon">S</span>
+      <span class="sync-logo-text">SYNC</span>
+      <span class="sync-tagline">Superior WordPress Synchronization</span>
+    </div>
+    <button class="sync-mobile-toggle" id="sync-mobile-toggle">
+      <span class="dashicons dashicons-menu-alt"></span>
+    </button>
+  </header>
+
+  <!-- Side navigation -->
+  <nav class="sync-sidebar" id="sync-sidebar">
+    <ul class="sync-menu">
+      <li class="sync-menu-item sync-active">
+        <a href="#dashboard" class="sync-menu-link">
+          <span class="dashicons dashicons-dashboard"></span>
+          <span class="sync-menu-text">Dashboard</span>
+        </a>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#file-sync" class="sync-menu-link">
+          <span class="dashicons dashicons-media-document"></span>
+          <span class="sync-menu-text">File Sync</span>
+        </a>
+        <ul class="sync-submenu">
+          <li class="sync-submenu-item">
+            <a href="#file-settings" class="sync-submenu-link">Settings</a>
+          </li>
+          <li class="sync-submenu-item">
+            <a href="#file-history" class="sync-submenu-link">History</a>
+          </li>
+        </ul>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#database-sync" class="sync-menu-link">
+          <span class="dashicons dashicons-database"></span>
+          <span class="sync-menu-text">Database Sync</span>
+        </a>
+        <ul class="sync-submenu">
+          <li class="sync-submenu-item">
+            <a href="#db-settings" class="sync-submenu-link">Settings</a>
+          </li>
+          <li class="sync-submenu-item">
+            <a href="#db-tables" class="sync-submenu-link">Tables</a>
+          </li>
+        </ul>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#media-sync" class="sync-menu-link">
+          <span class="dashicons dashicons-images-alt2"></span>
+          <span class="sync-menu-text">Media Sync</span>
+        </a>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#schedule" class="sync-menu-link">
+          <span class="dashicons dashicons-calendar-alt"></span>
+          <span class="sync-menu-text">Schedule</span>
+        </a>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#advanced" class="sync-menu-link">
+          <span class="dashicons dashicons-admin-tools"></span>
+          <span class="sync-menu-text">Advanced</span>
+        </a>
+      </li>
+      <li class="sync-menu-item">
+        <a href="#logs" class="sync-menu-link">
+          <span class="dashicons dashicons-list-view"></span>
+          <span class="sync-menu-text">Logs</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main content area -->
+  <main class="sync-content">
+    <div class="sync-content-header">
+      <h1 class="sync-page-title">Dashboard</h1>
+    </div>
+
+    <!-- Dashboard welcome card -->
+    <div class="sync-card sync-welcome-card">
+      <div class="sync-card-dismissible">
+        <span class="sync-dismiss-icon dashicons dashicons-no-alt"></span>
+      </div>
+      <div class="sync-card-content">
+        <h2 class="sync-card-title">Congratulations!</h2>
+        <p class="sync-highlight">Sync is now activated and ready to work for you.<br>Your sites should be synchronized faster now!</p>
+        <p>To guarantee efficient synchronization, Sync automatically applies best practices for WordPress multi-site management.</p>
+        <p>We also enable options that provide immediate benefits to your workflow.</p>
+        <p>Continue to the options to further optimize your synchronization!</p>
+      </div>
+    </div>
+
+    <!-- Account section -->
+    <div class="sync-section">
+      <div class="sync-section-header">
+        <h2 class="sync-section-title">My Account</h2>
+        <button class="sync-refresh-btn">
+          <span class="dashicons dashicons-update"></span>
+          Refresh info
+        </button>
+      </div>
+
+      <div class="sync-section-content">
+        <div class="sync-row">
+          <div class="sync-col">
+            <div class="sync-info-group">
+              <div class="sync-info-item">
+                <span class="sync-info-label">License</span>
+                <span class="sync-info-value sync-info-highlight">Infinite</span>
+              </div>
+              <div class="sync-info-item">
+                <span class="sync-info-label">Expiration Date</span>
+                <span class="sync-info-value">
+                  <span class="sync-info-icon dashicons dashicons-yes-alt"></span>
+                  January 1, 2030
+                </span>
+              </div>
+            </div>
+            
+            <div class="sync-toggle-group">
+              <span class="sync-toggle-label">Sync Analytics</span>
+              <label class="sync-toggle">
+                <input type="checkbox" id="sync-analytics-toggle">
+                <span class="sync-toggle-slider"></span>
+              </label>
+            </div>
+            <p class="sync-toggle-description">I agree to share anonymous data with the development team to help improve Sync.</p>
+            <a href="#" class="sync-link">What info will we collect?</a>
+            
+            <div class="sync-button-container">
+              <button class="sync-button sync-primary-button">VIEW MY ACCOUNT</button>
+            </div>
+          </div>
+          
+          <div class="sync-col">
+            <div class="sync-quick-actions">
+              <h3 class="sync-quick-actions-title">Quick Actions</h3>
+              
+              <div class="sync-action-group">
+                <h4 class="sync-action-title">Cache files</h4>
+                <p class="sync-action-description">This action will clear and reload all the cache files.</p>
+                <button class="sync-button sync-action-button">
+                  <span class="dashicons dashicons-trash"></span>
+                  CLEAR AND RELOAD
+                </button>
+              </div>
+              
+              <div class="sync-action-group">
+                <h4 class="sync-action-title">Priority Elements</h4>
+                <p class="sync-action-description">Configure which elements should be synchronized first.</p>
+                <button class="sync-button sync-action-button">CONFIGURE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 		<?php
 	}
 
