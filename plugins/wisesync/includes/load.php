@@ -8,6 +8,8 @@
  * @since   1.0.0
  */
 
+use WiseSync\Sync_Settings;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -22,3 +24,6 @@ add_action(
 		register_sync_block_type( WSYNC_PLUGIN_DIR . 'blocks/build/' );
 	}
 );
+
+// Call settings class.
+$settings = new Sync_Settings();
