@@ -172,7 +172,7 @@ jobs:
 
       - name: 🛠️ Build Frontend Assets
         if: steps.changes.outputs.build_required == 'true'
-        run: npm run build
+        run: npm run build:linux
 
       - name: 🔧 Lint & Fix Assets
         if: steps.changes.outputs.build_required == 'true'
