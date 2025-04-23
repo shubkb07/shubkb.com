@@ -9,12 +9,12 @@ on:
 jobs:
   build_and_deploy:
     name: 🔧 Build & 🚀 Deploy
-    runs-on: ubuntu-latest # Ubuntu is faster than macOS
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Running Version 1.1 of Build and Deploy Workflow
+      - name: Running Version 1.2 of Build and Deploy Workflow
         run: |
-          echo "Running Version 1.0 of Build and Deploy Workflow"
+          echo "Running Version 1.2 of Build and Deploy Workflow"
           echo "Running on ${{ runner.os }}"
           echo "Event Name: ${{ github.event_name }}"
           echo "Repository: ${{ github.repository }}"
@@ -22,7 +22,7 @@ jobs:
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 1 # Shallow clone for speed
+          fetch-depth: 2 # Need at least 2 commits to detect changes
 
       - name: 📝 Get Last Commit Message
         id: last_commit
@@ -44,11 +44,53 @@ jobs:
             exit 1
           fi
 
+      - name: 🔎 Detect File Changes
+        id: changed-files
+        run: |
+          # Check if specific files or directories have changed
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check for package.json/lock changes or if node_modules doesn't exist
+          if echo "$CHANGED_FILES" | grep -q "package-lock.json\|package.json"; then
+            echo "NPM_DEPS_CHANGED=true" >> $GITHUB_ENV
+          else
+            echo "NPM_DEPS_CHANGED=false" >> $GITHUB_ENV
+          fi
+          
+          # Check for composer.json/lock changes
+          if echo "$CHANGED_FILES" | grep -q "composer.lock\|composer.json"; then
+            echo "COMPOSER_DEPS_CHANGED=true" >> $GITHUB_ENV
+          else
+            echo "COMPOSER_DEPS_CHANGED=false" >> $GITHUB_ENV
+          fi
+          
+          # Check for plugin/theme code changes that would need rebuilding
+          if echo "$CHANGED_FILES" | grep -q "plugins/wisesync/\|themes/papersync/"; then
+            echo "NEED_REBUILD=true" >> $GITHUB_ENV
+            
+            # If code changes, we need the dependencies too
+            echo "NEED_DEPS=true" >> $GITHUB_ENV
+          else
+            echo "NEED_REBUILD=false" >> $GITHUB_ENV
+            
+            # Check if any plugins/themes changes at all that need deployment
+            if echo "$CHANGED_FILES" | grep -q "plugins/\|themes/"; then
+              echo "NEED_DEPLOY_ONLY=true" >> $GITHUB_ENV
+              echo "NEED_DEPS=false" >> $GITHUB_ENV
+            else
+              echo "NEED_DEPLOY_ONLY=false" >> $GITHUB_ENV
+              echo "NEED_DEPS=false" >> $GITHUB_ENV
+            fi
+          fi
+
       #####################################
-      # ⚙️ Setup PHP & Node
+      # ⚙️ Setup PHP & Node (when needed)
       #####################################
       
       - name: 🐘 Setup PHP
+        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
@@ -56,19 +98,24 @@ jobs:
           coverage: none
 
       - name: 📦 Setup Node.js
+        if: env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: '16'
+          cache: 'npm'
+          cache-dependency-path: 'package-lock.json'
 
       #####################################
-      # ♻️ Restore Caches
+      # ♻️ Restore Caches (when needed)
       #####################################
 
       - name: ♻️ Get Composer Cache Directory
+        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
         id: composer-cache-dir
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: ♻️ Cache Composer dependencies
+        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
         uses: actions/cache@v3
         id: composer-cache
         with:
@@ -76,32 +123,32 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      - name: ♻️ Cache NPM + node_modules
+      - name: ♻️ Cache node_modules
+        if: env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true'
         uses: actions/cache@v3
+        id: node-modules-cache
         with:
-          path: |
-            ~/.npm
-            node_modules
-          key: npm-${{ runner.os }}-${{ github.ref_name }}-${{ hashFiles('package-lock.json') }}
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            npm-${{ runner.os }}-${{ github.ref_name }}-
+            ${{ runner.os }}-node-modules-
 
       #####################################
-      # 📥 Install Dependencies
+      # 📥 Install Dependencies (when needed)
       #####################################
 
-      - name: 📥 Install Dependencies (Parallel)
+      - name: 📥 Install Composer Dependencies
+        if: (env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true') && steps.composer-cache.outputs.cache-hit != 'true'
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: 📥 Install Node Dependencies
+        if: (env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true') && steps.node-modules-cache.outputs.cache-hit != 'true'
         run: |
-          # Install dependencies in parallel
-          composer install --prefer-dist --no-progress --no-interaction &
-          if [ -f package-lock.json ]; then
-            npm ci &
-          else
-            npm install &
-          fi
-          wait
+          echo "Installing Node dependencies (cache miss or required by code changes)"
+          npm ci --prefer-offline --no-audit --no-fund --silent
       
       - name: 📥 Install WP-CLI
+        if: env.NEED_REBUILD == 'true'
         run: |
           echo "Installing WP-CLI..."
           curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -114,9 +161,11 @@ jobs:
       #####################################
 
       - name: 🛠️ Build Assets for Blocks and Languages
+        if: env.NEED_REBUILD == 'true'
         run: npm run build
 
-      - name: 🛠️ Lint Fix Assets for JS, CSS, SCSS, Json, Md, and PHP
+      - name: 🛠️ Lint Fix Assets
+        if: env.NEED_REBUILD == 'true'
         run: npm run lint:fix
 
       #####################################
@@ -124,10 +173,15 @@ jobs:
       #####################################
 
       - name: 🧼 Cleanup Unnecessary Files
+        if: env.NEED_REBUILD == 'true' || env.NEED_DEPLOY_ONLY == 'true'
         run: |
           echo "🧹 Cleaning up unnecessary build files..."
-          rm -rf ./plugins/wisesync/blocks/src
-          rm -rf ./themes/papersync/blocks/src
+          if [ -d "./plugins/wisesync/blocks/src" ]; then
+            rm -rf ./plugins/wisesync/blocks/src
+          fi
+          if [ -d "./themes/papersync/blocks/src" ]; then
+            rm -rf ./themes/papersync/blocks/src
+          fi
 
       #####################################
       # 🚀 Deploy
@@ -145,6 +199,8 @@ jobs:
           git init
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git config core.sparsecheckout true
+          echo "plugins/" > .git/info/sparse-checkout
+          echo "themes/" >> .git/info/sparse-checkout
           git pull origin $TARGET_BRANCH
           
           # Update build files
