@@ -9,8 +9,8 @@
  * Plugin URI:        https://shubkb.com
  * Description:       All-in-one solution for WordPress users to use everything WiseSync has to offer to make them successful on the web.
  * Version:           1.0.0
- * Requires at least: 6.7
- * Requires PHP:      8.3
+ * Requires at least: 6.8
+ * Requires PHP:      8.0
  * Author:            Shubham Kumar Bansal <shub@shubkb.com>
  * Author URI:        https://shubkb.com
  * License:           Apache License 2.0

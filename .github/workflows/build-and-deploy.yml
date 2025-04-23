@@ -75,19 +75,10 @@ jobs:
             echo "build_required=false" >> $GITHUB_OUTPUT
           fi
           
-          # Generate list of changed plugin/theme directories
+          # List changed directories for debugging
           echo "Changed plugin/theme directories:"
-          grep -E "^plugins/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq | tee changed_plugins.txt
-          grep -E "^themes/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq | tee changed_themes.txt
-          
-          # Create JSON array of changed directories for later use
-          echo "changed_plugins=$(cat changed_plugins.txt | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
-          echo "changed_themes=$(cat changed_themes.txt | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
-
-      - name: 🛠️ Setup for Build Process
-        if: steps.changes.outputs.build_required == 'true'
-        run: |
-          echo "Setting up build environment due to changes in wisesync or papersync..."
+          grep -E "^plugins/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq
+          grep -E "^themes/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq
 
       #####################################
       # ⚙️ Setup PHP & Node (only if needed)
@@ -175,6 +166,17 @@ jobs:
         run: npm run lint:fix
 
       #####################################
+      # 🧼 Cleanup
+      #####################################
+
+      - name: 🧼 Cleanup Build Files
+        if: steps.changes.outputs.build_required == 'true'
+        run: |
+          echo "🧹 Cleaning up unnecessary build files..."
+          rm -rf ./plugins/wisesync/blocks/src
+          rm -rf ./themes/papersync/blocks/src
+
+      #####################################
       # 🚀 Deploy
       #####################################
 
@@ -191,13 +193,6 @@ jobs:
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git fetch --depth=1 origin $TARGET_BRANCH
           git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
-
-      - name: 🧼 Cleanup Build Files
-        if: steps.changes.outputs.build_required == 'true'
-        run: |
-          echo "🧹 Cleaning up unnecessary build files..."
-          rm -rf ./plugins/wisesync/blocks/src
-          rm -rf ./themes/papersync/blocks/src
 
       - name: 🚚 Deploy Changed Plugins
         run: |
