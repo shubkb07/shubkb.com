@@ -75,21 +75,39 @@ jobs:
           fi
           echo "📃 Changed files:"
           cat changed_files.txt
+
+          # Check for dependency changes
           grep -q "package-lock.json" changed_files.txt && echo "npm_deps_changed=true" >> $GITHUB_OUTPUT || echo "npm_deps_changed=false" >> $GITHUB_OUTPUT
           grep -q "composer.lock" changed_files.txt && echo "composer_deps_changed=true" >> $GITHUB_OUTPUT || echo "composer_deps_changed=false" >> $GITHUB_OUTPUT
+          
+          # Check if build is required for special plugins/themes
           if grep -qE "plugins/wisesync/|themes/papersync/" changed_files.txt; then
             echo "build_required=true" >> $GITHUB_OUTPUT
           else
             echo "build_required=false" >> $GITHUB_OUTPUT
           fi
-          # Identify all plugins with changes
-          grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_plugins.txt
-          # Identify all themes with changes
-          grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_themes.txt
-          echo "Changed plugins:"
-          cat changed_plugins.txt
-          echo "Changed themes:"
-          cat changed_themes.txt
+          
+          # Find all changed plugins
+          if grep -qE "^plugins/" changed_files.txt; then
+            echo "plugins_changed=true" >> $GITHUB_OUTPUT
+            grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_plugins.txt
+            echo "Changed plugins:"
+            cat changed_plugins.txt
+          else
+            echo "plugins_changed=false" >> $GITHUB_OUTPUT
+            touch changed_plugins.txt
+          fi
+          
+          # Find all changed themes
+          if grep -qE "^themes/" changed_files.txt; then
+            echo "themes_changed=true" >> $GITHUB_OUTPUT
+            grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_themes.txt
+            echo "Changed themes:"
+            cat changed_themes.txt
+          else
+            echo "themes_changed=false" >> $GITHUB_OUTPUT
+            touch changed_themes.txt
+          fi
 
       - name: 🐘 Boot PHP
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
@@ -177,51 +195,49 @@ jobs:
           git fetch --depth=1 origin $TARGET_BRANCH
           git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
 
-      - name: 🚚 Sync Plugin Updates
+      - name: 🚚 Sync Plugin Updates - Special Plugins
+        if: steps.changes.outputs.build_required == 'true'
         run: |
-          echo "🚚 Deploying updated plugins…"
-          # First handle special plugins that require build steps
-          if [ "${{ steps.changes.outputs.build_required }}" = "true" ]; then
-            echo "  • Updating plugin: wisesync (with build)"
-            rm -rf deploy/plugins/wisesync
-            mkdir -p deploy/plugins
-            cp -r plugins/wisesync deploy/plugins/
-          fi
-          
-          # Now handle all other plugins with changes
-          if [ -f changed_plugins.txt ] && [ -s changed_plugins.txt ]; then
-            while IFS= read -r plugin; do
-              if [ -n "$plugin" ] && [ -d "plugins/$plugin" ]; then
-                echo "  • Updating plugin: $plugin"
-                rm -rf deploy/plugins/$plugin
-                mkdir -p deploy/plugins
-                cp -r plugins/$plugin deploy/plugins/
-              fi
-            done < changed_plugins.txt
-          fi
+          echo "🚚 Deploying special plugins with build requirements..."
+          echo "  • Updating plugin: wisesync (with build)"
+          rm -rf deploy/plugins/wisesync
+          mkdir -p deploy/plugins
+          cp -r plugins/wisesync deploy/plugins/
 
-      - name: 🚚 Sync Theme Updates
+      - name: 🚚 Sync Plugin Updates - Changed Plugins
+        if: steps.changes.outputs.plugins_changed == 'true'
         run: |
-          echo "🚚 Deploying updated themes…"
-          # First handle special themes that require build steps
-          if [ "${{ steps.changes.outputs.build_required }}" = "true" ]; then
-            echo "  • Updating theme: papersync (with build)"
-            rm -rf deploy/themes/papersync
-            mkdir -p deploy/themes
-            cp -r themes/papersync deploy/themes/
-          fi
-          
-          # Now handle all other themes with changes
-          if [ -f changed_themes.txt ] && [ -s changed_themes.txt ]; then
-            while IFS= read -r theme; do
-              if [ -n "$theme" ] && [ -d "themes/$theme" ]; then
-                echo "  • Updating theme: $theme"
-                rm -rf deploy/themes/$theme
-                mkdir -p deploy/themes
-                cp -r themes/$theme deploy/themes/
-              fi
-            done < changed_themes.txt
-          fi
+          echo "🚚 Deploying updated plugins..."
+          while IFS= read -r plugin; do
+            if [ -n "$plugin" ] && [ -d "plugins/$plugin" ]; then
+              echo "  • Updating plugin: $plugin"
+              rm -rf deploy/plugins/$plugin
+              mkdir -p deploy/plugins
+              cp -r plugins/$plugin deploy/plugins/
+            fi
+          done < changed_plugins.txt
+
+      - name: 🚚 Sync Theme Updates - Special Themes
+        if: steps.changes.outputs.build_required == 'true'
+        run: |
+          echo "🚚 Deploying special themes with build requirements..."
+          echo "  • Updating theme: papersync (with build)"
+          rm -rf deploy/themes/papersync
+          mkdir -p deploy/themes
+          cp -r themes/papersync deploy/themes/
+
+      - name: 🚚 Sync Theme Updates - Changed Themes
+        if: steps.changes.outputs.themes_changed == 'true'
+        run: |
+          echo "🚚 Deploying updated themes..."
+          while IFS= read -r theme; do
+            if [ -n "$theme" ] && [ -d "themes/$theme" ]; then
+              echo "  • Updating theme: $theme"
+              rm -rf deploy/themes/$theme
+              mkdir -p deploy/themes
+              cp -r themes/$theme deploy/themes/
+            fi
+          done < changed_themes.txt
 
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
