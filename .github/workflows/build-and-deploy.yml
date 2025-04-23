@@ -1,10 +1,14 @@
-name: Build & Deploy Workflow
+name: Optimized Build & Deploy Workflow
 
 on:
   push:
     branches:
       - master
       - dev
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build_and_deploy:
@@ -22,7 +26,7 @@ jobs:
       - name: ⬇️ Checkout Repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 2 # Need at least 2 commits to detect changes
+          fetch-depth: 2 # We need at least 2 commits to detect changes
 
       - name: 📝 Get Last Commit Message
         id: last_commit
@@ -44,53 +48,53 @@ jobs:
             exit 1
           fi
 
-      - name: 🔎 Detect File Changes
-        id: changed-files
+      - name: 🔍 Detect Changes
+        id: changes
         run: |
-          # Check if specific files or directories have changed
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD)
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
+          # Check if package lock files have changed
+          echo "Detecting file changes..."
+          git diff --name-only HEAD^ HEAD > changed_files.txt
           
-          # Check for package.json/lock changes or if node_modules doesn't exist
-          if echo "$CHANGED_FILES" | grep -q "package-lock.json\|package.json"; then
-            echo "NPM_DEPS_CHANGED=true" >> $GITHUB_ENV
+          # Set flags based on changed files
+          if grep -q "package-lock.json" changed_files.txt; then
+            echo "npm_deps_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "NPM_DEPS_CHANGED=false" >> $GITHUB_ENV
+            echo "npm_deps_changed=false" >> $GITHUB_OUTPUT
           fi
           
-          # Check for composer.json/lock changes
-          if echo "$CHANGED_FILES" | grep -q "composer.lock\|composer.json"; then
-            echo "COMPOSER_DEPS_CHANGED=true" >> $GITHUB_ENV
+          if grep -q "composer.lock" changed_files.txt; then
+            echo "composer_deps_changed=true" >> $GITHUB_OUTPUT
           else
-            echo "COMPOSER_DEPS_CHANGED=false" >> $GITHUB_ENV
+            echo "composer_deps_changed=false" >> $GITHUB_OUTPUT
           fi
           
-          # Check for plugin/theme code changes that would need rebuilding
-          if echo "$CHANGED_FILES" | grep -q "plugins/wisesync/\|themes/papersync/"; then
-            echo "NEED_REBUILD=true" >> $GITHUB_ENV
-            
-            # If code changes, we need the dependencies too
-            echo "NEED_DEPS=true" >> $GITHUB_ENV
+          # Check for changes in specific directories
+          if grep -q "plugins/wisesync/" changed_files.txt || grep -q "themes/papersync/" changed_files.txt; then
+            echo "build_required=true" >> $GITHUB_OUTPUT
           else
-            echo "NEED_REBUILD=false" >> $GITHUB_ENV
-            
-            # Check if any plugins/themes changes at all that need deployment
-            if echo "$CHANGED_FILES" | grep -q "plugins/\|themes/"; then
-              echo "NEED_DEPLOY_ONLY=true" >> $GITHUB_ENV
-              echo "NEED_DEPS=false" >> $GITHUB_ENV
-            else
-              echo "NEED_DEPLOY_ONLY=false" >> $GITHUB_ENV
-              echo "NEED_DEPS=false" >> $GITHUB_ENV
-            fi
+            echo "build_required=false" >> $GITHUB_OUTPUT
           fi
+          
+          # Generate list of changed plugin/theme directories
+          echo "Changed plugin/theme directories:"
+          grep -E "^plugins/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq | tee changed_plugins.txt
+          grep -E "^themes/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq | tee changed_themes.txt
+          
+          # Create JSON array of changed directories for later use
+          echo "changed_plugins=$(cat changed_plugins.txt | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+          echo "changed_themes=$(cat changed_themes.txt | jq -R . | jq -s .)" >> $GITHUB_OUTPUT
+
+      - name: 🛠️ Setup for Build Process
+        if: steps.changes.outputs.build_required == 'true'
+        run: |
+          echo "Setting up build environment due to changes in wisesync or papersync..."
 
       #####################################
-      # ⚙️ Setup PHP & Node (when needed)
+      # ⚙️ Setup PHP & Node (only if needed)
       #####################################
       
       - name: 🐘 Setup PHP
-        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
+        if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
@@ -98,24 +102,24 @@ jobs:
           coverage: none
 
       - name: 📦 Setup Node.js
-        if: env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true'
+        if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: '16'
           cache: 'npm'
-          cache-dependency-path: 'package-lock.json'
+          cache-dependency-path: package-lock.json
 
       #####################################
-      # ♻️ Restore Caches (when needed)
+      # ♻️ Restore Caches
       #####################################
 
       - name: ♻️ Get Composer Cache Directory
-        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
+        if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         id: composer-cache-dir
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: ♻️ Cache Composer dependencies
-        if: env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true'
+        if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: actions/cache@v3
         id: composer-cache
         with:
@@ -124,31 +128,33 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
 
       - name: ♻️ Cache node_modules
-        if: env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true'
+        if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/cache@v3
         id: node-modules-cache
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
+          key: node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: node-modules-${{ runner.os }}-
 
       #####################################
-      # 📥 Install Dependencies (when needed)
+      # 📥 Install Dependencies (only if needed)
       #####################################
-
+      
       - name: 📥 Install Composer Dependencies
-        if: (env.NEED_DEPS == 'true' || env.COMPOSER_DEPS_CHANGED == 'true') && steps.composer-cache.outputs.cache-hit != 'true'
+        if: (steps.changes.outputs.composer_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.composer-cache.outputs.cache-hit != 'true')
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: 📥 Install Node Dependencies
-        if: (env.NEED_DEPS == 'true' || env.NPM_DEPS_CHANGED == 'true') && steps.node-modules-cache.outputs.cache-hit != 'true'
+      - name: 📥 Install NPM Dependencies
+        if: (steps.changes.outputs.npm_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.node-modules-cache.outputs.cache-hit != 'true')
         run: |
-          echo "Installing Node dependencies (cache miss or required by code changes)"
-          npm ci --prefer-offline --no-audit --no-fund --silent
-      
+          if [ -f package-lock.json ]; then
+            npm ci --prefer-offline --no-audit
+          else
+            npm install --prefer-offline --no-audit
+          fi
+
       - name: 📥 Install WP-CLI
-        if: env.NEED_REBUILD == 'true'
+        if: steps.changes.outputs.build_required == 'true'
         run: |
           echo "Installing WP-CLI..."
           curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
@@ -157,37 +163,22 @@ jobs:
           wp --info
 
       #####################################
-      # 🛠️ Build + Setup i18n/l10n + Lint
+      # 🛠️ Build + Setup i18n/l10n + Lint (only if needed)
       #####################################
 
       - name: 🛠️ Build Assets for Blocks and Languages
-        if: env.NEED_REBUILD == 'true'
+        if: steps.changes.outputs.build_required == 'true'
         run: npm run build
 
       - name: 🛠️ Lint Fix Assets
-        if: env.NEED_REBUILD == 'true'
+        if: steps.changes.outputs.build_required == 'true'
         run: npm run lint:fix
-
-      #####################################
-      # 🧼 Cleanup
-      #####################################
-
-      - name: 🧼 Cleanup Unnecessary Files
-        if: env.NEED_REBUILD == 'true' || env.NEED_DEPLOY_ONLY == 'true'
-        run: |
-          echo "🧹 Cleaning up unnecessary build files..."
-          if [ -d "./plugins/wisesync/blocks/src" ]; then
-            rm -rf ./plugins/wisesync/blocks/src
-          fi
-          if [ -d "./themes/papersync/blocks/src" ]; then
-            rm -rf ./themes/papersync/blocks/src
-          fi
 
       #####################################
       # 🚀 Deploy
       #####################################
 
-      - name: 🚀 Deploy to Target Build Branch
+      - name: 🚀 Prepare Target Branch
         run: |
           echo "🚚 Preparing deployment to $TARGET_BRANCH branch..."
           git config --global user.name "Shubham Kumar Bansal"
@@ -198,19 +189,55 @@ jobs:
           cd deploy
           git init
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git config core.sparsecheckout true
-          echo "plugins/" > .git/info/sparse-checkout
-          echo "themes/" >> .git/info/sparse-checkout
-          git pull origin $TARGET_BRANCH
+          git fetch --depth=1 origin $TARGET_BRANCH
+          git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
+
+      - name: 🧼 Cleanup Build Files
+        if: steps.changes.outputs.build_required == 'true'
+        run: |
+          echo "🧹 Cleaning up unnecessary build files..."
+          rm -rf ./plugins/wisesync/blocks/src
+          rm -rf ./themes/papersync/blocks/src
+
+      - name: 🚚 Deploy Changed Plugins
+        run: |
+          echo "Deploying changed plugins..."
           
-          # Update build files
-          cd .. 
-          rm -rf deploy/plugins deploy/themes
-          cp -r plugins deploy/
-          cp -r themes deploy/
+          # Get list of all plugin directories
+          cd plugins
+          plugin_dirs=$(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's/^\.\///')
+          cd ..
           
-          # Commit and push changes
+          for plugin in $plugin_dirs; do
+            if grep -q "plugins/$plugin" changed_files.txt || [ "$plugin" = "wisesync" -a "${{ steps.changes.outputs.build_required }}" = "true" ]; then
+              echo "Updating plugin: $plugin"
+              rm -rf deploy/plugins/$plugin
+              mkdir -p deploy/plugins
+              cp -r plugins/$plugin deploy/plugins/
+            fi
+          done
+
+      - name: 🚚 Deploy Changed Themes
+        run: |
+          echo "Deploying changed themes..."
+          
+          # Get list of all theme directories
+          cd themes
+          theme_dirs=$(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's/^\.\///')
+          cd ..
+          
+          for theme in $theme_dirs; do
+            if grep -q "themes/$theme" changed_files.txt || [ "$theme" = "papersync" -a "${{ steps.changes.outputs.build_required }}" = "true" ]; then
+              echo "Updating theme: $theme"
+              rm -rf deploy/themes/$theme
+              mkdir -p deploy/themes
+              cp -r themes/$theme deploy/themes/
+            fi
+          done
+
+      - name: 🚀 Commit and Push Changes
+        run: |
           cd deploy
-          git add .
+          git add --all
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }}" || echo "✅ No changes to commit"
           git push origin HEAD:$TARGET_BRANCH
