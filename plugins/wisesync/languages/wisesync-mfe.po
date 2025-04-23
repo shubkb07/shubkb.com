@@ -35,7 +35,6 @@ msgid "Shubham Kumar Bansal <shub@shubkb.com>"
 msgstr ""
 
 #: includes/blocks/class-cookie-banner-block.php:209
-#: blocks/build/cookie-banner/index.js:1
 #: blocks/src/cookie-banner/edit.js:394
 msgid "Cookie Settings"
 msgstr ""
@@ -52,13 +51,11 @@ msgstr ""
 msgid "Sync Advance Blocks"
 msgstr ""
 
-#: blocks/build/cookie-banner/block.json
 #: blocks/src/cookie-banner/block.json
 msgctxt "block title"
 msgid "Cookie Banner"
 msgstr ""
 
-#: blocks/build/cookie-banner/block.json
 #: blocks/src/cookie-banner/block.json
 msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
