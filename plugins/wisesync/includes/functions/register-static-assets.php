@@ -18,11 +18,12 @@
  */
 function sync_register_static_assets() {
 	$styles_files = array(
-		'event' => WSYNC_PLUGIN_CSS_URL . 'event.css',
+		'admin' => WSYNC_PLUGIN_CSS_URL . 'admin.css',
 	);
 
 	$scripts_files = array(
 		'event' => WSYNC_PLUGIN_JS_URL . 'event.js',
+		'admin' => WSYNC_PLUGIN_JS_URL . 'admin.js',
 	);
 
 	// Register styles.
@@ -57,7 +58,13 @@ add_action( 'wp_enqueue_scripts', 'sync_register_static_assets' );
  * This function enqueues static assets for the admin area.
  */
 function sync_load_admin_static_assets() {
+
+	// Add styles for admin area.
+	wp_enqueue_style( 'admin' );
+
+	// Add scripts for admin area.
 	wp_enqueue_script( 'event' );
+	wp_enqueue_script( 'admin' );
 }
 
 add_action( 'admin_enqueue_scripts', 'sync_load_admin_static_assets' );
