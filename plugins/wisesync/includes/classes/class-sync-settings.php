@@ -30,7 +30,7 @@ class Sync_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public function init_settings() {
+	public function init_settings_page() {
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync-settings-menu', array( $this, 'settings_page' ), 'dashicons-sort', 23 );
 	}
 
