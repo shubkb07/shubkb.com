@@ -41,73 +41,29 @@ class Sync_Settings {
 	 */
 	public function settings_page() {
 		?>
-		<div id="sync-dashboard" class="sync-dashboard">
-  <nav class="sync-sidebar" aria-label="Sync Dashboard Sidebar">
+<div class="sync-wrapper">
+  <div class="sync-sidebar">
+    <div class="sync-logo">Sync Panel</div>
+    <button class="sync-toggle-button" onclick="sync_toggleMenu()">☰</button>
     <ul class="sync-menu">
-      <li class="sync-menu-item active">
-        <button type="button"
-                class="sync-menu-link"
-                data-sync-target="dashboard"
-                aria-controls="sync-content-dashboard"
-                aria-expanded="true">
-          Dashboard
-        </button>
-      </li>
-      <li class="sync-menu-item has-submenu">
-        <button type="button"
-                class="sync-menu-link"
-                data-sync-target="settings"
-                aria-controls="sync-submenu-settings"
-                aria-expanded="false">
-          Settings
-        </button>
-        <ul id="sync-submenu-settings" class="sync-submenu" hidden>
-          <li class="sync-submenu-item">
-            <button type="button"
-                    class="sync-submenu-link"
-                    data-sync-target="general"
-                    aria-controls="sync-content-general"
-                    aria-expanded="false">
-              General
-            </button>
-          </li>
-          <li class="sync-submenu-item">
-            <button type="button"
-                    class="sync-submenu-link"
-                    data-sync-target="advanced"
-                    aria-controls="sync-content-advanced"
-                    aria-expanded="false">
-              Advanced
-            </button>
-          </li>
+      <li><a href="#">Dashboard</a></li>
+      <li class="sync-has-submenu">
+        <a href="#" onclick="sync_toggleSubMenu(event)">Settings</a>
+        <ul class="sync-submenu">
+          <li><a href="#">General</a></li>
+          <li><a href="#">Advanced</a></li>
         </ul>
       </li>
-      <!-- add more top-level items here -->
+      <li><a href="#">Logs</a></li>
     </ul>
-  </nav>
+  </div>
 
-  <main class="sync-main">
-    <section id="sync-content-dashboard" class="sync-content" data-sync-content="dashboard">
-      <h1 class="sync-heading">Welcome to Sync Dashboard</h1>
-      <p>Select a menu item to see details here.</p>
-    </section>
-
-    <section id="sync-content-settings" class="sync-content" data-sync-content="settings" hidden>
-      <h1 class="sync-heading">Settings Overview</h1>
-      <p>Choose a sub-section from the sidebar.</p>
-    </section>
-
-    <section id="sync-content-general" class="sync-content" data-sync-content="general" hidden>
-      <h1 class="sync-heading">General Settings</h1>
-      <p>General settings content…</p>
-    </section>
-
-    <section id="sync-content-advanced" class="sync-content" data-sync-content="advanced" hidden>
-      <h1 class="sync-heading">Advanced Settings</h1>
-      <p>Advanced settings content…</p>
-    </section>
-  </main>
+  <div class="sync-content">
+    <h1>Welcome to Sync Dashboard</h1>
+    <p>This is your inner admin panel. Add whatever you want here.</p>
+  </div>
 </div>
+
 		<?php
 	}
 
