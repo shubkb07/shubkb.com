@@ -1,4 +1,4 @@
-name: Optimized Build & Deploy Workflow
+name: 🚀 Epic Build & Deploy Workflow 🎉
 
 on:
   push:
@@ -16,114 +16,74 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Running Version 1.1 of Build and Deploy Workflow
+      - name: 🏁 Start Build & Deploy v1.1
         run: |
-          echo "Running Version 1.1 of Build and Deploy Workflow"
-          echo "Running on ${{ runner.os }}"
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Repository: ${{ github.repository }}"
+          echo "🏁 Starting Build & Deploy v1.1!"
+          echo "🖥️ Running on ${{ runner.os }}"
+          echo "📦 Trigger: ${{ github.event_name }} in ${{ github.repository }}"
 
-      - name: ⬇️ Checkout Repository
+      - name: 📥 Checkout the Repo
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Fetch all history for proper change detection
+          fetch-depth: 0
 
-      - name: 📝 Get Last Commit Message
+      - name: 💬 Capture Last Commit Message
         id: last_commit
         run: |
           sanitized_message=$(git log -1 --pretty=%B | tr '\n' ' ' | tr -d '\r')
           echo "message=$sanitized_message" >> $GITHUB_OUTPUT
 
-      - name: Set Target Branch
+      - name: 🎯 Determine Deployment Branch
         id: set_target_branch
         run: |
           current_branch="${GITHUB_REF##*/}"
-          echo "Current branch: $current_branch"
+          echo "🔍 Current branch: $current_branch"
           if [ "$current_branch" == "master" ]; then
             echo "TARGET_BRANCH=master-build" >> $GITHUB_ENV
           elif [ "$current_branch" == "dev" ]; then
             echo "TARGET_BRANCH=dev-build" >> $GITHUB_ENV
           else
-            echo "Error: Push from unrecognized branch: $current_branch. Exiting."
+            echo "❌ Unrecognized branch: $current_branch. Exiting!"
             exit 1
           fi
 
-      - name: 🔍 Detect Changes Since Last Deployment
+      - name: 🔍 Scan for Changes Since Last Deploy
         id: changes
         run: |
-          echo "Detecting file changes since last deployment..."
-          
-          # Get the current commit hash
+          echo "🔎 Detecting file changes..."
           CURRENT_COMMIT=$(git rev-parse HEAD)
-          echo "Current commit: $CURRENT_COMMIT"
-          
-          # Clone the target branch to find the last deployed commit
-          mkdir -p temp_deploy
-          cd temp_deploy
+          echo "🆔 Current commit: $CURRENT_COMMIT"
+          mkdir -p temp_deploy && cd temp_deploy
           git init
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git fetch --depth=1 origin $TARGET_BRANCH
-          
-          # Check if target branch exists and get last deployment commit
           if git checkout $TARGET_BRANCH 2>/dev/null; then
-            # Get the last commit message to find the original commit hash
             LAST_DEPLOY_MSG=$(git log -1 --pretty=%B)
-            cd ..
-            rm -rf temp_deploy
-            
-            # Check if we can find a reference to the original commit
+            cd .. && rm -rf temp_deploy
             if [[ $LAST_DEPLOY_MSG =~ SHA:([0-9a-f]{40}) ]]; then
               LAST_COMMIT=${BASH_REMATCH[1]}
-              echo "Last deployed commit found: $LAST_COMMIT"
-              # Get all changes between last deployed commit and current
+              echo "🔄 Last deployed SHA: $LAST_COMMIT"
               git diff --name-only $LAST_COMMIT $CURRENT_COMMIT > changed_files.txt
             else
-              echo "Couldn't find original commit reference in last deploy message, comparing with last 10 commits"
-              # Fall back to comparing with the last 10 commits
+              echo "⚠️ No SHA in last message; comparing last 10 commits"
               git diff --name-only HEAD~10..HEAD > changed_files.txt
             fi
           else
-            echo "Target branch doesn't exist yet or couldn't be checked out, comparing with last 10 commits"
-            cd ..
-            rm -rf temp_deploy
-            # Fall back to comparing with the last 10 commits
+            echo "⚠️ No target branch yet; comparing last 10 commits"
+            cd .. && rm -rf temp_deploy
             git diff --name-only HEAD~10..HEAD > changed_files.txt
           fi
-          
-          # Print the changed files for debugging
-          echo "Changed files:"
+          echo "📃 Changed files:"
           cat changed_files.txt
-          
-          # Set flags based on changed files
-          if grep -q "package-lock.json" changed_files.txt; then
-            echo "npm_deps_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "npm_deps_changed=false" >> $GITHUB_OUTPUT
-          fi
-          
-          if grep -q "composer.lock" changed_files.txt; then
-            echo "composer_deps_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "composer_deps_changed=false" >> $GITHUB_OUTPUT
-          fi
-          
-          # Check for changes in specific directories
-          if grep -q "plugins/wisesync/" changed_files.txt || grep -q "themes/papersync/" changed_files.txt; then
+          grep -q "package-lock.json" changed_files.txt && echo "npm_deps_changed=true" >> $GITHUB_OUTPUT || echo "npm_deps_changed=false" >> $GITHUB_OUTPUT
+          grep -q "composer.lock" changed_files.txt && echo "composer_deps_changed=true" >> $GITHUB_OUTPUT || echo "composer_deps_changed=false" >> $GITHUB_OUTPUT
+          if grep -qE "plugins/wisesync/|themes/papersync/" changed_files.txt; then
             echo "build_required=true" >> $GITHUB_OUTPUT
           else
             echo "build_required=false" >> $GITHUB_OUTPUT
           fi
-          
-          # List changed directories for debugging
-          echo "Changed plugin/theme directories:"
-          grep -E "^plugins/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq
-          grep -E "^themes/[^/]+/" changed_files.txt | cut -d/ -f1-2 | sort | uniq
 
-      #####################################
-      # ⚙️ Setup PHP & Node (only if needed)
-      #####################################
-      
-      - name: 🐘 Setup PHP
+      - name: 🐘 Boot PHP
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: shivammathur/setup-php@v2
         with:
@@ -131,7 +91,7 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      - name: 📦 Setup Node.js
+      - name: 📦 Boot Node.js
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/setup-node@v3
         with:
@@ -139,16 +99,12 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      #####################################
-      # ♻️ Restore Caches
-      #####################################
-
-      - name: ♻️ Get Composer Cache Directory
+      - name: ♻️ Composer Cache Recall
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         id: composer-cache-dir
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: ♻️ Cache Composer dependencies
+      - name: ♻️ Cache Composer Dependencies
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: actions/cache@v3
         id: composer-cache
@@ -157,7 +113,7 @@ jobs:
           key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      - name: ♻️ Cache node_modules
+      - name: ♻️ NPM Cache Recall
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/cache@v3
         id: node-modules-cache
@@ -166,15 +122,11 @@ jobs:
           key: node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: node-modules-${{ runner.os }}-
 
-      #####################################
-      # 📥 Install Dependencies (only if needed)
-      #####################################
-      
-      - name: 📥 Install Composer Dependencies
+      - name: 📥 Composer Install
         if: (steps.changes.outputs.composer_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.composer-cache.outputs.cache-hit != 'true')
         run: composer install --prefer-dist --no-progress --no-interaction
 
-      - name: 📥 Install NPM Dependencies
+      - name: 📥 NPM Install
         if: (steps.changes.outputs.npm_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.node-modules-cache.outputs.cache-hit != 'true')
         run: |
           if [ -f package-lock.json ]; then
@@ -183,96 +135,70 @@ jobs:
             npm install --prefer-offline --no-audit
           fi
 
-      - name: 📥 Install WP-CLI
+      - name: ⚡ Install WP-CLI
         if: steps.changes.outputs.build_required == 'true'
         run: |
-          echo "Installing WP-CLI..."
+          echo "⚡ Fetching WP-CLI..."
           curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
           chmod +x wp-cli.phar
           sudo mv wp-cli.phar /usr/local/bin/wp
           wp --info
 
-      #####################################
-      # 🛠️ Build + Setup i18n/l10n + Lint (only if needed)
-      #####################################
-
-      - name: 🛠️ Build Assets for Blocks and Languages
+      - name: 🛠️ Build Frontend Assets
         if: steps.changes.outputs.build_required == 'true'
         run: npm run build
 
-      - name: 🛠️ Lint Fix Assets
+      - name: 🔧 Lint & Fix Assets
         if: steps.changes.outputs.build_required == 'true'
         run: npm run lint:fix
 
-      #####################################
-      # 🧼 Cleanup
-      #####################################
-
-      - name: 🧼 Cleanup Build Files
+      - name: 🧹 Clean Up Build Artifacts
         if: steps.changes.outputs.build_required == 'true'
         run: |
-          echo "🧹 Cleaning up unnecessary build files..."
-          rm -rf ./plugins/wisesync/blocks/src
-          rm -rf ./themes/papersync/blocks/src
+          echo "🧹 Tidying up…"
+          rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
 
-      #####################################
-      # 🚀 Deploy
-      #####################################
-
-      - name: 🚀 Prepare Target Branch
+      - name: 📦 Prep $TARGET_BRANCH for Deployment
         run: |
-          echo "🚚 Preparing deployment to $TARGET_BRANCH branch..."
+          echo "📦 Preparing branch: $TARGET_BRANCH"
           git config --global user.name "Shubham Kumar Bansal"
           git config --global user.email "shub@shubkb.com"
-          
-          # Use sparse checkout for faster clone of target branch
-          mkdir -p deploy
-          cd deploy
+          mkdir -p deploy && cd deploy
           git init
           git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
           git fetch --depth=1 origin $TARGET_BRANCH
           git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
 
-      - name: 🚚 Deploy Changed Plugins
+      - name: 🚚 Sync Plugin Updates
         run: |
-          echo "Deploying changed plugins..."
-          
-          # Get list of all plugin directories
+          echo "🚚 Deploying updated plugins…"
           cd plugins
-          plugin_dirs=$(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's/^\.\///')
-          cd ..
-          
-          for plugin in $plugin_dirs; do
-            if grep -q "plugins/$plugin" changed_files.txt || [ "$plugin" = "wisesync" -a "${{ steps.changes.outputs.build_required }}" = "true" ]; then
-              echo "Updating plugin: $plugin"
-              rm -rf deploy/plugins/$plugin
-              mkdir -p deploy/plugins
-              cp -r plugins/$plugin deploy/plugins/
+          for plugin in $(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's|^\./||'); do
+            if grep -q "plugins/$plugin" changed_files.txt || { [ "$plugin" = "wisesync" ] && [ "${{ steps.changes.outputs.build_required }}" = "true" ]; }; then
+              echo "  • Updating plugin: $plugin"
+              rm -rf ../deploy/plugins/$plugin
+              mkdir -p ../deploy/plugins
+              cp -r $plugin ../deploy/plugins/
             fi
           done
 
-      - name: 🚚 Deploy Changed Themes
+      - name: 🚚 Sync Theme Updates
         run: |
-          echo "Deploying changed themes..."
-          
-          # Get list of all theme directories
+          echo "🚚 Deploying updated themes…"
           cd themes
-          theme_dirs=$(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's/^\.\///')
-          cd ..
-          
-          for theme in $theme_dirs; do
-            if grep -q "themes/$theme" changed_files.txt || [ "$theme" = "papersync" -a "${{ steps.changes.outputs.build_required }}" = "true" ]; then
-              echo "Updating theme: $theme"
-              rm -rf deploy/themes/$theme
-              mkdir -p deploy/themes
-              cp -r themes/$theme deploy/themes/
+          for theme in $(find . -maxdepth 1 -type d | grep -v "^\.$" | sed 's|^\./||'); do
+            if grep -q "themes/$theme" changed_files.txt || { [ "$theme" = "papersync" ] && [ "${{ steps.changes.outputs.build_required }}" = "true" ]; }; then
+              echo "  • Updating theme: $theme"
+              rm -rf ../deploy/themes/$theme
+              mkdir -p ../deploy/themes
+              cp -r $theme ../deploy/themes/
             fi
           done
 
-      - name: 🚀 Commit and Push Changes
+      - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
           cd deploy
           git add --all
-          # Add the original commit SHA to the commit message
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') - ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "✅ No changes to commit"
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "✅ Nothing new to deploy!"
           git push origin HEAD:$TARGET_BRANCH
+          echo "🚀 All done! Site deployed to $TARGET_BRANCH 🎉"
