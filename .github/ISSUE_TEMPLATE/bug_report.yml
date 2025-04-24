@@ -1,0 +1,53 @@
+name: 🐛 Bug Report
+description: Report an issue so we can fix it
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug! Please fill out the following so we can help.
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: Plugin Version
+      placeholder: ex: 1.2.3
+
+  - type: input
+    id: wp_version
+    attributes:
+      label: WordPress Version
+      placeholder: ex: 6.5.2
+
+  - type: textarea
+    id: bug_description
+    attributes:
+      label: Describe the bug
+      description: What is happening? Be as detailed as possible.
+      placeholder: ex: When I click the sync button, nothing happens.
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to...
+        2. Click on...
+        3. See the error
+
+  - type: textarea
+    id: themes_plugins
+    attributes:
+      label: Related themes or plugins
+      placeholder: ex: Using Astra theme and WooCommerce plugin
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Other
