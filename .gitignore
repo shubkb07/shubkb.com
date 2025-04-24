@@ -11,4 +11,8 @@
 /.temp/
 /plugins/wisesync/blocks/build
 /themes/papersync/blocks/build
+/plugins/wisesync/**/*.mo
+/themes/papersync/**/*.mo
+/plugins/wisesync/**/*.json
+/themes/papersync/**/*.json
 /wp-cli.phar

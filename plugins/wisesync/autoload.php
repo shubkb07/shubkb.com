@@ -29,22 +29,32 @@ foreach ( $functions as $function_file ) {
  *
  * @param string $class_name The name of the class to autoload.
  */
-function wisesync_autoload( $class_name ) {
-	// Check if the class name starts with the plugin prefix.
-	if ( strpos( $class_name, 'WiseSync' ) !== 0 ) {
-		return;
+function sync_autoload( $class_name ) {
+
+	$class_prefix = 'Sync\\';
+	if ( strpos( $class_name, $class_prefix ) !== 0 ) {
+		return; // Not a class we want to autoload.
 	}
 
-	// Replace the namespace separator with directory separator.
-	$class_name = str_replace( '\\', DIRECTORY_SEPARATOR, $class_name );
+	// Remove the prefix from the class name.
+	$class_name = substr( $class_name, strlen( $class_prefix ) );
 
-	// Construct the file path.
-	$file_path = WSYNC_PLUGIN_DIR . '/includes/classes/' . $class_name . '.php';
+	// Convert the class name to lowercase.
+	$class_name = strtolower( $class_name );
 
-	// Check if the file exists and include it.
-	if ( file_exists( $file_path ) ) {
-		require_once $file_path;
+	// Replace underscores with dashes.
+	$class_name = str_replace( '_', '-', $class_name );
+
+	// Check if class file exists.
+	if ( file_exists( WP_PLUGIN_DIR . 'wisesync/includes/classes/class-' . $class_name . '.php' ) ) {
+		$class_file = WP_PLUGIN_DIR . 'wisesync/includes/classes/class-' . $class_name . '.php';
+	} elseif ( file_exists( WSYNC_PLUGIN_DIR . 'includes/classes/class-' . $class_name . '.php' ) ) {
+		$class_file = WSYNC_PLUGIN_DIR . 'includes/classes/class-' . $class_name . '.php';
+	} else {
+		return; // Class file does not exist.
 	}
+
+	require_once $class_file;
 }
 
-spl_autoload_register( 'wisesync_autoload' );
+spl_autoload_register( 'sync_autoload' );

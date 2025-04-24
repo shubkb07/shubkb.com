@@ -1,0 +1,14 @@
+# Create .prettierignore based on your .gitignore
+cp .gitignore .prettierignore
+
+# Then add some Prettier-specific ignores
+cat << EOF >> .prettierignore
+# Prettier specific ignores
+vendor/
+node_modules/
+*.min.js
+*.min.css
+/build/
+/dist/
+/languages/
+EOF

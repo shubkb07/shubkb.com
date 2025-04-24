@@ -13,7 +13,9 @@
   "license": "ISC",
   "author": "Shubham Kumar Bansal <shub@shubkb.com>",
   "scripts": {
-    "build": "npm run build:blocks:plugin:wisesync && npm run build:blocks:theme:papersync && npm run i18n:linux",
+    "start": "npm run build && npm run lint:fix",
+    "build": "npm run build:blocks:plugin:wisesync && npm run build:blocks:theme:papersync && npm run i18n",
+    "build:linux": "npm run build:blocks:plugin:wisesync && npm run build:blocks:theme:papersync && npm run i18n:linux",
     "lint": "node -e \"const {execSync} = require('child_process'); ['wp:lint:js:wisesync', 'wp:lint:js:papersync', 'wp:lint:css:wisesync', 'wp:lint:css:papersync', 'wp:lint:pkg-json:papersync', 'wp:lint:pkg-json:wisesync', 'wp:lint:md:docs:papersync', 'wp:lint:md:docs:wisesync', 'lint:css:wisesync', 'lint:css:papersync', 'lint:js:wisesync', 'lint:js:papersync', 'wp:phpcs'].forEach(cmd => { try { execSync('npm run ' + cmd, {stdio: 'inherit'}); } catch(e) { console.log('Error in ' + cmd + ', continuing...'); } });\"",
     "lint:fix": "node -e \"const {exec} = require('child_process'); const commands = ['wp:lint:js:fix:wisesync', 'wp:lint:js:fix:papersync', 'wp:lint:css:fix:wisesync', 'wp:lint:css:fix:papersync', 'wp:lint:pkg-json:fix:papersync', 'wp:lint:pkg-json:fix:wisesync', 'wp:lint:md:docs:fix:papersync', 'wp:lint:md:docs:fix:wisesync', 'lint:css:fix:wisesync', 'lint:css:fix:papersync', 'lint:js:fix:wisesync', 'lint:js:fix:papersync', 'wp:phpcs:fix']; let running = commands.length; commands.forEach(cmd => { console.log('Starting: ' + cmd); const proc = exec('npm run ' + cmd, (error, stdout, stderr) => { console.log('Output from ' + cmd + ':\\n' + stdout); if (stderr) console.error('Errors from ' + cmd + ':\\n' + stderr); running--; if (running === 0) console.log('All processes completed'); }); });\"",
     "build:blocks:plugin:wisesync": "wp-scripts build --config ./node_modules/@wordpress/scripts/config/webpack.config.js --webpack-src-dir=./plugins/wisesync/blocks/src --output-path=./plugins/wisesync/blocks/build",
@@ -42,12 +44,14 @@
     "lint:css:fix:papersync": "stylelint ./themes/papersync/**/*.{css,scss} --fix",
     "lint:js:fix:wisesync": "eslint ./plugins/wisesync/**/*.{js,jsx} --fix",
     "lint:js:fix:papersync": "eslint ./themes/papersync/**/*.{js,jsx} --fix",
-    "wp:phpcs": "php ./vendor/bin/phpcs . -d memory_limit=1024M",
-    "wp:phpcs:fix": "php ./vendor/bin/phpcbf . -d memory_limit=1024M",
-    "i18n:linux": "node ./build/i18n.mjs --linux",
-    "i18n": "node ./build/i18n.mjs"
+    "wp:phpcs": "php ./vendor/bin/phpcs ./plugins/wisesync -d memory_limit=1024M && php ./vendor/bin/phpcs ./themes/papersync -d memory_limit=1024M",
+    "wp:phpcs:fix": "php ./vendor/bin/phpcbf ./plugins/wisesync -d memory_limit=1024M && php ./vendor/bin/phpcbf ./themes/papersync -d memory_limit=1024M",
+    "i18n": "node -e \"const execSync=require('child_process').execSync;const fs=require('fs');const path=require('path');const isLinux=process.env.IS_LINUX === 'true';const WP_CLI='php wp-cli.phar';console.log(`Using WP_CLI command: ${WP_CLI}`);const PLUGIN_PATH='./plugins/wisesync';const PLUGIN_DOMAIN='wisesync';const THEME_PATH='./themes/papersync';const THEME_DOMAIN='papersync';function executeCommand(command){console.log(`\\x1b[36mExecuting: ${command}\\x1b[0m`);try{const output=execSync(command,{encoding:'utf8'});console.log(`\\x1b[32mSuccess:\\x1b[0m ${output}`);return true;}catch(error){console.error(`\\x1b[31mError executing command:\\x1b[0m ${error.message}`);return false;}}function ensureDirExists(dirPath){if(!fs.existsSync(dirPath)){console.log(`Creating directory: ${dirPath}`);fs.mkdirSync(dirPath,{recursive:true});}}console.log('\\x1b[33m======== Starting WordPress i18n Build Process ========\\x1b[0m');ensureDirExists(`${PLUGIN_PATH}/languages`);ensureDirExists(`${THEME_PATH}/languages`);console.log('\\n\\x1b[33m>> Generating POT files...\\x1b[0m');executeCommand(`${WP_CLI} i18n make-pot ${PLUGIN_PATH} ${PLUGIN_PATH}/languages/${PLUGIN_DOMAIN}.pot --domain=${PLUGIN_DOMAIN}`);executeCommand(`${WP_CLI} i18n make-pot ${THEME_PATH} ${THEME_PATH}/languages/${THEME_DOMAIN}.pot --domain=${THEME_DOMAIN}`);console.log('\\n\\x1b[33m>> Updating PO files...\\x1b[0m');executeCommand(`${WP_CLI} i18n update-po ${PLUGIN_PATH}/languages/${PLUGIN_DOMAIN}.pot ${PLUGIN_PATH}/languages/`);executeCommand(`${WP_CLI} i18n update-po ${THEME_PATH}/languages/${THEME_DOMAIN}.pot ${THEME_PATH}/languages/`);console.log('\\n\\x1b[33m>> Generating JSON translation files for JavaScript...\\x1b[0m');executeCommand(`${WP_CLI} i18n make-json ${PLUGIN_PATH}/languages/`);executeCommand(`${WP_CLI} i18n make-json ${THEME_PATH}/languages/`);console.log('\\n\\x1b[33m>> Generating MO files...\\x1b[0m');executeCommand(`${WP_CLI} i18n make-mo ${PLUGIN_PATH}/languages/`);executeCommand(`${WP_CLI} i18n make-mo ${THEME_PATH}/languages/`);console.log('\\n\\x1b[33m======== Translation Build Process Complete ========\\x1b[0m');\"",
+    "i18n:linux": "node -e \"const execSync=require('child_process').execSync;const fs=require('fs');const path=require('path');const WP_CLI='wp';console.log('Using WP_CLI command: ' + WP_CLI);const PLUGIN_PATH='./plugins/wisesync';const PLUGIN_DOMAIN='wisesync';const THEME_PATH='./themes/papersync';const THEME_DOMAIN='papersync';function executeCommand(command){console.log('Executing: ' + command);try{const output=execSync(command,{encoding:'utf8'});console.log('Success: ' + output);return true;}catch(error){console.error('Error executing command: ' + error.message);return false;}}function ensureDirExists(dirPath){if(!fs.existsSync(dirPath)){console.log('Creating directory: ' + dirPath);fs.mkdirSync(dirPath,{recursive:true});}}console.log('======== Starting WordPress i18n Build Process ========');ensureDirExists(PLUGIN_PATH + '/languages');ensureDirExists(THEME_PATH + '/languages');console.log('>> Generating POT files...');executeCommand(WP_CLI + ' i18n make-pot ' + PLUGIN_PATH + ' ' + PLUGIN_PATH + '/languages/' + PLUGIN_DOMAIN + '.pot --domain=' + PLUGIN_DOMAIN);executeCommand(WP_CLI + ' i18n make-pot ' + THEME_PATH + ' ' + THEME_PATH + '/languages/' + THEME_DOMAIN + '.pot --domain=' + THEME_DOMAIN);console.log('>> Updating PO files...');executeCommand(WP_CLI + ' i18n update-po ' + PLUGIN_PATH + '/languages/' + PLUGIN_DOMAIN + '.pot ' + PLUGIN_PATH + '/languages/');executeCommand(WP_CLI + ' i18n update-po ' + THEME_PATH + '/languages/' + THEME_DOMAIN + '.pot ' + THEME_PATH + '/languages/');console.log('>> Generating JSON translation files for JavaScript...');executeCommand(WP_CLI + ' i18n make-json ' + PLUGIN_PATH + '/languages/');executeCommand(WP_CLI + ' i18n make-json ' + THEME_PATH + '/languages/');console.log('>> Generating MO files...');executeCommand(WP_CLI + ' i18n make-mo ' + PLUGIN_PATH + '/languages/');executeCommand(WP_CLI + ' i18n make-mo ' + THEME_PATH + '/languages/');console.log('======== Translation Build Process Complete ========');\""
   },
   "devDependencies": {
+    "@prettier/plugin-php": "^0.22.4",
+    "@prettier/plugin-xml": "^3.4.1",
     "@wordpress/annotations": "^3.22.0",
     "@wordpress/block-directory": "^5.22.0",
     "@wordpress/block-library": "^9.22.0",
@@ -59,6 +63,7 @@
     "@wordpress/edit-widgets": "^6.22.0",
     "@wordpress/format-library": "^5.22.0",
     "@wordpress/list-reusable-blocks": "^5.22.0",
-    "@wordpress/nux": "^9.22.0"
+    "@wordpress/nux": "^9.22.0",
+    "prettier": "^3.5.3"
   }
 }

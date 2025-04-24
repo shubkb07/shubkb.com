@@ -9,13 +9,11 @@
 		<exclude name="Squiz.Commenting.FileComment.Missing"/>
 	</rule>
 	<file>.</file>
+	<rule ref="WordPress-VIP-Go"/>
 	<rule ref="WordPress.WP.I18n">
 		<properties>
 			<property name="text_domain" type="array">
 				<!-- List of text domains used in your plugin and theme -->
-				<element value="shubkbPlugin" />
-				<element value="shubkbTheme" />
-				<element value="webauthn-login" />
 				<element value="wisesync" />
 				<element value="papersync" />
 			</property>
@@ -32,24 +30,17 @@
 	<arg value="s"/>
 
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/.temp/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>.github/</exclude-pattern>
 	<exclude-pattern>*/cache/*</exclude-pattern>
 	<exclude-pattern>*/uploads/*</exclude-pattern>
-	<exclude-pattern>*/wflogs/*</exclude-pattern>
 	<exclude-pattern>*/.git/*</exclude-pattern>
-	<exclude-pattern>*/wp-rocket-config/*</exclude-pattern>
-	<exclude-pattern>*/advanced-cache.php</exclude-pattern>
 	<exclude-pattern>*/themes/index.php</exclude-pattern>
 	<exclude-pattern>*/plugins/index.php</exclude-pattern>
 	<exclude-pattern>*/index.php</exclude-pattern>
-	<exclude-pattern>plugins/code-block-pro/</exclude-pattern>
 	<exclude-pattern>plugins/google-site-kit/</exclude-pattern>
-	<exclude-pattern>plugins/wordfence/</exclude-pattern>
-	<exclude-pattern>plugins/wordpress-seo/</exclude-pattern>
 	<exclude-pattern>plugins/wp-consent-api/</exclude-pattern>
-	<exclude-pattern>plugins/wp-dark-mode/</exclude-pattern>
-	<exclude-pattern>plugins/wp-mail-smtp/</exclude-pattern>
 	<exclude-pattern>plugins/wp-rocket/</exclude-pattern>
 	<exclude-pattern>themes/twentytwentyfive/</exclude-pattern>
 </ruleset>
