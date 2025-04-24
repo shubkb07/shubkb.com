@@ -1,0 +1,86 @@
+name: 🔌 Integration Request
+description: Request integration with another plugin or service
+labels: [integration]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an integration! Your ideas help us make our products more versatile.
+
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which component should have this integration? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: textarea
+    id: integration_with
+    attributes:
+      label: What to integrate with
+      description: Which plugin, theme, or service would you like us to integrate with?
+      placeholder: "ex: WooCommerce, Elementor, Advanced Custom Fields, etc."
+    validations:
+      required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: Version of the third-party product
+      description: Which version of the plugin/theme/service should we integrate with?
+      placeholder: "ex: WooCommerce 8.2.1, Elementor Pro 3.15.2, etc."
+
+  - type: textarea
+    id: integration_description
+    attributes:
+      label: Describe the integration
+      description: How should our product integrate with this third-party solution?
+      placeholder: "ex: WiseSync should be able to sync WooCommerce product data including prices, inventory, and custom product attributes."
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Your use case
+      description: How would you use this integration in your projects?
+      placeholder: "ex: I manage an e-commerce site with WooCommerce and need to sync product data between staging and production environments without losing orders."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: business_impact
+    attributes:
+      label: Business Impact
+      description: How important is this integration for your workflow?
+      options:
+        - Nice to have
+        - Would improve efficiency
+        - Would enable new use cases
+        - Critical for my business
+    validations:
+      required: true
+
+  - type: textarea
+    id: integration_details
+    attributes:
+      label: Technical suggestions
+      description: If you have technical knowledge about both systems, please share your suggestions for the integration
+      placeholder: "ex: WooCommerce stores product data in the wp_posts and wp_postmeta tables with specific meta keys for pricing and inventory."
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Current workarounds
+      description: How are you currently handling this without the integration?
+      placeholder: "ex: I'm manually exporting and importing data using CSV files, which is time-consuming and error-prone."
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact information (optional)
+      description: If you'd like to discuss this integration further or help test it
+      placeholder: "ex: email@example.com or @github_username"

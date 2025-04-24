@@ -1,0 +1,105 @@
+name: 🔄 Compatibility Issue
+description: Report conflicts between our products and other plugins/themes
+labels: [compatibility]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a compatibility issue. This helps us improve integration with other tools.
+
+  - type: checkboxes
+    id: our_component
+    attributes:
+      label: Which of our components has compatibility issues? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: WiseSync Plugin Version
+      description: Which version of our plugin are you using? (Leave blank if not applicable)
+      placeholder: "ex: 1.2.3"
+
+  - type: input
+    id: theme_version
+    attributes:
+      label: PaperSync Theme Version
+      description: Which version of our theme are you using? (Leave blank if not applicable)
+      placeholder: "ex: 1.0.2"
+
+  - type: textarea
+    id: conflicting_products
+    attributes:
+      label: Conflicting plugins/themes
+      description: Which other plugins or themes conflict with our product?
+      placeholder: "ex: Plugin Name v2.3.4, Theme Name v1.5.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Describe the compatibility issue
+      description: What happens when both products are active?
+      placeholder: "ex: When WiseSync and Plugin X are both active, the sync process fails with a JavaScript error in the console."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Activate WiseSync plugin
+        2. Activate Plugin X
+        3. Go to Sync Settings
+        4. Click on "Start Sync"
+        5. See error in console
+
+  - type: textarea
+    id: error_messages
+    attributes:
+      label: Error messages
+      description: Include any error messages from PHP logs, JavaScript console, etc.
+      render: shell
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Have you confirmed this is a compatibility issue?
+      description: Please verify that this issue only occurs when both products are active
+      options:
+        - label: The issue disappears when one of the conflicting products is deactivated
+          required: true
+
+  - type: input
+    id: wp_version
+    attributes:
+      label: WordPress Version
+      placeholder: "ex: 6.5.2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Impact of this conflict
+      options:
+        - Minor (creates warnings but functionality works)
+        - Moderate (partial functionality broken)
+        - Major (significant features don't work)
+        - Critical (site crashes or admin access broken)
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots showing the issue
+      placeholder: "Drag and drop images here"

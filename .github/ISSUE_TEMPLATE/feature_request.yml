@@ -1,23 +1,29 @@
 name: 💡 Feature Request
-description: Suggest an idea for WiseSync
+description: Suggest an idea for WiseSync plugin or PaperSync theme
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea! Let's make WiseSync even better 💪
+        Thanks for the idea! Let's make our project even better 💪
 
-  - type: input
-    id: plugin_version
+  - type: checkboxes
+    id: component
     attributes:
-      label: Plugin Version (if relevant)
-      placeholder: "ex: 1.2.3"
+      label: Which components is this feature for? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
 
   - type: textarea
     id: feature_desc
     attributes:
       label: What feature do you want?
       placeholder: "ex: Add a bulk sync option for all CPTs."
+    validations:
+      required: true
 
   - type: textarea
     id: benefit
@@ -25,9 +31,44 @@ body:
       label: Why is it useful?
       description: Explain how this helps your workflow or others.
       placeholder: "It will save time and reduce manual syncing."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Have you tried any workarounds or alternative approaches?
+      placeholder: "ex: I've been manually syncing each CPT one by one, but it takes too much time."
+
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact of this feature
+      description: How would you rate the importance of this feature?
+      options:
+        - Nice to have (minor improvement)
+        - Helpful (improves efficiency)
+        - Important (enables new workflows)
+        - Critical (blocking my work without it)
+
+  - type: textarea
+    id: implementation_idea
+    attributes:
+      label: Implementation ideas
+      description: If you have ideas on how this feature could be implemented, share them here.
+      placeholder: "ex: This could be added as a new button in the main dashboard that allows selecting multiple CPTs at once."
 
   - type: textarea
     id: theme_plugin_context
     attributes:
-      label: Are specific themes/plugins involved?
-      placeholder: "ex: Useful with WPML, Elementor, etc."
+      label: Are specific WordPress themes/plugins involved?
+      description: List any third-party themes or plugins that would interact with this feature
+      placeholder: "ex: Useful with WooCommerce, Elementor, etc."
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Mockups or examples
+      description: If you have any sketches, screenshots of similar features, or other visual aids, add them here.
+      placeholder: "Drag and drop images here"

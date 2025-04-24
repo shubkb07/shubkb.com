@@ -1,5 +1,5 @@
 name: 🐛 Bug Report
-description: Report an issue so we can fix it
+description: Report an issue in WiseSync plugin or PaperSync theme
 labels: [bug]
 body:
   - type: markdown
@@ -7,17 +7,37 @@ body:
       value: |
         Thanks for reporting a bug! Please fill out the following so we can help.
 
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which components are affected? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
   - type: input
     id: plugin_version
     attributes:
-      label: Plugin Version
+      label: WiseSync Plugin Version
+      description: Which version of the WiseSync plugin are you using? (Leave blank if not applicable)
       placeholder: "ex: 1.2.3"
+
+  - type: input
+    id: theme_version
+    attributes:
+      label: PaperSync Theme Version
+      description: Which version of the PaperSync theme are you using? (Leave blank if not applicable)
+      placeholder: "ex: 1.0.2"
 
   - type: input
     id: wp_version
     attributes:
       label: WordPress Version
       placeholder: "ex: 6.5.2"
+    validations:
+      required: true
 
   - type: textarea
     id: bug_description
@@ -25,6 +45,15 @@ body:
       label: Describe the bug
       description: What is happening? Be as detailed as possible.
       placeholder: "ex: When I click the sync button, nothing happens."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+      placeholder: "ex: The sync process should start and show a progress indicator."
 
   - type: textarea
     id: steps
@@ -34,20 +63,70 @@ body:
         1. Go to...
         2. Click on...
         3. See the error
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating_system
+    attributes:
+      label: Operating System
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Android
+        - iOS
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: other_os
+    attributes:
+      label: If you selected "Other" above, please specify your OS
+      placeholder: "ex: FreeBSD, ChromeOS, etc."
 
   - type: textarea
     id: themes_plugins
     attributes:
-      label: Related themes or plugins
-      placeholder: "ex: Using Astra theme and WooCommerce plugin"
+      label: Related third-party themes or plugins
+      description: List any other WordPress themes or plugins that might be related to this issue
+      placeholder: "ex: Using WooCommerce 8.2.1 and Elementor Pro 3.15.2"
 
-  - type: dropdown
+  - type: checkboxes
     id: browser
     attributes:
       label: Browser
+      description: Select the browser(s) where you're experiencing the issue
       options:
-        - Chrome
-        - Firefox
-        - Safari
-        - Edge
-        - Other
+        - label: Chrome
+        - label: Firefox
+        - label: Safari
+        - label: Edge
+        - label: Other
+
+  - type: input
+    id: other_browser
+    attributes:
+      label: If you selected "Other" above, please specify the browser
+      placeholder: "ex: Opera, Brave, etc."
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+      placeholder: "Drag and drop images here"
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code.
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Add any other context about the problem here.
