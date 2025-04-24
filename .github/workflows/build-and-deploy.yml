@@ -340,6 +340,13 @@ jobs:
             rm -rf themes/papersync
             cp -r ../themes/papersync themes/
           fi
+
+          echo "Syncing other changes to wordpress-sync repo..."
+          rm -rf CODE_OF_CONDUCT.md LICENSE.md README.md CONTRIBUTING.md SECURITY.md SUPPORT.md
+          # Copy documentation files from the main repo
+          cp -f ../CODE_OF_CONDUCT.md ../LICENSE.md ../README.md ../CONTRIBUTING.md ../SECURITY.md ../SUPPORT.md ./
+
+          echo "📦 Preparing wordpress-sync repo for deployment..."
           
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
