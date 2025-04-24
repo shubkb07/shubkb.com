@@ -263,62 +263,70 @@ jobs:
           echo "🚀 All done! Site deployed to $TARGET_BRANCH 🎉"
 
       # New steps for additional repository pushes when on master branch with wisesync/papersync changes
-      - name: 🔑 Set up SSH for deployments
-        if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
-        uses: webfactory/ssh-agent@v0.7.0
+      - name: 🔄 Checkout wisesync repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
+        uses: actions/checkout@v3
         with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-
-      - name: 🔄 Push wisesync to dedicated repo
+          repository: shubkb07/wisesync
+          path: wisesync_repo
+          token: ${{ secrets.GH_PAT }}
+          
+      - name: 🔄 Update wisesync repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
         run: |
-          echo "🛫 Preparing wisesync for deployment to dedicated repo..."
-          mkdir -p wisesync_deploy
-          cd wisesync_deploy
-          git init
+          echo "🛫 Updating wisesync in dedicated repo..."
+          # Clear the directory content but keep .git folder
+          find wisesync_repo -mindepth 1 -not -path "wisesync_repo/.git*" -delete
+          # Copy the latest content
+          cp -r plugins/wisesync/* wisesync_repo/
+          cd wisesync_repo
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
-          cp -r ../plugins/wisesync/* .
           git add --all
-          git commit -m "Update wisesync from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "Nothing new to push for wisesync!"
-          git remote add origin git@github.com:shubkb07/wisesync.git
-          git push -f origin master
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for wisesync"
+          git push
           cd ..
           echo "✅ Pushed wisesync to dedicated repo"
 
-      - name: 🔄 Push papersync to dedicated repo
+      - name: 🔄 Checkout papersync repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/papersync
+          path: papersync_repo
+          token: ${{ secrets.GH_PAT }}
+          
+      - name: 🔄 Update papersync repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
         run: |
-          echo "🛫 Preparing papersync for deployment to dedicated repo..."
-          mkdir -p papersync_deploy
-          cd papersync_deploy
-          git init
+          echo "🛫 Updating papersync in dedicated repo..."
+          # Clear the directory content but keep .git folder
+          find papersync_repo -mindepth 1 -not -path "papersync_repo/.git*" -delete
+          # Copy the latest content
+          cp -r themes/papersync/* papersync_repo/
+          cd papersync_repo
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
-          cp -r ../themes/papersync/* .
           git add --all
-          git commit -m "Update papersync from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "Nothing new to push for papersync!"
-          git remote add origin git@github.com:shubkb07/papersync.git
-          git push -f origin master
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for papersync"
+          git push
           cd ..
           echo "✅ Pushed papersync to dedicated repo"
 
-      - name: 🔄 Push to wordpress-sync repo
+      - name: 🔄 Checkout wordpress-sync repo
+        if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/wordpress-sync
+          path: wordpress_sync_repo
+          token: ${{ secrets.GH_PAT }}
+          
+      - name: 🔄 Update wordpress-sync repo
         if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
         run: |
-          echo "🛫 Preparing wordpress-sync deployment..."
-          mkdir -p wordpress_sync_deploy
-          cd wordpress_sync_deploy
-          git init
-          git config user.name "Shubham Kumar Bansal"
-          git config user.email "shub@shubkb.com"
+          echo "🛫 Updating wordpress-sync repo..."
+          cd wordpress_sync_repo
           
-          # Try to fetch existing content
-          git remote add origin git@github.com:shubkb07/wordpress-sync.git
-          git fetch origin master || echo "No existing repository or branch"
-          git checkout master || git checkout -b master
-          
-          # Add/update wisesync and papersync
           if [ "${{ steps.changes.outputs.wisesync_changed }}" == "true" ]; then
             echo "Adding/updating wisesync plugin..."
             mkdir -p plugins
@@ -333,8 +341,10 @@ jobs:
             cp -r ../themes/papersync themes/
           fi
           
+          git config user.name "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
           git add --all
-          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "Nothing new to push for wordpress-sync!"
-          git push origin master
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for wordpress-sync"
+          git push
           cd ..
           echo "✅ Pushed to wordpress-sync repo"
