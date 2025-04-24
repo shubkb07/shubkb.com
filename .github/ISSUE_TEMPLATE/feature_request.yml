@@ -5,29 +5,29 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea! Let’s make WiseSync even better 💪
+        Thanks for the idea! Let's make WiseSync even better 💪
 
   - type: input
     id: plugin_version
     attributes:
       label: Plugin Version (if relevant)
-      placeholder: ex: 1.2.3
+      placeholder: "ex: 1.2.3"
 
   - type: textarea
     id: feature_desc
     attributes:
       label: What feature do you want?
-      placeholder: ex: Add a bulk sync option for all CPTs.
+      placeholder: "ex: Add a bulk sync option for all CPTs."
 
   - type: textarea
     id: benefit
     attributes:
       label: Why is it useful?
       description: Explain how this helps your workflow or others.
-      placeholder: It will save time and reduce manual syncing.
+      placeholder: "It will save time and reduce manual syncing."
 
   - type: textarea
     id: theme_plugin_context
     attributes:
       label: Are specific themes/plugins involved?
-      placeholder: ex: Useful with WPML, Elementor, etc.
+      placeholder: "ex: Useful with WPML, Elementor, etc."
