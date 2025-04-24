@@ -34,16 +34,6 @@ msgstr ""
 msgid "Shubham Kumar Bansal <shub@shubkb.com>"
 msgstr ""
 
-#: includes/blocks/class-cookie-banner-block.php:209
-#: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:394
-msgid "Cookie Settings"
-msgstr ""
-
-#: includes/blocks/class-cookie-banner-block.php:210
-msgid "Close"
-msgstr ""
-
 #: includes/functions/block.php:26
 msgid "Sync Blocks"
 msgstr ""
