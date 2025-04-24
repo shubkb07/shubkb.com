@@ -1,0 +1,79 @@
+name: 🎨 UI/UX Feedback
+description: Suggest improvements to the user interface or experience
+labels: [design]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping us improve the design and usability of our products!
+
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which component's UI needs improvement? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_issue
+    attributes:
+      label: What's the current UX/UI issue?
+      description: Describe what aspect of the interface or experience could be improved
+      placeholder: "ex: The sync settings page is confusing because there are too many options on one screen without clear grouping."
+    validations:
+      required: true
+
+  - type: textarea
+    id: improvement
+    attributes:
+      label: Suggested improvement
+      description: How do you think we should improve this aspect of the UI/UX?
+      placeholder: "ex: Group the sync settings into tabs for different content types, with clear visual hierarchy."
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefit
+    attributes:
+      label: How would this improve the user experience?
+      description: Explain the benefits of implementing this change
+      placeholder: "ex: Users would be able to find relevant settings faster and understand the relationships between different options."
+
+  - type: textarea
+    id: screenshots_current
+    attributes:
+      label: Screenshots of current UI
+      description: If applicable, add screenshots showing the current interface
+      placeholder: "Drag and drop images here"
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or examples
+      description: If you have sketches, wireframes, or examples from other products, add them here
+      placeholder: "Drag and drop images here"
+
+  - type: dropdown
+    id: user_impact
+    attributes:
+      label: User Impact
+      description: How many users do you think this issue affects?
+      options:
+        - Very few users (edge case)
+        - Some users (specific workflows)
+        - Many users (common workflows)
+        - All users (core functionality)
+
+  - type: dropdown
+    id: expertise
+    attributes:
+      label: Your design background
+      description: Do you have experience in UI/UX design?
+      options:
+        - I'm a professional designer
+        - I have some design experience
+        - I'm a developer with UI interest
+        - I'm an end user with feedback

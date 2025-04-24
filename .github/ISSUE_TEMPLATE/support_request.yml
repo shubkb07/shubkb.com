@@ -1,0 +1,104 @@
+name: 🆘 Support Request
+description: Request help when the plugin or theme breaks your site
+labels: [support]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reaching out! We'll help you get your site back on track.
+
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which component is causing issues? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: input
+    id: plugin_version
+    attributes:
+      label: WiseSync Plugin Version
+      description: Which version of the WiseSync plugin are you using? (Leave blank if not applicable)
+      placeholder: "ex: 1.2.3"
+
+  - type: input
+    id: theme_version
+    attributes:
+      label: PaperSync Theme Version
+      description: Which version of the PaperSync theme are you using? (Leave blank if not applicable)
+      placeholder: "ex: 1.0.2"
+
+  - type: input
+    id: wp_version
+    attributes:
+      label: WordPress Version
+      placeholder: "ex: 6.5.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Describe the issue
+      description: What's happening on your site?
+      placeholder: "ex: After activating WiseSync, my homepage shows a white screen of death."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_before
+    attributes:
+      label: What happened just before the issue?
+      description: Did you make any changes, updates, or installations before the issue occurred?
+      placeholder: "ex: I updated WiseSync to version 1.2.3 and then activated the content sync feature."
+
+  - type: dropdown
+    id: site_access
+    attributes:
+      label: Site Access
+      description: Can you still access your WordPress admin?
+      options:
+        - Yes, admin works fine
+        - Yes, but with errors/warnings
+        - No, admin shows errors
+        - No, white screen of death
+    validations:
+      required: true
+
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: Hosting Environment
+      options:
+        - Shared hosting
+        - VPS/Dedicated server
+        - Managed WordPress (WP Engine, Kinsta, etc.)
+        - Local development
+        - Other
+
+  - type: textarea
+    id: error_logs
+    attributes:
+      label: Error logs
+      description: If available, please paste any relevant error logs or messages
+      render: shell
+
+  - type: textarea
+    id: plugins_active
+    attributes:
+      label: Active plugins
+      description: Please list all active plugins on your site
+      placeholder: "ex: WooCommerce, Elementor Pro, Yoast SEO, etc."
+
+  - type: checkboxes
+    id: attempted_fixes
+    attributes:
+      label: I have already tried
+      options:
+        - label: Deactivating all other plugins
+        - label: Switching to a default WordPress theme
+        - label: Clearing browser cache/cookies
+        - label: Clearing server/plugin caches

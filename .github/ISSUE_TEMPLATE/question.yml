@@ -1,0 +1,47 @@
+name: ❓ Question
+description: Ask a question about using WiseSync plugin or PaperSync theme
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for your interest! We're happy to help with your questions.
+
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which component is your question about? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know about using our plugin or theme?
+      placeholder: "ex: How do I configure the sync options for custom post types?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any relevant context that might help us answer your question
+      placeholder: "ex: I'm trying to sync my custom product post types between staging and production sites."
+
+  - type: input
+    id: wp_version
+    attributes:
+      label: WordPress Version
+      placeholder: "ex: 6.5.2"
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Information about your setup that might be relevant to your question
+      placeholder: "ex: Using WooCommerce 8.2.1, Elementor Pro 3.15.2, and a child theme"

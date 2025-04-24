@@ -7,14 +7,13 @@ body:
       value: |
         Thanks for the idea! Let's make our project even better 💪
 
-  - type: dropdown
+  - type: checkboxes
     id: component
     attributes:
-      label: Which component is this feature for?
+      label: Which components is this feature for? (select all that apply)
       options:
-        - WiseSync plugin
-        - PaperSync theme
-        - Both
+        - label: WiseSync plugin
+        - label: PaperSync theme
     validations:
       required: true
 

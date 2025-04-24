@@ -1,0 +1,71 @@
+name: 🌐 Translation Issue
+description: Report issues with translations or request a new language
+labels: [i18n]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve our translations! Your input helps us reach a global audience.
+
+  - type: checkboxes
+    id: component
+    attributes:
+      label: Which component has translation issues? (select all that apply)
+      options:
+        - label: WiseSync plugin
+        - label: PaperSync theme
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: What type of translation issue is this?
+      options:
+        - Incorrect translation
+        - Missing translation
+        - Request for new language
+        - Inconsistent terminology
+        - Contextual issue
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      description: Which language is affected?
+      placeholder: "ex: Spanish (es_ES), French (fr_FR), etc."
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue_description
+    attributes:
+      label: Describe the issue
+      description: Please provide details about the translation problem
+      placeholder: "ex: The term 'sync' is inconsistently translated throughout the Spanish version - sometimes as 'sincronizar' and sometimes as 'sincronización'"
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested_translation
+    attributes:
+      label: Suggested translation
+      description: If you're proposing a correction, please provide your suggested translation
+      placeholder: "ex: 'Sync' should always be translated as 'sincronizar' (verb) or 'sincronización' (noun)"
+
+  - type: input
+    id: translator_info
+    attributes:
+      label: Your language expertise
+      description: Please share your background with this language (native speaker, professional translator, etc.)
+      placeholder: "ex: Native Spanish speaker, professional translator"
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots showing the translation issue
+      placeholder: "Drag and drop images here"
