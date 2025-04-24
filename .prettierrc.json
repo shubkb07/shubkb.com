@@ -9,26 +9,5 @@
   "arrowParens": "always",
   "spaceInParens": true,
   "endOfLine": "lf",
-  "plugins": ["@wordpress/prettier-config",
-  "@prettier/plugin-php",
-  ""
-],
-  "overrides": [
-    {
-      "files": "*.php",
-      "options": {
-        "printWidth": 120,
-        "tabWidth": 4,
-        "phpVersion": "8.0",
-        "singleQuote": true,
-        "braceStyle": "1tbs"
-      }
-    },
-    {
-      "files": "*.scss",
-      "options": {
-        "singleQuote": true
-      }
-    }
-  ]
+  "plugins": ["@wordpress/prettier-config"]
 }
