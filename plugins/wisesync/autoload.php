@@ -30,8 +30,6 @@ foreach ( $functions as $function_file ) {
  * @param string $class_name The name of the class to autoload.
  */
 function sync_autoload( $class_name ) {
-	// Check if the class name starts with the plugin prefix.
-	error_log( 'Class name: ' . $class_name ); // Debugging line.
 
 	$class_prefix = 'Sync\\';
 	if ( strpos( $class_name, $class_prefix ) !== 0 ) {
@@ -47,8 +45,6 @@ function sync_autoload( $class_name ) {
 	// Replace underscores with dashes.
 	$class_name = str_replace( '_', '-', $class_name );
 
-	error_log( 'Class name after processing: ' . $class_name ); // Debugging line.
-
 	// Check if class file exists.
 	if ( file_exists( WP_PLUGIN_DIR . 'wisesync/includes/classes/class-' . $class_name . '.php' ) ) {
 		$class_file = WP_PLUGIN_DIR . 'wisesync/includes/classes/class-' . $class_name . '.php';
@@ -57,7 +53,7 @@ function sync_autoload( $class_name ) {
 	} else {
 		return; // Class file does not exist.
 	}
-	error_log( 'Class file: ' . $class_file ); // Debugging line.
+
 	require_once $class_file;
 }
 

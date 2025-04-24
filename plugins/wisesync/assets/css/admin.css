@@ -456,7 +456,6 @@
   
   /* Responsive styles */
   @media screen and (max-width: 782px) {
-
 	.sync-container {
 	  margin: 0 -10px;
 	}
@@ -494,14 +493,12 @@
   }
   
   @media screen and (min-width: 783px) {
-
 	.sync-tagline {
 	  display: inline;
 	}
   }
   
   @media screen and (min-width: 1200px) {
-
 	.sync-sidebar {
 	  width: 280px;
 	}

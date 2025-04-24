@@ -34,7 +34,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	  document.addEventListener( 'click', function( e ) {
 			if ( sidebar && sidebar.classList.contains( 'sync-mobile-open' ) ) {
 		  const clickedInside = e.target.closest( '#sync-sidebar' ) || e.target.closest( '#sync-mobile-toggle' );
-		  if ( ! clickedInside ) {
+		  if ( !clickedInside ) {
 					sidebar.classList.remove( 'sync-mobile-open' );
 		  }
 			}
@@ -99,7 +99,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		  if ( pageTitle ) {
 					const menuText = this.closest( '.sync-menu-item' ).querySelector( '.sync-menu-text' ).textContent;
 					const submenuText = this.textContent;
-					pageTitle.textContent = `${ menuText } - ${ submenuText }`;
+					pageTitle.textContent = `${menuText} - ${submenuText}`;
 		  }
 			} );
 	  } );
