@@ -45,9 +45,17 @@ class Sync_Settings {
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
+		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
 	}
 
-	public function add_menu( $menu_slug, $menu_name, $callback = false, $icon_url = '', $for_sub = false, $position = 0 ) {}
+	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site'  ) {
+		$this->menus[ $menu_slug ] = array(
+			'menu_name' => $menu_name,
+			'position' => $position,
+			'create_sync_menu' => $create_sync_menu,
+			'settings_level' => $settings_level,
+		);
+	}
 
 	/**
 	 * Initialize settings.
@@ -55,16 +63,40 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
+		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus = array(
 			'sync' => array(
-				'menu_name' => 'Sync',
-				'callback'  => array( $this, 'settings_page' ),
-				'position' => 0,
+				'menu_name' => 'Sync Home',
+				'position' => -1,
+				'create_sync_menu' => true,
+				'settings_level' => 'both',
 			),
 		);
-		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
-		add_submenu_page( 'sync', 'Sync Home', 'Settings', 'manage_options', 'sync', array( $this, 'settings_page' ) );
-		add_submenu_page( 'sync', 'Sync Settings', 'Settings 2', 'manage_options', 'sync-settings-menu-2', array( $this, 'settings_page' ) );
+		$this->init_settings_pages();
+	}
+
+	/**
+	 * Initialize settings pages.
+	 *
+	 * @since 1.0.0
+	 */
+	private function init_settings_pages() {
+		foreach ( $this->menus as $menu_slug => $menu ) {
+			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
+				return; // Only show on site admin.
+			} elseif ( is_network_admin() && ! in_array( $menu['settings_level'], array( 'network', 'both' ), true ) ) {
+				return; // Only show on network admin.
+			}
+			add_submenu_page(
+				'sync',
+				$menu['menu_name'],
+				$menu['menu_name'],
+				'manage_options',
+				$menu_slug,
+				array( $this, 'settings_page' ),
+				$menu['position']
+			);
+		}
 	}
 
 	/**
