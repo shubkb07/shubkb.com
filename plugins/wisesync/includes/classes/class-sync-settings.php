@@ -16,6 +16,28 @@ namespace Sync;
  * @since 1.0.0
  */
 class Sync_Settings {
+
+	/**
+	 * Menus array.
+	 *
+	 * @var array
+	 */
+	private $menus = array();
+
+	/**
+	 * Forms array.
+	 *
+	 * @var array
+	 */
+	private $forms = array();
+
+	/**
+	 * Settings array.
+	 *
+	 * @var array
+	 */
+	private $settings = array();
+
 	/**
 	 * Sync Settings constructor.
 	 *
@@ -25,14 +47,24 @@ class Sync_Settings {
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 	}
 
+	public function add_menu( $menu_slug, $menu_name, $callback = false, $icon_url = '', $for_sub = false, $position ) {}
+
 	/**
 	 * Initialize settings.
 	 *
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
-		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync-settings-menu', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
-		add_submenu_page( 'sync-settings-menu', 'Sync Settings', 'Settings', 'manage_options', 'sync-settings-menu', array( $this, 'settings_page' ) );
+		$this->menus = array(
+			'sync' => array(
+				'menu_name' => 'Sync',
+				'callback'  => array( $this, 'settings_page' ),
+				'position' => 0,
+			),
+		);
+		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
+		add_submenu_page( 'sync', 'Sync Home', 'Settings', 'manage_options', 'sync', array( $this, 'settings_page' ) );
+		add_submenu_page( 'sync', 'Sync Settings', 'Settings 2', 'manage_options', 'sync-settings-menu-2', array( $this, 'settings_page' ) );
 	}
 
 	/**
@@ -41,6 +73,8 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function settings_page() {
+		global $plugin_page;
+		$sync_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'sync';
 		?>
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
@@ -131,7 +165,7 @@ class Sync_Settings {
 		<span class="sync-dismiss-icon dashicons dashicons-no-alt"></span>
 		</div>
 		<div class="sync-card-content">
-		<h2 class="sync-card-title">Congratulations!</h2>
+		<h2 class="sync-card-title">Congratulations! <?php echo $plugin_page; ?></h2>
 		<p class="sync-highlight">Sync is now activated and ready to work for you.<br>Your sites should be synchronized faster now!</p>
 		<p>To guarantee efficient synchronization, Sync automatically applies best practices for WordPress multi-site management.</p>
 		<p>We also enable options that provide immediate benefits to your workflow.</p>
