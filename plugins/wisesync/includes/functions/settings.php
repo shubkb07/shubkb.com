@@ -40,4 +40,6 @@ function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $cr
     $sync_settings->add_wp_menu( $menu_slug, $menu_name, $position, $create_sync_menu, $settings_level );
 }
 
-sync_add_wp_settings_menu( 'settings', __( 'WiseSync Settings', 'wisesync' ), 10, true, 'site' );
+add_action( 'sync_add_settings_page', function () {
+    sync_add_wp_settings_menu( 'settings', __( 'WiseSync Settings', 'wisesync' ), 10, true, 'site' );
+});
