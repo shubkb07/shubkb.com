@@ -27,6 +27,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	  if ( mobileToggle ) {
 			mobileToggle.addEventListener( 'click', function() {
 		  sidebar.classList.toggle( 'sync-mobile-open' );
+		  document.body.classList.toggle( 'sync-sidebar-open' ); // Prevent body scrolling
 			} );
 	  }
 
@@ -36,6 +37,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		  const clickedInside = e.target.closest( '#sync-sidebar' ) || e.target.closest( '#sync-mobile-toggle' );
 		  if ( !clickedInside ) {
 					sidebar.classList.remove( 'sync-mobile-open' );
+					document.body.classList.remove( 'sync-sidebar-open' ); // Restore body scrolling
 		  }
 			}
 	  } );
