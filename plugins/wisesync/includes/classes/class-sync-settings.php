@@ -49,6 +49,27 @@ class Sync_Settings {
 	}
 
 	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site'  ) {
+
+		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
+			return;
+		}
+	
+		if ( empty( $menu_name ) || ! is_string( $menu_name ) ) {
+			return;
+		}
+	
+		if ( ! is_numeric( $position ) || $position < 0 ) {
+			return;
+		}
+	
+		if ( ! is_bool( $create_sync_menu ) ) {
+			return;
+		}
+	
+		if ( ! in_array( $settings_level, array( 'site', 'network', 'both' ), true ) ) {
+			return;
+		}
+
 		$this->menus[ $menu_slug ] = array(
 			'menu_name' => $menu_name,
 			'position' => $position,

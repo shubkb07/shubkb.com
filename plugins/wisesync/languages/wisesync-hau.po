@@ -54,6 +54,6 @@ msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
 msgstr ""
 
-#: includes/functions/settings.php:37
+#: includes/functions/settings.php:41
 msgid "WiseSync Settings"
 msgstr ""
