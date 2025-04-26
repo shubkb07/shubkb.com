@@ -47,7 +47,7 @@ class Sync_Settings {
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 	}
 
-	public function add_menu( $menu_slug, $menu_name, $callback = false, $icon_url = '', $for_sub = false, $position ) {}
+	public function add_menu( $menu_slug, $menu_name, $callback = false, $icon_url = '', $for_sub = false, $position = 0 ) {}
 
 	/**
 	 * Initialize settings.
