@@ -49,6 +49,7 @@ class Sync_Settings {
 	}
 
 	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site'  ) {
+		error_log ( 'add_wp_menu called' );
 
 		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
@@ -70,6 +71,8 @@ class Sync_Settings {
 			return;
 		}
 
+		error_log ( 'add_wp_menu added' );
+
 		$this->menus[ $menu_slug ] = array(
 			'menu_name' => $menu_name,
 			'position' => $position,
@@ -84,6 +87,7 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
+		error_log ( 'init_settings_page called' );
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus[ 'sync' ] = array(
 			'menu_name' => 'Sync Home',
@@ -100,6 +104,7 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	private function init_settings_pages() {
+		error_log( 'init_settings_pages called' );
 		foreach ( $this->menus as $menu_slug => $menu ) {
 			error_log( 'Menu slug: ' . print_r( $menu_slug, true ) );
 			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
