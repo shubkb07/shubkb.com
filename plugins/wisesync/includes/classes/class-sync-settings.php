@@ -85,19 +85,12 @@ class Sync_Settings {
 	 */
 	public function init_settings_page() {
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
-
-		// Ensure existing menus are not overwritten
-		if ( empty( $this->menus ) ) {
-			$this->menus = array(
-				'sync' => array(
-					'menu_name' => 'Sync Home',
-					'position' => -1,
-					'create_sync_menu' => true,
-					'settings_level' => 'both',
-				),
-			);
-		}
-
+		$this->menus[ 'sync' ] = array(
+			'menu_name' => 'Sync Home',
+			'position' => -1,
+			'create_sync_menu' => true,
+			'settings_level' => 'both',
+		);
 		$this->init_settings_pages();
 	}
 
@@ -108,6 +101,7 @@ class Sync_Settings {
 	 */
 	private function init_settings_pages() {
 		foreach ( $this->menus as $menu_slug => $menu ) {
+			error_log( 'Menu slug: ' . print_r( $menu_slug, true ) );
 			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
 				return; // Only show on site admin.
 			} elseif ( is_network_admin() && ! in_array( $menu['settings_level'], array( 'network', 'both' ), true ) ) {
