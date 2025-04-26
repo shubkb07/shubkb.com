@@ -8,9 +8,14 @@
  * @since 1.0.0
  */
 
+use Sync\Sync_Settings;
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
+
+// Call settings class.
+$settings = new Sync_Settings();
 
 /**
  * Initialize settings page.
