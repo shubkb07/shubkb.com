@@ -470,7 +470,7 @@
 	
 	.sync-sidebar {
 	  position: fixed;
-	  top: 77px; /* Position exactly below the header */
+	  top: 120px; /* Position exactly below the header */
 	  left: 0;
 	  height: calc(100% - 70px); /* Take full height minus header */
 	  transform: translateX(-100%);
