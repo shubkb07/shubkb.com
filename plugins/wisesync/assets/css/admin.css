@@ -584,3 +584,22 @@
   .admin-color-sunrise .sync-menu-link:hover .dashicons {
 	color: #dd823b;
   }
+
+/* Adjust sidebar in mobile mode to avoid overlapping with the header */
+@media screen and (max-width: 782px) {
+    .sync-sidebar {
+        top: 60px; /* Push the sidebar down to clear the header */
+    }
+
+    .sync-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 100;
+    }
+
+    .sync-content {
+        margin-top: 60px; /* Add margin to avoid content being hidden behind the header */
+    }
+}
