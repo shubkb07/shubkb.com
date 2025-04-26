@@ -465,13 +465,17 @@
 	  display: block;
 	}
 	
+	/* Calculate header height based on logo and padding */
+	.sync-header {
+	  height: 70px; /* Fixed height for consistency */
+	}
+	
 	.sync-sidebar {
 	  position: fixed;
-	  top: 0;
+	  top: 70px; /* Position exactly below the header */
 	  left: 0;
-	  height: 100%;
+	  height: calc(100% - 70px); /* Take full height minus header */
 	  transform: translateX(-100%);
-	  padding-top: 70px; /* Add padding to account for header height */
 	  z-index: 9;
 	  overflow-y: auto;
 	}
@@ -502,6 +506,14 @@
 
 	.sync-tagline {
 	  display: inline;
+	}
+	
+	/* Reset any mobile-specific styles for desktop */
+	.sync-sidebar {
+	  position: relative;
+	  top: auto;
+	  height: auto;
+	  transform: none;
 	}
   }
   
@@ -589,4 +601,3 @@
   .admin-color-sunrise .sync-menu-link:hover .dashicons {
 	color: #dd823b;
   }
-  
