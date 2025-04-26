@@ -592,14 +592,14 @@
     }
 
     .sync-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        z-index: 100;
+        position: relative; /* Restore original position */
+        top: auto;
+        left: auto;
+        width: auto;
+        z-index: auto;
     }
 
     .sync-content {
-        margin-top: 60px; /* Add margin to avoid content being hidden behind the header */
+        margin-top: 0; /* Remove margin added earlier */
     }
 }
