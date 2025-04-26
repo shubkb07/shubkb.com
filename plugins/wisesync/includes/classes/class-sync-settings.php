@@ -90,11 +90,17 @@ class Sync_Settings {
 		error_log ( 'init_settings_page called' );
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus[ 'sync' ] = array(
-			'menu_name' => 'Sync Home',
+			'menu_name' => 'Sync',
 			'position' => -1,
 			'create_sync_menu' => true,
 			'settings_level' => 'both',
 		);
+
+		/**
+		 * Sync Settings Page Hook
+		 */
+		do_action( 'sync_add_settings_page' );
+
 		$this->init_settings_pages();
 	}
 
