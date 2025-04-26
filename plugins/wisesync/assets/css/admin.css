@@ -5,7 +5,6 @@
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 	color: #333;
 	background-color: #f0f0f1;
-	min-height: calc(100vh - 32px);
 	position: relative;
 	margin: 0 -20px; /* Compensate for WordPress admin margins */
 	box-sizing: border-box;
@@ -470,7 +469,7 @@
 	
 	.sync-sidebar {
 	  position: fixed;
-	  top: 70px; /* Position exactly below the header */
+	  top: 77px; /* Position exactly below the header */
 	  left: 0;
 	  height: calc(100% - 70px); /* Take full height minus header */
 	  transform: translateX(-100%);
