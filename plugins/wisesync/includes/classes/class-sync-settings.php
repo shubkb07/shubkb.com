@@ -260,7 +260,6 @@ class Sync_Settings {
 	 */
 	public function settings_page() {
 		global $plugin_page;
-		$sync_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'sync';
 		?>
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
