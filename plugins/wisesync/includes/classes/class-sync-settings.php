@@ -277,64 +277,34 @@ class Sync_Settings {
 	<!-- Side navigation -->
 	<nav class="sync-sidebar" id="sync-sidebar">
 	<ul class="sync-menu">
-		<li class="sync-menu-item sync-active">
-		<a href="#dashboard" class="sync-menu-link">
-			<span class="dashicons dashicons-dashboard"></span>
-			<span class="sync-menu-text">Dashboard</span>
-		</a>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#file-sync" class="sync-menu-link">
-			<span class="dashicons dashicons-media-document"></span>
-			<span class="sync-menu-text">File Sync</span>
-		</a>
-		<ul class="sync-submenu">
-			<li class="sync-submenu-item">
-			<a href="#file-settings" class="sync-submenu-link">Settings</a>
-			</li>
-			<li class="sync-submenu-item">
-			<a href="#file-history" class="sync-submenu-link">History</a>
-			</li>
-		</ul>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#database-sync" class="sync-menu-link">
-			<span class="dashicons dashicons-database"></span>
-			<span class="sync-menu-text">Database Sync</span>
-		</a>
-		<ul class="sync-submenu">
-			<li class="sync-submenu-item">
-			<a href="#db-settings" class="sync-submenu-link">Settings</a>
-			</li>
-			<li class="sync-submenu-item">
-			<a href="#db-tables" class="sync-submenu-link">Tables</a>
-			</li>
-		</ul>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#media-sync" class="sync-menu-link">
-			<span class="dashicons dashicons-images-alt2"></span>
-			<span class="sync-menu-text">Media Sync</span>
-		</a>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#schedule" class="sync-menu-link">
-			<span class="dashicons dashicons-calendar-alt"></span>
-			<span class="sync-menu-text">Schedule</span>
-		</a>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#advanced" class="sync-menu-link">
-			<span class="dashicons dashicons-admin-tools"></span>
-			<span class="sync-menu-text">Advanced</span>
-		</a>
-		</li>
-		<li class="sync-menu-item">
-		<a href="#logs" class="sync-menu-link">
-			<span class="dashicons dashicons-list-view"></span>
-			<span class="sync-menu-text">Logs</span>
-		</a>
-		</li>
+		<?php
+		global $plugin_page;
+		if ( isset( $this->sync_menus['sync'] ) ) {
+			foreach ( $this->sync_menus['sync'] as $menu ) {
+				$is_active = ( $plugin_page === $menu['menu_slug'] ) ? 'sync-active' : '';
+				echo '<li class="sync-menu-item ' . esc_attr( $is_active ) . '">';
+				echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . $menu['menu_slug'] ) ) . '" class="sync-menu-link">';
+				echo '<span class="dashicons dashicons-admin-generic"></span>'; // Replace with actual icon if available
+				echo '<span class="sync-menu-text">' . esc_html( $menu['menu_name'] ) . '</span>';
+				echo '</a>';
+
+				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
+					echo '<ul class="sync-submenu">';
+					foreach ( $menu['sub_menu'] as $sub_menu ) {
+						$is_sub_active = ( $plugin_page === $sub_menu['menu_slug'] ) ? 'sync-active' : '';
+						echo '<li class="sync-submenu-item ' . esc_attr( $is_sub_active ) . '">';
+						echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . $sub_menu['menu_slug'] ) ) . '" class="sync-submenu-link">';
+						echo esc_html( $sub_menu['menu_name'] );
+						echo '</a>';
+						echo '</li>';
+					}
+					echo '</ul>';
+				}
+
+				echo '</li>';
+			}
+		}
+		?>
 	</ul>
 	</nav>
 
