@@ -31,7 +31,8 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
-		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync-settings-menu', array( $this, 'settings_page' ), 'dashicons-sort', is_network_admin() ? 23 : 63 );
+		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync-settings-menu', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
+		add_submenu_page( 'sync-settings-menu', 'Sync Settings', 'Settings', 'manage_options', 'sync-settings-menu', array( $this, 'settings_page' ) );
 	}
 
 	/**
