@@ -35,8 +35,6 @@ function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $cr
      */
     global $sync_settings;
 
-    error_log ( 'sync_add_wp_settings_menu called' );
-
     $sync_settings->add_wp_menu( $menu_slug, $menu_name, $position, $create_sync_menu, $settings_level );
 }
 
