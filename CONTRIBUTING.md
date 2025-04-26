@@ -51,7 +51,7 @@ For contributing to our WordPress theme:
 
 ```bash
 # Clone the repository
-git clone https://github.com/shubkb07/shubkb.com.git
+git clone https://github.com/shubkb07/sync-web.git
 
 # Navigate to project directory
 cd shubkb.com/wp-content

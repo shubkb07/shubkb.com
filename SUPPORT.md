@@ -6,9 +6,9 @@ This document outlines how to get support for our WordPress projects - both the 
 
 Before seeking technical support, please:
 
-1. Check our [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions) for common questions and answers
+1. Check our [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions) for common questions and answers
 2. Review the project's specific documentation in the respective `/docs` directories
-3. Search existing issues on our [GitHub repository](https://github.com/shubkb07/shubkb.com/issues)
+3. Search existing issues on our [GitHub repository](https://github.com/shubkb07/sync-web/issues)
 
 ## Project-Specific Support
 
@@ -16,8 +16,8 @@ Before seeking technical support, please:
 
 For help with the WiseSync plugin:
 
-- Submit issues through our [GitHub Issues](https://github.com/shubkb07/shubkb.com/issues)
-- Ask questions in [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions)
+- Submit issues through our [GitHub Issues](https://github.com/shubkb07/sync-web/issues)
+- Ask questions in [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions)
 - Check the plugin documentation in `/plugins/wisesync/docs/`
 - For premium support, email `sync@shubkb.com` with your license key
 
@@ -25,8 +25,8 @@ For help with the WiseSync plugin:
 
 For help with the PaperSync theme:
 
-- Submit issues through our [GitHub Issues](https://github.com/shubkb07/shubkb.com/issues)
-- Ask questions in [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions)
+- Submit issues through our [GitHub Issues](https://github.com/shubkb07/sync-web/issues)
+- Ask questions in [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions)
 - Check the theme documentation in `/themes/papersync/docs/`
 - For premium theme support, email `sync@shubkb.com` with your purchase details
 
@@ -52,7 +52,7 @@ Instead, follow the guidelines in our [SECURITY.md](SECURITY.md) file.
 
 Have an idea to improve our projects? We'd love to hear it!
 
-- Submit feature requests via [GitHub Issues](https://github.com/shubkb07/shubkb.com/issues)
+- Submit feature requests via [GitHub Issues](https://github.com/shubkb07/sync-web/issues)
 - Clearly describe the feature and its benefits
 - Use the "Feature Request" issue template when available
 

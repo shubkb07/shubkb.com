@@ -8,7 +8,7 @@ Thank you for using the PaperSync WordPress theme! This document outlines how to
 
 Before seeking support, please check our comprehensive documentation:
 
-- [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions) - Detailed guides for setup and customization
+- [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions) - Detailed guides for setup and customization
 - Project documentation in the `/docs` folder of the repository
 - Answers to common questions in our issue tracker
 
@@ -19,8 +19,8 @@ We offer support through these official channels:
 #### GitHub Issues and Discussions
 
 For all users:
-- [GitHub Issues](https://github.com/shubkb07/shubkb.com/issues) - For bug reports
-- [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions) - For questions and ideas
+- [GitHub Issues](https://github.com/shubkb07/sync-web/issues) - For bug reports
+- [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions) - For questions and ideas
 - Response time typically within 2-3 business days
 
 #### Premium Support
@@ -48,7 +48,7 @@ For customers who purchased PaperSync Pro:
 **Issue**: How to modify specific design elements
 - Use the WordPress Customizer (Appearance > Customize)
 - For advanced customizations, create a child theme
-- Refer to our [customization guide](https://github.com/shubkb07/shubkb.com/wiki/papersync-customization)
+- Refer to our [customization guide](https://github.com/shubkb07/sync-web/wiki/papersync-customization)
 
 ### Theme Updates
 
@@ -86,7 +86,7 @@ We do not provide support for:
 ## Feature Requests
 
 Have ideas for improving PaperSync? We'd love to hear them:
-- Submit feature requests through our [GitHub repository](https://github.com/shubkb07/shubkb.com/issues)
+- Submit feature requests through our [GitHub repository](https://github.com/shubkb07/sync-web/issues)
 - Vote for existing feature requests
 
 Thank you for choosing PaperSync!

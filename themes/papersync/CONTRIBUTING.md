@@ -9,7 +9,7 @@ There are several ways you can contribute to PaperSync:
 ### Reporting Bugs
 
 Before submitting a bug report:
-1. Check if the issue has already been reported in our [issues list](https://github.com/shubkb07/shubkb.com/issues)
+1. Check if the issue has already been reported in our [issues list](https://github.com/shubkb07/sync-web/issues)
 2. Make sure you're using the latest version of the theme
 3. Include the following information in your report:
    - Steps to reproduce the bug
