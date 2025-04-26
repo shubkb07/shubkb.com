@@ -456,7 +456,6 @@
   
   /* Responsive styles */
   @media screen and (max-width: 782px) {
-
 	.sync-container {
 	  margin: 0 -10px;
 	}
@@ -466,9 +465,14 @@
 	}
 	
 	.sync-sidebar {
-	  position: absolute;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
 	  height: 100%;
 	  transform: translateX(-100%);
+	  padding-top: 70px; /* Add padding to account for header height */
+	  z-index: 9;
+	  overflow-y: auto;
 	}
 	
 	.sync-sidebar.sync-mobile-open {
@@ -494,14 +498,12 @@
   }
   
   @media screen and (min-width: 783px) {
-
 	.sync-tagline {
 	  display: inline;
 	}
   }
   
   @media screen and (min-width: 1200px) {
-
 	.sync-sidebar {
 	  width: 280px;
 	}
@@ -584,22 +586,4 @@
   .admin-color-sunrise .sync-menu-link:hover .dashicons {
 	color: #dd823b;
   }
-
-/* Adjust sidebar in mobile mode to avoid overlapping with the header */
-@media screen and (max-width: 782px) {
-    .sync-sidebar {
-        top: 60px; /* Push the sidebar down to clear the header */
-    }
-
-    .sync-header {
-        position: relative; /* Restore original position */
-        top: auto;
-        left: auto;
-        width: auto;
-        z-index: auto;
-    }
-
-    .sync-content {
-        margin-top: 0; /* Remove margin added earlier */
-    }
-}
+  
