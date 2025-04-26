@@ -14,8 +14,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit; // Exit if accessed directly.
 }
 
-// Call settings class.
-$settings = new Sync_Settings();
+/**
+ * Sync Settings Class.
+ *
+ * @global Sync_Settings $sync_settings
+ */
+$sync_settings = new Sync_Settings();
 
 /**
  * Initialize settings page.
@@ -27,11 +31,11 @@ function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $cr
     /**
      * Sync Settings Class
      *
-     * @var \Sync\Sync_Settings
+     * @global Sync_Settings
      */
-    global $settings;
+    global $sync_settings;
 
-    $settings->add_wp_menu( $menu_slug, $menu_name, $position, $create_sync_menu, $settings_level );
+    $sync_settings->add_wp_menu( $menu_slug, $menu_name, $position, $create_sync_menu, $settings_level );
 }
 
 sync_add_wp_settings_menu( 'wisesync-settings', __( 'WiseSync Settings', 'wisesync' ), 10, true, 'site' );
