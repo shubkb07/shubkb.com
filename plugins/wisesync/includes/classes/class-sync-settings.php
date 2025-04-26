@@ -25,6 +25,13 @@ class Sync_Settings {
 	private $menus = array();
 
 	/**
+	 * Sync Menus Array.
+	 *
+	 * @var array
+	 */
+	private $sync_menus = array();
+
+	/**
 	 * Forms array.
 	 *
 	 * @var array
@@ -48,8 +55,18 @@ class Sync_Settings {
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
 	}
 
+	/**
+	 * Add WP menu.
+	 *
+	 * @param string $menu_slug Menu slug.
+	 * @param string $menu_name Menu name.
+	 * @param int $position Menu position.
+	 * @param bool $create_sync_menu Create sync menu.
+	 * @param string $settings_level Settings level (site, network, both).
+	 *
+	 * @since 1.0.0
+	 */
 	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site'  ) {
-		error_log ( 'add_wp_menu called' );
 
 		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
@@ -71,8 +88,6 @@ class Sync_Settings {
 			return;
 		}
 
-		error_log ( 'add_wp_menu added' );
-
 		$this->menus[ $menu_slug ] = array(
 			'menu_name' => $menu_name,
 			'position' => $position,
@@ -82,12 +97,98 @@ class Sync_Settings {
 	}
 
 	/**
+	 * Add Sync Menus.
+	 */
+	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null ) {
+		// Validate inputs
+		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) || strpos( $wp_menu_slug, 'sync' ) === false ) {
+			return;
+		}
+
+		if ( empty( $menu_name ) || ! is_string( $menu_name ) ) {
+			return;
+		}
+
+		if ( $menu_slug !== false && ( ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) === false ) ) {
+			return;
+		}
+
+		if ( $icon_url !== null && ! is_string( $icon_url ) ) {
+			return;
+		}
+
+		if ( $position !== null && ( ! is_numeric( $position ) || $position < 0 ) ) {
+			return;
+		}
+
+		// Check if wp_menu_slug exists in $menus
+		if ( isset( $this->menus[ $wp_menu_slug ] ) ) {
+			if ( ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) {
+				$this->sync_menus[ $wp_menu_slug ] = [];
+			}
+
+			$this->sync_menus[ $wp_menu_slug ][] = [
+				'menu_name' => $menu_name,
+				'menu_slug' => $menu_slug,
+				'icon_url'  => $icon_url,
+				'position'  => $position,
+				'sub_menu'  => $menu_slug === false ? [] : null,
+			];
+		}
+	}
+
+	/**
+	 * Add Sync Sub Menus.
+	 */
+	public function add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $icon_url = null, $position = null ) {
+		// Validate inputs
+		if ( empty( $parent_menu_slug ) || ! is_string( $parent_menu_slug ) || strpos( $parent_menu_slug, 'sync' ) === false ) {
+			return;
+		}
+
+		if ( empty( $menu_name ) || ! is_string( $menu_name ) ) {
+			return;
+		}
+
+		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) === false ) {
+			return;
+		}
+
+		if ( $icon_url !== null && ! is_string( $icon_url ) ) {
+			return;
+		}
+
+		if ( $position !== null && ( ! is_numeric( $position ) || $position < 0 ) ) {
+			return;
+		}
+
+		// Check if parent_menu_slug exists in $sync_menus
+		if ( isset( $this->sync_menus[ $parent_menu_slug ] ) ) {
+			foreach ( $this->sync_menus[ $parent_menu_slug ] as &$menu ) {
+				if ( $menu['menu_slug'] === $parent_menu_slug || $menu['menu_slug'] === false ) {
+					if ( ! isset( $menu['sub_menu'] ) ) {
+						$menu['sub_menu'] = [];
+					}
+
+					$menu['sub_menu'][] = [
+						'menu_name' => $menu_name,
+						'menu_slug' => $menu_slug,
+						'icon_url'  => $icon_url,
+						'position'  => $position,
+					];
+					break;
+				}
+			}
+		}
+	}
+
+	/**
 	 * Initialize settings.
 	 *
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
-		error_log ( 'init_settings_page called' );
+
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus[ 'sync' ] = array(
 			'menu_name' => 'Sync',
@@ -101,6 +202,11 @@ class Sync_Settings {
 		 */
 		do_action( 'sync_add_settings_page' );
 
+		/**
+		 * Sync Settings Page Filter
+		 */
+		apply_filters( 'sync_settings_page', $this->menus );
+
 		$this->init_settings_pages();
 	}
 
@@ -110,14 +216,31 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	private function init_settings_pages() {
-		error_log( 'init_settings_pages called' );
+
 		foreach ( $this->menus as $menu_slug => $menu ) {
-			error_log( 'Menu slug: ' . print_r( $menu_slug, true ) );
+
 			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
 				return; // Only show on site admin.
 			} elseif ( is_network_admin() && ! in_array( $menu['settings_level'], array( 'network', 'both' ), true ) ) {
 				return; // Only show on network admin.
 			}
+
+			if ( $menu['create_sync_menu'] ) {
+				if ( isset( $this->sync_menus[ $menu_slug ] ) && is_array( $this->sync_menus[ $menu_slug ] ) ) {
+					$has_valid_sub_menu = false;
+					foreach ( $this->sync_menus[ $menu_slug ] as $sub_menu ) {
+						if ( $menu_slug !== false || ( isset( $sub_menu['sub_menu'] ) && ! empty( $sub_menu['sub_menu'] ) ) ) {
+							$has_valid_sub_menu = true;
+							break;
+						}
+					}
+
+					if ( ! $has_valid_sub_menu ) {
+						continue; // Skip adding this menu if no valid sub-menu exists.
+					}
+				}
+			}
+
 			add_submenu_page(
 				'sync',
 				$menu['menu_name'],
@@ -137,7 +260,6 @@ class Sync_Settings {
 	 */
 	public function settings_page() {
 		global $plugin_page;
-		$sync_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : 'sync';
 		?>
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
