@@ -10,6 +10,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 	function syncDashboardInit() {
 		setupMobileMenu();
 		setupMenuNavigation();
+		handleUrlHash(); // Load content based on URL hash on page load
 		setupDismissibleCards();
 		setupToggleSwitches();
 		setupRefreshButton();
@@ -49,6 +50,12 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		const submenuLinks = document.querySelectorAll( '.sync-submenu-link' );
 		const pageTitle = document.querySelector( '.sync-page-title' );
 		const contentContainer = document.getElementById( 'sync-dynamic-content' );
+		
+		// Get the default menu slug (first menu item)
+		let defaultMenuSlug = '';
+		if (menuLinks.length > 0) {
+			defaultMenuSlug = menuLinks[0].getAttribute('data-slug');
+		}
 
 		// Handle main menu clicks
 		menuLinks.forEach( function( link ) {
@@ -56,6 +63,7 @@ document.addEventListener( 'DOMContentLoaded', function() {
 				const menuItem = this.parentElement;
 				const submenu = menuItem.querySelector( '.sync-submenu' );
 				const menuSlug = this.getAttribute( 'data-slug' );
+				const href = this.getAttribute( 'href' );
 
 				// If this item has a submenu
 				if ( submenu ) {
@@ -85,6 +93,9 @@ document.addEventListener( 'DOMContentLoaded', function() {
 						pageTitle.textContent = menuText;
 					}
 
+					// Update URL hash without triggering hashchange event
+					history.pushState(null, '', href);
+
 					// Load content for this menu
 					loadMenuContent(menuSlug);
 				}
@@ -98,6 +109,13 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 				const parentSlug = this.getAttribute( 'data-parent' );
 				const subMenuSlug = this.getAttribute( 'data-slug' );
+				const href = this.getAttribute( 'href' );
+
+				// Set active state for parent menu item
+				document.querySelectorAll( '.sync-menu-item' ).forEach( function( item ) {
+					item.classList.remove( 'sync-active' );
+				});
+				this.closest( '.sync-menu-item' ).classList.add( 'sync-active' );
 
 				// Set active state for submenu item
 				document.querySelectorAll( '.sync-submenu-item' ).forEach( function( item ) {
@@ -112,74 +130,148 @@ document.addEventListener( 'DOMContentLoaded', function() {
 					pageTitle.textContent = `${menuText} - ${submenuText}`;
 				}
 
+				// Update URL hash
+				history.pushState(null, '', href);
+
 				// Load content for this submenu
 				loadSubmenuContent(parentSlug, subMenuSlug);
 			} );
 		} );
 
-		/**
-		 * Load content for a main menu item
-		 * @param {string} menuSlug - The slug of the menu to load
-		 */
-		function loadMenuContent(menuSlug) {
-			const template = document.getElementById( `sync-page-${menuSlug}` );
+		// Initial load of default content if no hash in URL
+		if (!window.location.hash && defaultMenuSlug) {
+			loadMenuContent(defaultMenuSlug);
+		}
+	}
+
+	/**
+	 * Handle URL hash on page load to navigate to specific menu/submenu
+	 */
+	function handleUrlHash() {
+		if (window.location.hash) {
+			const hash = window.location.hash.substring(1); // Remove the # character
 			
-			if (template) {
-				// Fade out current content
-				fadeOut(contentContainer, 200, function() {
-					// Replace content with template content
-					contentContainer.innerHTML = template.innerHTML;
+			// Check if hash is for a submenu (format: sync-parent-child)
+			if (hash.split('-').length > 2) {
+				const parts = hash.split('-');
+				// Remove 'sync-' prefix and get the parent and child slugs
+				const parentSlug = parts[1];
+				const childSlug = parts.slice(2).join('-'); // In case child slug has hyphens
+				
+				// Set active states
+				const menuItem = document.querySelector(`.sync-menu-link[data-slug="${parentSlug}"]`).parentElement;
+				menuItem.classList.add('sync-active');
+				
+				const submenuItem = document.querySelector(`.sync-submenu-link[data-parent="${parentSlug}"][data-slug="${childSlug}"]`);
+				if (submenuItem) {
+					submenuItem.parentElement.classList.add('sync-active');
 					
-					// Reinitialize components in the new content
-					setupDismissibleCards();
-					setupToggleSwitches();
-					setupRefreshButton();
-					setupActionButtons();
+					// Update page title
+					const pageTitle = document.querySelector('.sync-page-title');
+					if (pageTitle) {
+						const menuText = menuItem.querySelector('.sync-menu-text').textContent;
+						const submenuText = submenuItem.textContent;
+						pageTitle.textContent = `${menuText} - ${submenuText}`;
+					}
 					
-					// Fade in new content
-					contentContainer.style.opacity = '0';
-					contentContainer.style.display = '';
-					fadeIn(contentContainer, 200);
-				});
-			} else if (menuSlug === 'dashboard') {
-				// Dashboard is already loaded by default
-				// Just ensure it's visible
-				fadeOut(contentContainer, 200, function() {
-					// The server already rendered the dashboard content,
-					// but if it wasn't visible, make it visible now
-					contentContainer.style.opacity = '0';
-					contentContainer.style.display = '';
-					fadeIn(contentContainer, 200);
-				});
+					// Load submenu content
+					loadSubmenuContent(parentSlug, childSlug);
+				}
+			}
+			// Check if hash is for a main menu (format: sync-menuslug)
+			else if (hash.startsWith('sync-')) {
+				const menuSlug = hash.replace('sync-', '');
+				const menuLink = document.querySelector(`.sync-menu-link[data-slug="${menuSlug}"]`);
+				
+				if (menuLink) {
+					// Set active state
+					document.querySelectorAll('.sync-menu-item').forEach(function(item) {
+						item.classList.remove('sync-active');
+					});
+					menuLink.parentElement.classList.add('sync-active');
+					
+					// Update page title
+					const pageTitle = document.querySelector('.sync-page-title');
+					if (pageTitle) {
+						const menuText = menuLink.querySelector('.sync-menu-text').textContent;
+						pageTitle.textContent = menuText;
+					}
+					
+					// Load menu content
+					loadMenuContent(menuSlug);
+				}
+			}
+		} else {
+			// No hash in URL, load default menu content
+			const defaultMenuLink = document.querySelector('.sync-menu-link');
+			if (defaultMenuLink) {
+				const defaultMenuSlug = defaultMenuLink.getAttribute('data-slug');
+				loadMenuContent(defaultMenuSlug);
 			}
 		}
+	}
 
-		/**
-		 * Load content for a submenu item
-		 * @param {string} parentSlug - The slug of the parent menu
-		 * @param {string} subMenuSlug - The slug of the submenu to load
-		 */
-		function loadSubmenuContent(parentSlug, subMenuSlug) {
-			const template = document.getElementById( `sync-subpage-${parentSlug}-${subMenuSlug}` );
-			
-			if (template) {
-				// Fade out current content
-				fadeOut(contentContainer, 200, function() {
-					// Replace content with template content
-					contentContainer.innerHTML = template.innerHTML;
-					
-					// Reinitialize components in the new content
-					setupDismissibleCards();
-					setupToggleSwitches();
-					setupRefreshButton();
-					setupActionButtons();
-					
-					// Fade in new content
-					contentContainer.style.opacity = '0';
-					contentContainer.style.display = '';
-					fadeIn(contentContainer, 200);
-				});
-			}
+	/**
+	 * Listen for hash changes in the URL
+	 */
+	window.addEventListener('hashchange', function() {
+		handleUrlHash();
+	});
+
+	/**
+	 * Load content for a main menu item
+	 * @param {string} menuSlug - The slug of the menu to load
+	 */
+	function loadMenuContent(menuSlug) {
+		const template = document.getElementById( `sync-page-${menuSlug}` );
+		const contentContainer = document.getElementById('sync-dynamic-content');
+		
+		if (template) {
+			// Fade out current content
+			fadeOut(contentContainer, 200, function() {
+				// Replace content with template content
+				contentContainer.innerHTML = template.innerHTML;
+				
+				// Reinitialize components in the new content
+				setupDismissibleCards();
+				setupToggleSwitches();
+				setupRefreshButton();
+				setupActionButtons();
+				
+				// Fade in new content
+				contentContainer.style.opacity = '0';
+				contentContainer.style.display = '';
+				fadeIn(contentContainer, 200);
+			});
+		}
+	}
+
+	/**
+	 * Load content for a submenu item
+	 * @param {string} parentSlug - The slug of the parent menu
+	 * @param {string} subMenuSlug - The slug of the submenu to load
+	 */
+	function loadSubmenuContent(parentSlug, subMenuSlug) {
+		const template = document.getElementById( `sync-subpage-${parentSlug}-${subMenuSlug}` );
+		const contentContainer = document.getElementById('sync-dynamic-content');
+		
+		if (template) {
+			// Fade out current content
+			fadeOut(contentContainer, 200, function() {
+				// Replace content with template content
+				contentContainer.innerHTML = template.innerHTML;
+				
+				// Reinitialize components in the new content
+				setupDismissibleCards();
+				setupToggleSwitches();
+				setupRefreshButton();
+				setupActionButtons();
+				
+				// Fade in new content
+				contentContainer.style.opacity = '0';
+				contentContainer.style.display = '';
+				fadeIn(contentContainer, 200);
+			});
 		}
 	}
 
@@ -408,4 +500,4 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		`;
 		document.head.appendChild( style );
 	}
-} );
+});

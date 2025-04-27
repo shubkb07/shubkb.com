@@ -209,12 +209,27 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 					'value'        => '',
 					'place_holder' => 'Enter data value',
 				),
+				'break'       => array(
+					'count' => 1,
+				),
 			),
 		),
 	);
-	return sync_create_each_ajax_settings_page( $page_details, $setting_array );
+	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+}
+
+function default_show( $html_content, $page_details ) {
+	return 'Page Details' . print_r( $page_details, true );
 }
 
 // Update actions to dynamically load content for all menus and submenus.
-add_filter( 'sync_register_menu_settings_dashboard', 'sync_register_settings_dashboard' );
-add_filter( 'sync_register_submenu_settings_tools', 'sync_register_settings_tools' );
+add_filter( 'sync_register_menu_settings', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_dashboard', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_dashboard_sub_pika', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_dashboard_sub_logs', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_dashboard_sub_settings', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_reports', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_advanced', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_advanced_sub_wow', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_advanced_sub_tools', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_advanced_sub_diagnostics', 'sync_register_settings_tools', 10, 2 );
