@@ -422,10 +422,59 @@ class Sync_Settings {
 	}
 
 	/**
-	 * Sync settings.
+	 * Add settings pages dynamically.
 	 *
 	 * @since 1.0.0
 	 */
-	public function register_setting() {
+	private function add_dynamic_settings_pages() {
+		do_action('sync_register_menu_settings', function($page_details) {
+			foreach ($page_details as $slug => $details) {
+				echo '<section id="' . esc_attr($slug) . '">';
+				if (is_callable($details['callback'])) {
+					call_user_func($details['callback'], $details);
+				} else {
+					echo '<p>' . esc_html($details['name']) . '</p>';
+				}
+				echo '</section>';
+			}
+		});
+	}
+
+	/**
+	 * Create single AJAX settings page.
+	 *
+	 * @param array $page_details Page details.
+	 * @param array $settings_array Settings array.
+	 * @param bool  $refresh Refresh flag.
+	 *
+	 * @since 1.0.0
+	 */
+	public function create_single_ajax_settings_page($page_details, $settings_array, $refresh = false) {
+		$nonce = wp_create_nonce($page_details['slug']);
+		echo '<form id="' . esc_attr($page_details['slug']) . '" method="post">';
+		foreach ($settings_array as $key => $value) {
+			echo '<label>' . esc_html($key) . '</label>';
+			echo '<input type="text" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+		}
+		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($nonce) . '" />';
+		echo '<button type="submit">Save</button>';
+		echo '</form>';
+	}
+
+	/**
+	 * Create each AJAX settings page.
+	 *
+	 * @param array $page_details Page details.
+	 * @param array $settings_array Settings array.
+	 *
+	 * @since 1.0.0
+	 */
+	public function create_each_ajax_settings_page($page_details, $settings_array) {
+		$nonce = wp_create_nonce($page_details['slug']);
+		foreach ($settings_array as $key => $value) {
+			echo '<label>' . esc_html($key) . '</label>';
+			echo '<input type="checkbox" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+		}
+		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($nonce) . '" />';
 	}
 }

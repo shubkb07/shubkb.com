@@ -74,6 +74,18 @@ function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $menu_slug, $pos
 	$sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $position );
 }
 
+function sync_create_single_ajax_settings_page( $page_details, $setting_array, $refresh = false ) {
+	global $sync_settings;
+
+	$sync_settings->create_single_ajax_settings_page( $page_details, $setting_array, $refresh );
+}
+
+function sync_create_each_ajax_settings_page( $page_details, $setting_array ) {
+	global $sync_settings;
+
+	$sync_settings->create_each_ajax_settings_page( $page_details, $setting_array );
+}
+
 add_action(
 	'sync_add_settings_page',
 	function () {
@@ -85,7 +97,7 @@ add_action(
 		sync_add_sync_sub_menu( 'settings', 'dashboard', __( 'Sync Settings', 'wisesync' ), 'settings', 40 );
 
 		// Example usage of sync_add_sync_menu without sub-menus.
-		sync_add_sync_menu( 'settings', __( 'Sync Reports', 'wisesync' ), 'sync_reports', null, 50 );
+		sync_add_sync_menu( 'settings', __( 'Sync Reports', 'wisesync' ), 'reports', null, 50 );
 
 		// Another example with sub-menus.
 		sync_add_sync_menu( 'settings', __( 'Advanced Sync', 'wisesync' ), 'advanced', null, 60, true );
@@ -93,3 +105,27 @@ add_action(
 		sync_add_sync_sub_menu( 'settings', 'advanced', __( 'Sync Diagnostics', 'wisesync' ), 'diagnostics', 80 );
 	}
 );
+
+/**
+ * Dashboard Settings Page
+ *
+ * @param Array $page_details Page details.
+ */
+function sync_register_settings_dashboard( $page_details ) {
+	$setting_array = array();
+	sync_create_single_ajax_settings_page( $page_details, $setting_array );
+}
+
+/**
+ * Tools Settings Page
+ *
+ * @param Array $page_details Page details.
+ */
+function sync_register_settings_tools( $page_details ) {
+	$setting_array = array();
+	sync_create_each_ajax_settings_page( $page_details, $setting_array );
+}
+
+
+add_action( 'sync_register_menu_settings_dashboard', 'sync_register_settings_dashboard' );
+add_action( 'sync_register_submenu_settings_tools', 'sync_register_settings_tools' );
