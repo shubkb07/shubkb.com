@@ -53,6 +53,9 @@ class Sync_Settings {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
+
+		// Ensure sync_menus is initialized properly in the constructor
+		$this->sync_menus = array();
 	}
 
 	/**
@@ -279,8 +282,8 @@ class Sync_Settings {
 	<ul class="sync-menu">
 		<?php
 		global $plugin_page;
-		if ( isset( $this->sync_menus['sync'] ) ) {
-			foreach ( $this->sync_menus['sync'] as $menu ) {
+		if ( isset( $this->sync_menus[ $plugin_page ] ) ) {
+			foreach ( $this->sync_menus[ $plugin_page ] as $menu ) {
 				$is_active = ( $plugin_page === $menu['menu_slug'] ) ? 'sync-active' : '';
 				echo '<li class="sync-menu-item ' . esc_attr( $is_active ) . '">';
 				echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . $menu['menu_slug'] ) ) . '" class="sync-menu-link">';

@@ -73,14 +73,14 @@ add_action( 'sync_add_settings_page', function () {
 
     // Example usage of sync_add_sync_menu with sub-menus
     sync_add_sync_menu( 'settings', __( 'Sync Dashboard', 'wisesync' ), 'sync_dashboard', null, 20 );
-    sync_add_sync_sub_menu( 'sync_dashboard', __( 'Sync Logs', 'wisesync' ), 'sync_logs', null, 30 );
-    sync_add_sync_sub_menu( 'sync_dashboard', __( 'Sync Settings', 'wisesync' ), 'sync_settings', null, 40 );
+    sync_add_sync_sub_menu( 'dashboard', __( 'Sync Logs', 'wisesync' ), 'sync_logs', null, 30 );
+    sync_add_sync_sub_menu( 'dashboard', __( 'Sync Settings', 'wisesync' ), 'sync_settings', null, 40 );
 
     // Example usage of sync_add_sync_menu without sub-menus
     sync_add_sync_menu( 'settings', __( 'Sync Reports', 'wisesync' ), 'sync_reports', null, 50 );
 
     // Another example with sub-menus
     sync_add_sync_menu( 'settings', __( 'Advanced Sync', 'wisesync' ), 'advanced_sync', null, 60 );
-    sync_add_sync_sub_menu( 'advanced_sync', __( 'Sync Tools', 'wisesync' ), 'sync_tools', null, 70 );
-    sync_add_sync_sub_menu( 'advanced_sync', __( 'Sync Diagnostics', 'wisesync' ), 'sync_diagnostics', null, 80 );
+    sync_add_sync_sub_menu( 'advanced', __( 'Sync Tools', 'wisesync' ), 'sync_tools', null, 70 );
+    sync_add_sync_sub_menu( 'advanced', __( 'Sync Diagnostics', 'wisesync' ), 'sync_diagnostics', null, 80 );
 });
