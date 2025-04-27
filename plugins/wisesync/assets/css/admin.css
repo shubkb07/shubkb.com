@@ -1,3 +1,8 @@
+/* Fix x-axis overflow */
+body {
+    overflow-x: hidden;
+}
+
 /* Base styles */
 .sync-container {
 	display: flex;
@@ -351,7 +356,7 @@
 	width: 14px;
 	left: 3px;
 	bottom: 3px;
-	background-color: white;
+	background-color: #fff;
 	transition: .4s;
 	border-radius: 50%;
   }

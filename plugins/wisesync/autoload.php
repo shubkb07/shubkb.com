@@ -18,9 +18,12 @@ if ( file_exists( WSYNC_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 }
 
 // Load Text Domain.
-add_action( 'init', function () {
-	load_plugin_textdomain( 'wisesync', false, WSYNC_PLUGIN_DIR . '/languages/' );
-} );
+add_action(
+	'init',
+	function () {
+		load_plugin_textdomain( 'wisesync', false, WSYNC_PLUGIN_DIR . '/languages/' );
+	} 
+);
 
 /**
  * Autoloads classes for the WiseSync plugin.

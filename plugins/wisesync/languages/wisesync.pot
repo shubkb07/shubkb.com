@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-04-27T07:57:41+00:00\n"
+"POT-Creation-Date: 2025-04-27T20:10:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: wisesync\n"
@@ -43,35 +43,35 @@ msgstr ""
 msgid "Sync Advance Blocks"
 msgstr ""
 
-#: includes/functions/settings.php:72
+#: includes/functions/settings.php:107
 msgid "WiseSync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:75
+#: includes/functions/settings.php:119
 msgid "Sync Dashboard"
 msgstr ""
 
-#: includes/functions/settings.php:76
+#: includes/functions/settings.php:128
 msgid "Sync Logs"
 msgstr ""
 
-#: includes/functions/settings.php:77
+#: includes/functions/settings.php:129
 msgid "Sync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:80
+#: includes/functions/settings.php:132
 msgid "Sync Reports"
 msgstr ""
 
-#: includes/functions/settings.php:83
+#: includes/functions/settings.php:137
 msgid "Advanced Sync"
 msgstr ""
 
-#: includes/functions/settings.php:84
+#: includes/functions/settings.php:146
 msgid "Sync Tools"
 msgstr ""
 
-#: includes/functions/settings.php:85
+#: includes/functions/settings.php:147
 msgid "Sync Diagnostics"
 msgstr ""
 
