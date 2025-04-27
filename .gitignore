@@ -9,6 +9,9 @@
 /.idea/
 /.vscode/
 /.temp/
+/index.php
+/plugins/index.php
+/themes/index.php
 /plugins/wisesync/blocks/build
 /themes/papersync/blocks/build
 /plugins/wisesync/**/*.mo
