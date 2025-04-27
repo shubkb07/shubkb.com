@@ -102,9 +102,9 @@ class Sync_Settings {
 	/**
 	 * Add Sync Menus.
 	 */
-	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null ) {
+	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
 		// Validate inputs
-		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) ) {
+		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) ) {
 			return;
 		}
 
@@ -112,7 +112,7 @@ class Sync_Settings {
 			return;
 		}
 
-		if ( false !== $menu_slug || ( is_string( $menu_slug ) && strpos( $menu_slug, 'sync' ) !== false ) ) {
+		if ( false !== $menu_slug && is_string( $menu_slug ) && strpos( $menu_slug, 'sync' ) === true && ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
 		}
 
@@ -120,20 +120,21 @@ class Sync_Settings {
 			return;
 		}
 
-		// Check if wp_menu_slug exists in $menus
-		if ( isset( $this->menus[ $wp_menu_slug ] ) ) {
-			if ( ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) {
-				$this->sync_menus[ $wp_menu_slug ] = [];
-			}
-
-			$this->sync_menus[ $wp_menu_slug ][] = [
-				'menu_name' => $menu_name,
-				'menu_slug' => $menu_slug,
-				'icon_url'  => $icon_url,
-				'position'  => $position,
-				'sub_menu'  => $menu_slug === false ? [] : null,
-			];
+		if ( $sub_menu_support !== null && ! is_bool( $sub_menu_support ) ) {
+			return;
 		}
+
+		if ( ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) {
+			$this->sync_menus[ $wp_menu_slug ] = [];
+		}
+
+		$this->sync_menus[ $wp_menu_slug ][] = [
+			'menu_name' => $menu_name,
+			'menu_slug' => $menu_slug,
+			'icon_url'  => $icon_url,
+			'position'  => $position,
+			'sub_menu'  => $sub_menu_support ? [] : false,
+		];
 	}
 
 	/**
@@ -245,7 +246,7 @@ class Sync_Settings {
 				$menu['menu_name'],
 				$menu['menu_name'],
 				'manage_options',
-				$menu_slug,
+				$menu_slug === 'sync' ? 'sync' : 'sync-' . $menu_slug,
 				array( $this, 'settings_page' ),
 				$menu['position']
 			);
@@ -259,6 +260,8 @@ class Sync_Settings {
 	 */
 	public function settings_page() {
 		global $plugin_page;
+
+		error_log( 'Sync Menus: ' . print_r( $this->sync_menus, true ) );
 		?>
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
