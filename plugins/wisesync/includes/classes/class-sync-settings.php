@@ -104,7 +104,7 @@ class Sync_Settings {
 	 */
 	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null ) {
 		// Validate inputs
-		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) || strpos( $wp_menu_slug, 'sync' ) === false ) {
+		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) ) {
 			return;
 		}
 
@@ -112,11 +112,7 @@ class Sync_Settings {
 			return;
 		}
 
-		if ( $menu_slug !== false && ( ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) === false ) ) {
-			return;
-		}
-
-		if ( $icon_url !== null && ! is_string( $icon_url ) ) {
+		if ( false !== $menu_slug || ( is_string( $menu_slug ) && strpos( $menu_slug, 'sync' ) !== false ) ) {
 			return;
 		}
 
