@@ -54,7 +54,7 @@ class Sync_Settings {
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
 
-		// Ensure sync_menus is initialized properly in the constructor
+		// Ensure sync_menus is initialized properly in the constructor.
 		$this->sync_menus = array();
 	}
 
@@ -63,13 +63,13 @@ class Sync_Settings {
 	 *
 	 * @param string $menu_slug Menu slug.
 	 * @param string $menu_name Menu name.
-	 * @param int $position Menu position.
-	 * @param bool $create_sync_menu Create sync menu.
+	 * @param int    $position Menu position.
+	 * @param bool   $create_sync_menu Create sync menu.
 	 * @param string $settings_level Settings level (site, network, both).
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site'  ) {
+	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site' ) {
 
 		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
@@ -92,19 +92,26 @@ class Sync_Settings {
 		}
 
 		$this->menus[ $menu_slug ] = array(
-			'menu_name' => $menu_name,
-			'position' => $position,
+			'menu_name'        => $menu_name,
+			'position'         => $position,
 			'create_sync_menu' => $create_sync_menu,
-			'settings_level' => $settings_level,
+			'settings_level'   => $settings_level,
 		);
 	}
 
 	/**
 	 * Add Sync Menus.
+	 *
+	 * @param string      $wp_menu_slug      WP Menu slug.
+	 * @param string      $menu_name         Menu name.
+	 * @param string|bool $menu_slug         Menu slug (optional).
+	 * @param string|null $icon_url          Icon URL (optional).
+	 * @param int|null    $position          Menu position (optional).
+	 * @param bool        $sub_menu_support  Whether sub-menu support is enabled (optional).
 	 */
 	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
-		// Validate inputs
-		if ( empty( $wp_menu_slug ) || ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) ) {
+		// Validate inputs.
+		if ( empty( $wp_menu_slug ) || ( ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) && $this->menus[ $wp_menu_slug ]['create_sync_menu'] ) ) {
 			return;
 		}
 
@@ -116,70 +123,65 @@ class Sync_Settings {
 			return;
 		}
 
-		if ( $position !== null && ( ! is_numeric( $position ) || $position < 0 ) ) {
+		if ( null !== $position && ( ! is_numeric( $position ) || 0 > $position ) ) {
 			return;
 		}
 
-		if ( $sub_menu_support !== null && ! is_bool( $sub_menu_support ) ) {
+		if ( null !== $sub_menu_support && false === is_bool( $sub_menu_support ) ) {
 			return;
 		}
 
 		if ( ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) {
-			$this->sync_menus[ $wp_menu_slug ] = [];
+			$this->sync_menus[ $wp_menu_slug ] = array();
 		}
 
-		$this->sync_menus[ $wp_menu_slug ][] = [
+		$this->sync_menus[ $wp_menu_slug ][ $menu_slug ] = array(
 			'menu_name' => $menu_name,
-			'menu_slug' => $menu_slug,
 			'icon_url'  => $icon_url,
 			'position'  => $position,
-			'sub_menu'  => $sub_menu_support ? [] : false,
-		];
+			'sub_menu'  => $sub_menu_support ? array() : false,
+		);
 	}
 
 	/**
 	 * Add Sync Sub Menus.
+	 *
+	 * @param string   $wp_menu_slug WP Menu slug.
+	 * @param string   $parent_menu_slug Parent menu slug.
+	 * @param string   $menu_name Menu name.
+	 * @param string   $menu_slug Menu slug.
+	 * @param int|null $position Menu position.
 	 */
-	public function add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $icon_url = null, $position = null ) {
-		// Validate inputs
-		if ( empty( $parent_menu_slug ) || ! is_string( $parent_menu_slug ) || strpos( $parent_menu_slug, 'sync' ) === false ) {
+	public function add_sync_sub_menus( $wp_menu_slug, $parent_menu_slug, $menu_name, $menu_slug, $position = null ) {
+		// Validate inputs.
+		if ( empty( $wp_menu_slug ) || ( ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) && ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) ) {
 			return;
+		}
+
+		if ( empty( $parent_menu_slug ) || ( ! is_string( $parent_menu_slug ) && ! isset( $this->sync_menus[ $wp_menu_slug ][ $parent_menu_slug ] ) ) ) {
+			return;
+		}
+
+		if ( ! isset( $this->sync_menus[ $wp_menu_slug ][ $parent_menu_slug ]['sub_menu'] ) || false === $this->sync_menus[ $wp_menu_slug ][ $parent_menu_slug ]['sub_menu'] ) {
+			return; // Parent menu slug does not support sub-menus.
 		}
 
 		if ( empty( $menu_name ) || ! is_string( $menu_name ) ) {
 			return;
 		}
 
-		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) === false ) {
+		if ( false !== $menu_slug && is_string( $menu_slug ) && strpos( $menu_slug, 'sync' ) === true && ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
 		}
 
-		if ( $icon_url !== null && ! is_string( $icon_url ) ) {
+		if ( null !== $position && ( ! is_numeric( $position ) || 0 > $position ) ) {
 			return;
 		}
 
-		if ( $position !== null && ( ! is_numeric( $position ) || $position < 0 ) ) {
-			return;
-		}
-
-		// Check if parent_menu_slug exists in $sync_menus
-		if ( isset( $this->sync_menus[ $parent_menu_slug ] ) ) {
-			foreach ( $this->sync_menus[ $parent_menu_slug ] as &$menu ) {
-				if ( $menu['menu_slug'] === $parent_menu_slug || $menu['menu_slug'] === false ) {
-					if ( ! isset( $menu['sub_menu'] ) ) {
-						$menu['sub_menu'] = [];
-					}
-
-					$menu['sub_menu'][] = [
-						'menu_name' => $menu_name,
-						'menu_slug' => $menu_slug,
-						'icon_url'  => $icon_url,
-						'position'  => $position,
-					];
-					break;
-				}
-			}
-		}
+		$this->sync_menus[ $wp_menu_slug ][ $parent_menu_slug ]['sub_menu'][ $menu_slug ] = array(
+			'menu_name' => $menu_name,
+			'position'  => $position,
+		);
 	}
 
 	/**
@@ -190,11 +192,11 @@ class Sync_Settings {
 	public function init_settings_page() {
 
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
-		$this->menus[ 'sync' ] = array(
-			'menu_name' => 'Sync',
-			'position' => -1,
+		$this->menus['sync'] = array(
+			'menu_name'        => 'Sync',
+			'position'         => -1,
 			'create_sync_menu' => true,
-			'settings_level' => 'both',
+			'settings_level'   => 'both',
 		);
 
 		/**
@@ -229,7 +231,7 @@ class Sync_Settings {
 				if ( isset( $this->sync_menus[ $menu_slug ] ) && is_array( $this->sync_menus[ $menu_slug ] ) ) {
 					$has_valid_sub_menu = false;
 					foreach ( $this->sync_menus[ $menu_slug ] as $sub_menu ) {
-						if ( $menu_slug !== false || ( isset( $sub_menu['sub_menu'] ) && ! empty( $sub_menu['sub_menu'] ) ) ) {
+						if ( false !== $menu_slug || ( isset( $sub_menu['sub_menu'] ) && ! empty( $sub_menu['sub_menu'] ) ) ) {
 							$has_valid_sub_menu = true;
 							break;
 						}
@@ -246,12 +248,21 @@ class Sync_Settings {
 				$menu['menu_name'],
 				$menu['menu_name'],
 				'manage_options',
-				$menu_slug === 'sync' ? 'sync' : 'sync-' . $menu_slug,
+				'sync' === $menu_slug ? 'sync' : 'sync-' . $menu_slug,
 				array( $this, 'settings_page' ),
 				$menu['position']
 			);
 		}
 	}
+
+	/**
+	 * Process icon.
+	 *
+	 * @param string $icon_url Icon URL.
+	 *
+	 * @since 1.0.0
+	 */
+	public function process_icon( $icon_url ) {}
 
 	/**
 	 * Settings page.
@@ -261,7 +272,8 @@ class Sync_Settings {
 	public function settings_page() {
 		global $plugin_page;
 
-		error_log( 'Sync Menus: ' . print_r( $this->sync_menus, true ) );
+		// Remove sync- from the plugin_page to get the actual menu slug.
+		$current_settings_page = str_replace( 'sync-', '', $plugin_page );
 		?>
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
@@ -269,46 +281,55 @@ class Sync_Settings {
 	<div class="sync-logo">
 		<span class="sync-logo-icon">S</span>
 		<span class="sync-logo-text">SYNC</span>
-		<span class="sync-tagline">Superior WordPress Synchronization</span>
+		<span class="sync-tagline">SYNC the Web</span>
 	</div>
 	<button class="sync-mobile-toggle" id="sync-mobile-toggle">
 		<span class="dashicons dashicons-menu-alt"></span>
 	</button>
 	</header>
 
+		<?php
+		if ( $this->menus[ $current_settings_page ]['create_sync_menu'] && isset( $this->sync_menus[ $current_settings_page ] ) && is_array( $this->sync_menus[ $current_settings_page ] ) ) {
+			?>
 	<!-- Side navigation -->
 	<nav class="sync-sidebar" id="sync-sidebar">
 	<ul class="sync-menu">
-		<?php
-		global $plugin_page;
-		if ( isset( $this->sync_menus[ $plugin_page ] ) ) {
-			foreach ( $this->sync_menus[ $plugin_page ] as $menu ) {
-				$is_active = ( $plugin_page === $menu['menu_slug'] ) ? 'sync-active' : '';
-				echo '<li class="sync-menu-item ' . esc_attr( $is_active ) . '">';
-				echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . $menu['menu_slug'] ) ) . '" class="sync-menu-link">';
-				echo '<span class="dashicons dashicons-admin-generic"></span>'; // Replace with actual icon if available
-				echo '<span class="sync-menu-text">' . esc_html( $menu['menu_name'] ) . '</span>';
-				echo '</a>';
-
+			<?php
+			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
+			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+				?>
+				<li class="sync-menu-item">
+				<a href="#<?php echo esc_attr( 'sync-' . $menu_slug ); ?>" class="sync-menu-link">
+					<?php $this->process_icon( $menu['icon_url'] ); ?>
+					<span class="sync-menu-text"><?php echo esc_html( $menu['menu_name'] ); ?></span>
+				</a>
+				<?php
 				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
-					echo '<ul class="sync-submenu">';
-					foreach ( $menu['sub_menu'] as $sub_menu ) {
-						$is_sub_active = ( $plugin_page === $sub_menu['menu_slug'] ) ? 'sync-active' : '';
-						echo '<li class="sync-submenu-item ' . esc_attr( $is_sub_active ) . '">';
-						echo '<a href="' . esc_url( admin_url( 'admin.php?page=' . $sub_menu['menu_slug'] ) ) . '" class="sync-submenu-link">';
-						echo esc_html( $sub_menu['menu_name'] );
-						echo '</a>';
-						echo '</li>';
-					}
-					echo '</ul>';
+					?>
+					<ul class="sync-submenu">
+						<?php
+						foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+							?>
+							<li class="sync-submenu-item">
+								<a href="#<?php echo esc_attr( 'sync-' . $sub_menu_slug ); ?>" class="sync-submenu-link"><?php echo esc_html( $sub_menu['menu_name'] ); ?></a>
+							</li>
+							<?php
+						}
+						?>
+					</ul>
+					<?php
 				}
-
-				echo '</li>';
+				?>
+				</li>
+				<?php
 			}
-		}
-		?>
+			?>
 	</ul>
 	</nav>
+
+			<?php
+		}
+		?>
 
 	<!-- Main content area -->
 	<main class="sync-content">
@@ -322,7 +343,7 @@ class Sync_Settings {
 		<span class="sync-dismiss-icon dashicons dashicons-no-alt"></span>
 		</div>
 		<div class="sync-card-content">
-		<h2 class="sync-card-title">Congratulations! <?php echo $plugin_page; ?></h2>
+		<h2 class="sync-card-title">Congratulations!</h2>
 		<p class="sync-highlight">Sync is now activated and ready to work for you.<br>Your sites should be synchronized faster now!</p>
 		<p>To guarantee efficient synchronization, Sync automatically applies best practices for WordPress multi-site management.</p>
 		<p>We also enable options that provide immediate benefits to your workflow.</p>
