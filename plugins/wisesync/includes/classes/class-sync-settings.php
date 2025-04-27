@@ -61,15 +61,15 @@ class Sync_Settings {
 	/**
 	 * Add WP menu.
 	 *
-	 * @param string $menu_slug Menu slug.
-	 * @param string $menu_name Menu name.
-	 * @param int    $position Menu position.
-	 * @param bool   $create_sync_menu Create sync menu.
-	 * @param string $settings_level Settings level (site, network, both).
+	 * @param string     $menu_slug Menu slug.
+	 * @param string     $menu_name Menu name.
+	 * @param int        $position Menu position.
+	 * @param bool|array $create_sync_menu Create sync menu.
+	 * @param string     $settings_level Settings level (site, network, both).
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site' ) {
+	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = false, $settings_level = 'site' ) {
 
 		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
@@ -83,10 +83,6 @@ class Sync_Settings {
 			return;
 		}
 	
-		if ( ! is_bool( $create_sync_menu ) ) {
-			return;
-		}
-	
 		if ( ! in_array( $settings_level, array( 'site', 'network', 'both' ), true ) ) {
 			return;
 		}
@@ -94,9 +90,19 @@ class Sync_Settings {
 		$this->menus[ $menu_slug ] = array(
 			'menu_name'        => $menu_name,
 			'position'         => $position,
-			'create_sync_menu' => $create_sync_menu,
+			'create_sync_menu' => false === $create_sync_menu ? false : true,
 			'settings_level'   => $settings_level,
 		);
+
+		// Check if, $create_sync_menu is array and have keys menu_name (required) which is not empty and string, and icon_url (optional, default null, else string and null can be set in array), position will always be -1 and sub_menu will always be false.
+		if ( is_array( $create_sync_menu ) && isset( $create_sync_menu['menu_name'] ) && ! empty( $create_sync_menu['menu_name'] ) && is_string( $create_sync_menu['menu_name'] ) ) {
+			$this->sync_menus[ $menu_slug ][''] = array(
+				'menu_name' => $create_sync_menu['menu_name'],
+				'icon_url'  => isset( $create_sync_menu['icon_url'] ) ? $create_sync_menu['icon_url'] : null,
+				'position'  => -1,
+				'sub_menu'  => false,
+			);
+		}
 	}
 
 	/**
@@ -107,7 +113,7 @@ class Sync_Settings {
 	 * @param string|bool $menu_slug         Menu slug (optional).
 	 * @param string|null $icon_url          Icon URL (optional).
 	 * @param int|null    $position          Menu position (optional).
-	 * @param bool        $sub_menu_support  Whether sub-menu support is enabled (optional).
+	 * @param bool|array  $sub_menu_support  Whether sub-menu support is enabled (optional).
 	 */
 	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
 		// Validate inputs.
@@ -127,7 +133,8 @@ class Sync_Settings {
 			return;
 		}
 
-		if ( null !== $sub_menu_support && false === is_bool( $sub_menu_support ) ) {
+		// $sub_menu_support must be false or array, if array, then must have key menu_name and menu_slug, both must be string and not empty, both are required, else return early.
+		if ( ! ( false === $sub_menu_support || ( is_array( $sub_menu_support ) && isset( $sub_menu_support['menu_name'] ) && ! empty( $sub_menu_support['menu_name'] ) && is_string( $sub_menu_support['menu_name'] ) && isset( $sub_menu_support['menu_slug'] ) && ! empty( $sub_menu_support['menu_slug'] ) && is_string( $sub_menu_support['menu_slug'] ) ) ) ) {
 			return;
 		}
 
@@ -139,7 +146,12 @@ class Sync_Settings {
 			'menu_name' => $menu_name,
 			'icon_url'  => $icon_url,
 			'position'  => $position,
-			'sub_menu'  => $sub_menu_support ? array() : false,
+			'sub_menu'  => $sub_menu_support ? array(
+				$sub_menu_support['menu_slug'] => array(
+					'menu_name' => $sub_menu_support['menu_name'],
+					'position'  => -1,
+				),
+			) : false,
 		);
 	}
 
@@ -195,7 +207,7 @@ class Sync_Settings {
 		$this->menus['sync'] = array(
 			'menu_name'        => 'Sync',
 			'position'         => -1,
-			'create_sync_menu' => true,
+			'create_sync_menu' => false,
 			'settings_level'   => 'both',
 		);
 
@@ -298,29 +310,29 @@ class Sync_Settings {
 			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
 			foreach ( $current_sync_menu as $menu_slug => $menu ) {
 				?>
-				<li class="sync-menu-item">
-				<a href="#<?php echo esc_attr( 'sync-' . $menu_slug ); ?>" class="sync-menu-link">
-					<?php $this->process_icon( $menu['icon_url'] ); ?>
-					<span class="sync-menu-text"><?php echo esc_html( $menu['menu_name'] ); ?></span>
-				</a>
+			<li class="sync-menu-item">
+			<a href="#<?php echo esc_attr( 'sync-' . $menu_slug ); ?>" class="sync-menu-link" data-slug="<?php echo esc_attr( $menu_slug ); ?>">
+				<?php $this->process_icon( $menu['icon_url'] ); ?>
+				<span class="sync-menu-text"><?php echo esc_html( $menu['menu_name'] ); ?></span>
+			</a>
 				<?php
 				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
 					?>
-					<ul class="sync-submenu">
-						<?php
-						foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
-							?>
-							<li class="sync-submenu-item">
-								<a href="#<?php echo esc_attr( 'sync-' . $sub_menu_slug ); ?>" class="sync-submenu-link"><?php echo esc_html( $sub_menu['menu_name'] ); ?></a>
-							</li>
-							<?php
-						}
+				<ul class="sync-submenu">
+					<?php
+					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
 						?>
-					</ul>
+						<li class="sync-submenu-item">
+							<a href="#<?php echo esc_attr( 'sync-' . $sub_menu_slug ); ?>" class="sync-submenu-link" data-parent="<?php echo esc_attr( $menu_slug ); ?>" data-slug="<?php echo esc_attr( $sub_menu_slug ); ?>"><?php echo esc_html( $sub_menu['menu_name'] ); ?></a>
+						</li>
+						<?php
+					}
+					?>
+				</ul>
 					<?php
 				}
 				?>
-				</li>
+			</li>
 				<?php
 			}
 			?>
@@ -331,12 +343,109 @@ class Sync_Settings {
 		}
 		?>
 
-	<!-- Main content area -->
+	<!-- Main content area - Dynamic -->
 	<main class="sync-content">
-	<div class="sync-content-header">
-		<h1 class="sync-page-title">Dashboard</h1>
-	</div>
+		<div class="sync-content-header">
+			<h1 class="sync-page-title">Dashboard</h1>
+		</div>
 
+		<!-- Dynamic content container -->
+		<div id="sync-dynamic-content">
+			<?php
+			// Initialize with the default content (dashboard).
+			$default_menu_slug = 'dashboard';
+			$default_page_data = array(
+				'name' => 'Dashboard',
+				'slug' => $default_menu_slug,
+			);
+			
+			// Apply filter for the default menu content.
+			$default_content = apply_filters(
+				"sync_register_menu_settings_{$default_menu_slug}", 
+				$this->get_default_dashboard_content(),
+				$default_page_data
+			);
+			
+			echo wp_kses_post( $default_content );
+			?>
+		</div>
+	</main>
+</div>
+
+<!-- Hidden templates for menu and submenu pages -->
+<div id="sync-page-templates" style="display: none;">
+		<?php
+		// Generate hidden templates for all menu pages.
+		if ( isset( $this->sync_menus[ $current_settings_page ] ) && is_array( $this->sync_menus[ $current_settings_page ] ) ) {
+			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
+		
+			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+				// Skip the default menu as it's already rendered.
+				if ( $menu_slug === $default_menu_slug ) {
+					continue;
+				}
+			
+				$page_data = array(
+					'name' => $menu['menu_name'],
+					'slug' => $menu_slug,
+				);
+			
+				// Create a template for this menu page.
+				$menu_content = apply_filters(
+					"sync_register_menu_settings_{$menu_slug}", 
+					'', // Empty default content.
+					$page_data
+				);
+			
+				if ( ! empty( $menu_content ) ) {
+					?>
+				<template id="sync-page-<?php echo esc_attr( $menu_slug ); ?>">
+						<?php echo wp_kses_post( $menu_content ); ?>
+				</template>
+						<?php
+				}
+			
+				// Process submenu pages.
+				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
+					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+						$sub_page_data = array(
+							'menu_name'   => $sub_menu['menu_name'],
+							'parent_slug' => $menu_slug,
+							'slug'        => $sub_menu_slug,
+						);
+					
+						// Create a template for this submenu page.
+						$submenu_content = apply_filters(
+							"sync_register_submenu_settings_{$sub_menu_slug}", 
+							'', // Empty default content.
+							$sub_page_data
+						);
+					
+						if ( ! empty( $submenu_content ) ) {
+							?>
+						<template id="sync-subpage-<?php echo esc_attr( $menu_slug ); ?>-<?php echo esc_attr( $sub_menu_slug ); ?>">
+								<?php echo wp_kses_post( $submenu_content ); ?>
+						</template>
+								<?php
+						}
+					}
+				}
+			}
+		}
+		?>
+</div>
+
+		<?php
+	}
+
+	/**
+	 * Get default dashboard content.
+	 * 
+	 * @return string HTML content for dashboard
+	 */
+	private function get_default_dashboard_content() {
+		ob_start();
+		?>
 	<!-- Dashboard welcome card -->
 	<div class="sync-card sync-welcome-card">
 		<div class="sync-card-dismissible">
@@ -416,9 +525,8 @@ class Sync_Settings {
 		</div>
 		</div>
 	</div>
-	</main>
-</div>
 		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -427,17 +535,20 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	private function add_dynamic_settings_pages() {
-		do_action('sync_register_menu_settings', function($page_details) {
-			foreach ($page_details as $slug => $details) {
-				echo '<section id="' . esc_attr($slug) . '">';
-				if (is_callable($details['callback'])) {
-					call_user_func($details['callback'], $details);
-				} else {
-					echo '<p>' . esc_html($details['name']) . '</p>';
+		do_action(
+			'sync_register_menu_settings',
+			function ( $page_details ) {
+				foreach ( $page_details as $slug => $details ) {
+					echo '<section id="' . esc_attr( $slug ) . '">';
+					if ( is_callable( $details['callback'] ) ) {
+						call_user_func( $details['callback'], $details );
+					} else {
+						echo '<p>' . esc_html( $details['name'] ) . '</p>';
+					}
+					echo '</section>';
 				}
-				echo '</section>';
 			}
-		});
+		);
 	}
 
 	/**
@@ -449,14 +560,14 @@ class Sync_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public function create_single_ajax_settings_page($page_details, $settings_array, $refresh = false) {
-		$nonce = wp_create_nonce($page_details['slug']);
-		echo '<form id="' . esc_attr($page_details['slug']) . '" method="post">';
-		foreach ($settings_array as $key => $value) {
-			echo '<label>' . esc_html($key) . '</label>';
-			echo '<input type="text" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+	public function create_single_ajax_settings_page( $page_details, $settings_array, $refresh = false ) {
+		$nonce = wp_create_nonce( $page_details['slug'] );
+		echo '<form id="' . esc_attr( $page_details['slug'] ) . '" method="post">';
+		foreach ( $settings_array as $key => $value ) {
+			echo '<label>' . esc_html( $key ) . '</label>';
+			echo '<input type="text" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
 		}
-		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($nonce) . '" />';
+		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr( $nonce ) . '" />';
 		echo '<button type="submit">Save</button>';
 		echo '</form>';
 	}
@@ -469,12 +580,12 @@ class Sync_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public function create_each_ajax_settings_page($page_details, $settings_array) {
-		$nonce = wp_create_nonce($page_details['slug']);
-		foreach ($settings_array as $key => $value) {
-			echo '<label>' . esc_html($key) . '</label>';
-			echo '<input type="checkbox" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '" />';
+	public function create_each_ajax_settings_page( $page_details, $settings_array ) {
+		$nonce = wp_create_nonce( $page_details['slug'] );
+		foreach ( $settings_array as $key => $value ) {
+			echo '<label>' . esc_html( $key ) . '</label>';
+			echo '<input type="checkbox" name="' . esc_attr( $key ) . '" value="' . esc_attr( $value ) . '" />';
 		}
-		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr($nonce) . '" />';
+		echo '<input type="hidden" name="_wpnonce" value="' . esc_attr( $nonce ) . '" />';
 	}
 }
