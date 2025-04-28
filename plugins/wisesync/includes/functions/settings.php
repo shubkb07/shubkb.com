@@ -218,8 +218,16 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
 }
 
+/**
+ * Default Show Function
+ *
+ * This function is called when no specific settings are defined for a menu.
+ *
+ * @param string $html_content HTML content.
+ * @param array  $page_details Page details.
+ */
 function default_show( $html_content, $page_details ) {
-	return 'Page Details' . print_r( $page_details, true );
+	return 'Page Details' . wp_json_encode( $page_details );
 }
 
 // Update actions to dynamically load content for all menus and submenus.
