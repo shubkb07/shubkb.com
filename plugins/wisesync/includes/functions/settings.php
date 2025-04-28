@@ -71,7 +71,7 @@ function sync_add_sync_menu( $wp_menu_slug, $menu_name, $menu_slug = false, $ico
 function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $menu_slug, $position = null ) {
 	global $sync_settings;
 
-	$sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $position );
+	return $sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $position );
 }
 
 /**
@@ -84,7 +84,7 @@ function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $menu_slug, $pos
 function sync_create_single_ajax_settings_page( $page_details, $setting_array, $refresh = false ) {
 	global $sync_settings;
 
-	$sync_settings->create_single_ajax_settings_page( $page_details, $setting_array, $refresh );
+	return $sync_settings->create_single_ajax_settings_page( $page_details, $setting_array, $refresh );
 }
 
 /**
@@ -178,7 +178,7 @@ function sync_register_settings_dashboard( $html_content, $page_details ) {
 			),
 		),
 	);
-	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	return sync_create_each_ajax_settings_page( $page_details, $setting_array );
 }
 
 /**
@@ -218,12 +218,20 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
 }
 
+/**
+ * Default Show Function
+ *
+ * This function is called when no specific settings are defined for a menu.
+ *
+ * @param string $html_content HTML content.
+ * @param array  $page_details Page details.
+ */
 function default_show( $html_content, $page_details ) {
-	return 'Page Details' . print_r( $page_details, true );
+	return 'Page Details' . wp_json_encode( $page_details );
 }
 
 // Update actions to dynamically load content for all menus and submenus.
-add_filter( 'sync_register_menu_settings', 'sync_register_settings_tools', 10, 2 );
+add_filter( 'sync_register_menu_settings', 'sync_register_settings_dashboard', 10, 2 );
 add_filter( 'sync_register_menu_dashboard', 'sync_register_settings_tools', 10, 2 );
 add_filter( 'sync_register_menu_dashboard_sub_pika', 'sync_register_settings_tools', 10, 2 );
 add_filter( 'sync_register_menu_dashboard_sub_logs', 'sync_register_settings_tools', 10, 2 );
