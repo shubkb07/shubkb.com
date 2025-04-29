@@ -231,15 +231,15 @@ class Sync_Settings {
 	 */
 	private function init_settings_pages() {
 
-		foreach ( $this->menus as $menu_slug => $menu ) {
+		foreach ( $this->menus as $menu_slug => $current_menu ) {
 
-			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
+			if ( ! is_network_admin() && ! in_array( $current_menu['settings_level'], array( 'site', 'both' ), true ) ) {
 				return; // Only show on site admin.
-			} elseif ( is_network_admin() && ! in_array( $menu['settings_level'], array( 'network', 'both' ), true ) ) {
+			} elseif ( is_network_admin() && ! in_array( $current_menu['settings_level'], array( 'network', 'both' ), true ) ) {
 				return; // Only show on network admin.
 			}
 
-			if ( $menu['create_sync_menu'] ) {
+			if ( $current_menu['create_sync_menu'] ) {
 				if ( isset( $this->sync_menus[ $menu_slug ] ) && is_array( $this->sync_menus[ $menu_slug ] ) ) {
 					$has_valid_sub_menu = false;
 					foreach ( $this->sync_menus[ $menu_slug ] as $sub_menu ) {
@@ -257,12 +257,12 @@ class Sync_Settings {
 
 			add_submenu_page(
 				'sync',
-				$menu['menu_name'],
-				$menu['menu_name'],
+				$current_menu['menu_name'],
+				$current_menu['menu_name'],
 				'manage_options',
 				'sync' === $menu_slug ? 'sync' : 'sync-' . $menu_slug,
 				array( $this, 'settings_page' ),
-				$menu['position']
+				$current_menu['position']
 			);
 		}
 	}
@@ -316,19 +316,19 @@ class Sync_Settings {
 	<ul class="sync-menu">
 			<?php
 			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
-			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+			foreach ( $current_sync_menu as $menu_slug => $current_menu ) {
 				?>
 	<li class="sync-menu-item <?php echo $menu_slug === $default_menu_slug ? 'sync-active' : ''; ?>">
 	<a href="#<?php echo esc_attr( 'sync-' . $menu_slug ); ?>" class="sync-menu-link" data-slug="<?php echo esc_attr( $menu_slug ); ?>">
-				<?php $this->process_icon( $menu['icon_url'] ); ?>
-		<span class="sync-menu-text"><?php echo esc_html( $menu['menu_name'] ); ?></span>
+				<?php $this->process_icon( $current_menu['icon_url'] ); ?>
+		<span class="sync-menu-text"><?php echo esc_html( $current_menu['menu_name'] ); ?></span>
 	</a>
 				<?php
-				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
+				if ( isset( $current_menu['sub_menu'] ) && is_array( $current_menu['sub_menu'] ) && ! empty( $current_menu['sub_menu'] ) ) {
 					?>
 		<ul class="sync-submenu">
 					<?php
-					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+					foreach ( $current_menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
 						?>
 				<li class="sync-submenu-item">
 					<a href="#<?php echo esc_attr( 'sync-' . $menu_slug . '-' . $sub_menu_slug ); ?>" class="sync-submenu-link" data-parent="<?php echo esc_attr( $menu_slug ); ?>" data-slug="<?php echo esc_attr( $sub_menu_slug ); ?>"><?php echo esc_html( $sub_menu['menu_name'] ); ?></a>
@@ -378,9 +378,9 @@ class Sync_Settings {
 		if ( isset( $this->sync_menus[ $current_settings_page ] ) && is_array( $this->sync_menus[ $current_settings_page ] ) ) {
 			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
 
-			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+			foreach ( $current_sync_menu as $menu_slug => $current_menu ) {
 				$page_data = array(
-					'name' => $menu['menu_name'],
+					'name' => $current_menu['menu_name'],
 					'slug' => $menu_slug,
 				);
 	
@@ -400,8 +400,8 @@ class Sync_Settings {
 				}
 	
 				// Process submenu pages.
-				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
-					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+				if ( isset( $current_menu['sub_menu'] ) && is_array( $current_menu['sub_menu'] ) && ! empty( $current_menu['sub_menu'] ) ) {
+					foreach ( $current_menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
 						$sub_page_data = array(
 							'name'        => $sub_menu['menu_name'],
 							'parent_slug' => $menu_slug,
