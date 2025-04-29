@@ -394,7 +394,7 @@ class Sync_Settings {
 				if ( ! empty( $menu_content ) ) {
 					?>
 		<template id="sync-page-<?php echo esc_attr( $menu_slug ); ?>">
-						<?php echo wp_kses_post( $menu_content ); ?>
+					<?php $this->sanitize_form_output( $menu_content ); ?>
 		</template>
 						<?php
 				}
@@ -418,7 +418,7 @@ class Sync_Settings {
 						if ( ! empty( $submenu_content ) ) {
 							?>
 				<template id="sync-subpage-<?php echo esc_attr( $menu_slug ); ?>-<?php echo esc_attr( $sub_menu_slug ); ?>">
-								<?php echo wp_kses_post( $submenu_content ); ?>
+							<?php $this->sanitize_form_output( $submenu_content ); ?>
 				</template>
 								<?php
 						}
@@ -903,6 +903,92 @@ class Sync_Settings {
 		</div>
 		<?php
 
+		if ( $return_html ) {
+			return ob_get_clean();
+		}
+	}
+
+	/**
+	 * Sanitize form output
+	 *
+	 * @param String $html HTML to sanitize.
+	 * @param bool   $return_html Whether to return the HTML instead of echoing it.
+	 */
+	private function sanitize_form_output( $html, $return_html = false ) {
+		if ( $return_html ) {
+			ob_start();
+		}
+		$allowed_tags = array(
+			'form'     => array(
+				'class'  => true,
+				'id'     => true,
+				'method' => true,
+				'action' => true,
+				'data-*' => true,
+			),
+			'input'    => array(
+				'type'        => true,
+				'name'        => true,
+				'value'       => true,
+				'class'       => true,
+				'id'          => true,
+				'placeholder' => true,
+				'required'    => true,
+				'data-*'      => true,
+			),
+			'button'   => array(
+				'type'  => true,
+				'class' => true,
+				'id'    => true,
+				'name'  => true,
+				'value' => true,
+			),
+			'div'      => array(
+				'class'  => true,
+				'id'     => true,
+				'data-*' => true,
+			),
+			'span'     => array(
+				'class' => true,
+				'id'    => true,
+			),
+			'label'    => array(
+				'for'   => true,
+				'class' => true,
+			),
+			'select'   => array(
+				'name'     => true,
+				'class'    => true,
+				'id'       => true,
+				'required' => true,
+			),
+			'option'   => array(
+				'value'    => true,
+				'selected' => true,
+			),
+			'textarea' => array(
+				'name'        => true,
+				'class'       => true,
+				'id'          => true,
+				'placeholder' => true,
+				'required'    => true,
+			),
+		);
+
+		// Add more allowed tags as needed.
+		$allowed_tags      = array_merge( $allowed_tags, wp_kses_allowed_html( 'post' ) );
+		$allowed_tags['*'] = array(
+			'class'  => true,
+			'id'     => true,
+			'style'  => true,
+			'data-*' => true,
+		);
+
+		// Filter to allow custom tags.
+		$allowed_tags = apply_filters( 'sync_allowed_html', $allowed_tags );
+
+		// Sanitize the HTML.
+		echo wp_kses( $html, $allowed_tags );
 		if ( $return_html ) {
 			return ob_get_clean();
 		}
