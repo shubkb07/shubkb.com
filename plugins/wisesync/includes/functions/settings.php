@@ -96,7 +96,7 @@ function sync_create_single_ajax_settings_page( $page_details, $setting_array, $
 function sync_create_each_ajax_settings_page( $page_details, $setting_array ) {
 	global $sync_settings;
 
-	$sync_settings->create_each_ajax_settings_page( $page_details, $setting_array );
+	return $sync_settings->create_each_ajax_settings_page( $page_details, $setting_array );
 }
 
 add_action(
@@ -178,7 +178,8 @@ function sync_register_settings_dashboard( $html_content, $page_details ) {
 			),
 		),
 	);
-	return sync_create_each_ajax_settings_page( $page_details, $setting_array );
+	$html_content  = sync_create_each_ajax_settings_page( $page_details, $setting_array );
+	return $html_content;
 }
 
 /**
@@ -215,7 +216,8 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 			),
 		),
 	);
-	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	$html_content  = sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	return $html_content;
 }
 
 /**
@@ -231,7 +233,7 @@ function default_show( $html_content, $page_details ) {
 }
 
 // Update actions to dynamically load content for all menus and submenus.
-add_filter( 'sync_register_menu_settings', 'sync_register_settings_dashboard', 10, 2 );
+add_filter( 'sync_register_menu_settings', 'sync_register_settings_tools', 10, 2 );
 add_filter( 'sync_register_menu_dashboard', 'sync_register_settings_tools', 10, 2 );
 add_filter( 'sync_register_menu_dashboard_sub_pika', 'sync_register_settings_tools', 10, 2 );
 add_filter( 'sync_register_menu_dashboard_sub_logs', 'sync_register_settings_tools', 10, 2 );

@@ -20,3 +20,4 @@
 /themes/papersync/**/*.json
 /wp-cli.phar
 **/debug.log
+**/temp.*
