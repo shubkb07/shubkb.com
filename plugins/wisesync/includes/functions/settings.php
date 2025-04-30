@@ -15,13 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Sync Settings Class.
- *
- * @global Sync_Settings $sync_settings
- */
-$sync_settings = new Sync_Settings();
-
-/**
  * Initialize settings page.
  *
  * @param string $menu_slug Menu slug.

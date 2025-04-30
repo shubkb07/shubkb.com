@@ -54,34 +54,34 @@ msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
 msgstr ""
 
-#: includes/functions/settings.php:107
+#: includes/functions/settings.php:100
 msgid "WiseSync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:119
+#: includes/functions/settings.php:112
 msgid "Sync Dashboard"
 msgstr ""
 
-#: includes/functions/settings.php:128
+#: includes/functions/settings.php:121
 msgid "Sync Logs"
 msgstr ""
 
-#: includes/functions/settings.php:129
+#: includes/functions/settings.php:122
 msgid "Sync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:132
+#: includes/functions/settings.php:125
 msgid "Sync Reports"
 msgstr ""
 
-#: includes/functions/settings.php:137
+#: includes/functions/settings.php:130
 msgid "Advanced Sync"
 msgstr ""
 
-#: includes/functions/settings.php:146
+#: includes/functions/settings.php:139
 msgid "Sync Tools"
 msgstr ""
 
-#: includes/functions/settings.php:147
+#: includes/functions/settings.php:140
 msgid "Sync Diagnostics"
 msgstr ""

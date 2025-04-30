@@ -51,8 +51,11 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
+
+		global $sync_ajax;
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
+		add_action( 'sync_register_ajax_actions', array( $this, 'register_settings_ajax' ) );
 
 		// Ensure sync_menus is initialized properly in the constructor.
 		$this->sync_menus = array();
@@ -231,15 +234,15 @@ class Sync_Settings {
 	 */
 	private function init_settings_pages() {
 
-		foreach ( $this->menus as $menu_slug => $menu ) {
+		foreach ( $this->menus as $menu_slug => $current_menu ) {
 
-			if ( ! is_network_admin() && ! in_array( $menu['settings_level'], array( 'site', 'both' ), true ) ) {
+			if ( ! is_network_admin() && ! in_array( $current_menu['settings_level'], array( 'site', 'both' ), true ) ) {
 				return; // Only show on site admin.
-			} elseif ( is_network_admin() && ! in_array( $menu['settings_level'], array( 'network', 'both' ), true ) ) {
+			} elseif ( is_network_admin() && ! in_array( $current_menu['settings_level'], array( 'network', 'both' ), true ) ) {
 				return; // Only show on network admin.
 			}
 
-			if ( $menu['create_sync_menu'] ) {
+			if ( $current_menu['create_sync_menu'] ) {
 				if ( isset( $this->sync_menus[ $menu_slug ] ) && is_array( $this->sync_menus[ $menu_slug ] ) ) {
 					$has_valid_sub_menu = false;
 					foreach ( $this->sync_menus[ $menu_slug ] as $sub_menu ) {
@@ -257,24 +260,43 @@ class Sync_Settings {
 
 			add_submenu_page(
 				'sync',
-				$menu['menu_name'],
-				$menu['menu_name'],
+				$current_menu['menu_name'],
+				$current_menu['menu_name'],
 				'manage_options',
 				'sync' === $menu_slug ? 'sync' : 'sync-' . $menu_slug,
 				array( $this, 'settings_page' ),
-				$menu['position']
+				$current_menu['position']
 			);
 		}
 	}
 
 	/**
-	 * Process icon.
-	 *
-	 * @param string $icon_url Icon URL.
+	 * Settings AJAX.
 	 *
 	 * @since 1.0.0
 	 */
-	public function process_icon( $icon_url ) {}
+	public function register_settings_ajax() {
+
+		sync_register_ajax( '', '' );
+	}
+
+	/**
+	 * Process icon.
+	 *
+	 * @param string $icon_url    Icon URL.
+	 * @param bool   $return_html Whether to return the HTML instead of echoing it.
+	 *
+	 * @since 1.0.0
+	 */
+	public function process_icon( $icon_url, $return_html ) {
+		if ( $return_html ) {
+			ob_start();
+		}
+
+		if ( $return_html ) {
+			return ob_get_clean();
+		}
+	}
 
 	/**
 	 * Settings page.
@@ -298,14 +320,14 @@ class Sync_Settings {
 <div class="sync-container">
 	<!-- Main navigation with logo and mobile menu toggle -->
 	<header class="sync-header">
-	<div class="sync-logo">
-		<span class="sync-logo-icon">S</span>
-		<span class="sync-logo-text">SYNC</span>
-		<span class="sync-tagline">SYNC the Web</span>
-	</div>
-	<button class="sync-mobile-toggle" id="sync-mobile-toggle">
-		<span class="dashicons dashicons-menu-alt"></span>
-	</button>
+		<div class="sync-logo">
+			<span class="sync-logo-icon">S</span>
+			<span class="sync-logo-text">SYNC</span>
+			<span class="sync-tagline">SYNC the Web</span>
+		</div>
+		<button class="sync-mobile-toggle" id="sync-mobile-toggle">
+			<span class="dashicons dashicons-menu-alt"></span>
+		</button>
 	</header>
 
 		<?php
@@ -316,19 +338,19 @@ class Sync_Settings {
 	<ul class="sync-menu">
 			<?php
 			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
-			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+			foreach ( $current_sync_menu as $menu_slug => $current_menu ) {
 				?>
 	<li class="sync-menu-item <?php echo $menu_slug === $default_menu_slug ? 'sync-active' : ''; ?>">
 	<a href="#<?php echo esc_attr( 'sync-' . $menu_slug ); ?>" class="sync-menu-link" data-slug="<?php echo esc_attr( $menu_slug ); ?>">
-				<?php $this->process_icon( $menu['icon_url'] ); ?>
-		<span class="sync-menu-text"><?php echo esc_html( $menu['menu_name'] ); ?></span>
+				<?php $this->process_icon( $current_menu['icon_url'] ); ?>
+		<span class="sync-menu-text"><?php echo esc_html( $current_menu['menu_name'] ); ?></span>
 	</a>
 				<?php
-				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
+				if ( isset( $current_menu['sub_menu'] ) && is_array( $current_menu['sub_menu'] ) && ! empty( $current_menu['sub_menu'] ) ) {
 					?>
 		<ul class="sync-submenu">
 					<?php
-					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+					foreach ( $current_menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
 						?>
 				<li class="sync-submenu-item">
 					<a href="#<?php echo esc_attr( 'sync-' . $menu_slug . '-' . $sub_menu_slug ); ?>" class="sync-submenu-link" data-parent="<?php echo esc_attr( $menu_slug ); ?>" data-slug="<?php echo esc_attr( $sub_menu_slug ); ?>"><?php echo esc_html( $sub_menu['menu_name'] ); ?></a>
@@ -367,7 +389,7 @@ class Sync_Settings {
 		</div>
 
 		<!-- Dynamic content container - Now empty to be filled by JS -->
-		<div id="sync-dynamic-content"></div>
+		<div id="sync-dynamic-content" class="sync-dynamic-content"></div>
 	</main>
 </div>
 
@@ -378,9 +400,9 @@ class Sync_Settings {
 		if ( isset( $this->sync_menus[ $current_settings_page ] ) && is_array( $this->sync_menus[ $current_settings_page ] ) ) {
 			$current_sync_menu = $this->sync_menus[ $current_settings_page ];
 
-			foreach ( $current_sync_menu as $menu_slug => $menu ) {
+			foreach ( $current_sync_menu as $menu_slug => $current_menu ) {
 				$page_data = array(
-					'name' => $menu['menu_name'],
+					'name' => $current_menu['menu_name'],
 					'slug' => $menu_slug,
 				);
 	
@@ -400,8 +422,8 @@ class Sync_Settings {
 				}
 	
 				// Process submenu pages.
-				if ( isset( $menu['sub_menu'] ) && is_array( $menu['sub_menu'] ) && ! empty( $menu['sub_menu'] ) ) {
-					foreach ( $menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
+				if ( isset( $current_menu['sub_menu'] ) && is_array( $current_menu['sub_menu'] ) && ! empty( $current_menu['sub_menu'] ) ) {
+					foreach ( $current_menu['sub_menu'] as $sub_menu_slug => $sub_menu ) {
 						$sub_page_data = array(
 							'name'        => $sub_menu['menu_name'],
 							'parent_slug' => $menu_slug,
@@ -444,10 +466,10 @@ class Sync_Settings {
 	 */
 	public function create_single_ajax_settings_page( $page_details, $settings_array, $submit_button_text = 'Save Changes', $refresh = false ) {
 		// Validate page details.
-		$slug        = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync-settings';
-		$name        = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Settings';
+		$slug        = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync';
+		$name        = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Sync';
 		$parent_slug = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
-		
+
 		// Create nonce key.
 		$nonce_key = 'sync_setting_' . ( $parent_slug ? $parent_slug . '_' : '' ) . $slug;
 		$nonce     = wp_create_nonce( $nonce_key );
@@ -459,10 +481,6 @@ class Sync_Settings {
 		?>
 		<div class="sync-settings-container sync-single-form" data-refresh="<?php echo esc_attr( $refresh ? 'true' : 'false' ); ?>">
 		
-		<div class="sync-settings-header">
-			<h2><?php echo esc_html( $name ); ?></h2>
-		</div>
-		
 		<form class="sync-settings-form" id="sync-form-<?php echo esc_attr( $slug ); ?>" data-slug="<?php echo esc_attr( $slug ); ?>">
 		
 		<input type="hidden" name="sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
@@ -472,7 +490,7 @@ class Sync_Settings {
 		<?php $this->generate_settings_html( $settings_array ); ?>
 		
 		<div class="sync-form-footer">
-		<button type="submit" class="sync-button sync-primary-button sync-submit-button">
+		<button type="button" class="sync-button sync-primary-button sync-submit-button">
 		<span class="dashicons dashicons-saved"></span><?php echo esc_html( $submit_button_text ); ?>
 		</button>
 		<div class="sync-form-message"></div>
@@ -508,10 +526,6 @@ class Sync_Settings {
 		// Begin container.
 		?>
 		<div class="sync-settings-container sync-each-setting" data-slug="<?php echo esc_attr( $slug ); ?>">
-		
-		<div class="sync-settings-header">
-		<h2><?php echo esc_html( $name ); ?></h2>
-		</div>
 		
 		<input type="hidden" id="sync-nonce-<?php echo esc_attr( $slug ); ?>" name="sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
 		<input type="hidden" id="sync-nonce-key-<?php echo esc_attr( $slug ); ?>" name="sync_nonce_key" value="<?php echo esc_attr( $nonce_key ); ?>">
