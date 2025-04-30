@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+// Load Global WiseSync Plugin Classes.
+require_once WSYNC_PLUGIN_DIR . 'includes/load/classes.php';
+
 // Register Blocks Category.
 add_filter( 'block_categories_all', 'register_sync_blocks_category' );
 

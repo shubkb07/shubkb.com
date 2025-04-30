@@ -32,6 +32,7 @@ const validEventTypes = new Set( [
 	'touchmove',
 	'touchend',
 	'touchcancel',
+	'hashchange', // Added hashchange event
 ] );
 
 /**
@@ -256,6 +257,34 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 							}
 							: null,
 					};
+				} else if ( 'hashchange' === type ) {
+					matched = true;
+					const newURL = e.newURL || window.location.href;
+					const oldURL = e.oldURL || '';
+					
+					// Extract hash values
+					const newHash = newURL.includes('#') ? newURL.split('#')[1] : '';
+					const oldHash = oldURL.includes('#') ? oldURL.split('#')[1] : '';
+					
+					data.hashData = {
+						newURL,
+						oldURL,
+						newHash,
+						oldHash
+					};
+					
+					// Check for hash pattern match if specified in condition
+					if (handler.condition.hashPattern) {
+						if (typeof handler.condition.hashPattern === 'string') {
+							// Exact match
+							matched = newHash === handler.condition.hashPattern;
+							conditionMatchWith = handler.condition.hashPattern;
+						} else if (handler.condition.hashPattern instanceof RegExp) {
+							// Regex match
+							matched = handler.condition.hashPattern.test(newHash);
+							conditionMatchWith = handler.condition.hashPattern.toString();
+						}
+					}
 				} else {
 					matched = true;
 				}
@@ -295,7 +324,12 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 			}
 		};
 
-		const targetEl = 'scroll' === type ? window : htmlDocument;
+		// Select appropriate target for the event type
+		const targetEl = 
+			'scroll' === type ? window : 
+			'hashchange' === type ? window :
+			htmlDocument;
+			
 		targetEl.addEventListener( type, listener, false );
 
 		eventList[ type ] = { listener, handlers };
@@ -325,7 +359,10 @@ function deRegisterEvent( eventName ) { // eslint-disable-line no-unused-vars
 			delete handlers[ eventName ];
 			// Remove listener when no more handlers for this eventType
 			if ( 0 === Object.keys( handlers ).length ) {
-				const targetEl = 'scroll' === type ? window : htmlDocument;
+				const targetEl = 
+					'scroll' === type ? window : 
+					'hashchange' === type ? window :
+					htmlDocument;
 				targetEl.removeEventListener( type, listener, false );
 				delete eventList[ type ];
 			}
