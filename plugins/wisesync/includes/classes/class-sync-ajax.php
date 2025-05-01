@@ -119,7 +119,7 @@ class Sync_Ajax {
 
 		// Loop through $_REQUEST, Check if its stringigy JSON then decode it.
 
-		$ajax_request_data = array( 'req' => $this->sanitize_array( $_REQUEST ) );
+		$ajax_request_data = array( 'req' => $this->sanitize_array( $_REQUEST ), 'action' => $this->ajax_action );
 
 		call_user_func_array( $this->ajax_action['callback'], array( $ajax_request_data ) );
 	}
