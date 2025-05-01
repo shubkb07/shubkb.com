@@ -55,7 +55,7 @@ class Sync_Settings {
 		global $sync_ajax;
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
-		add_action( 'sync_register_ajax_actions', array( $this, 'register_settings_ajax' ) );
+		
 
 		// Ensure sync_menus is initialized properly in the constructor.
 		$this->sync_menus = array();
