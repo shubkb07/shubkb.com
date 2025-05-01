@@ -17,9 +17,10 @@
  * @param string $nonce_key Nonce key.
  * @param string $action_type Action for (in, out, both/false).
  * @param bool   $options_capability Only admin.
+ * @param array  $args Additional arguments.
  */
-function sync_register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false ) {
+function sync_register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false, $args = array() ) {
 	global $sync_ajax;
 
-	$sync_ajax->register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false );
+	$sync_ajax->register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false, $args = array() );
 }

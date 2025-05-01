@@ -42,15 +42,16 @@ function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $cr
  *
  * @param string       $wp_menu_slug WP Menu slug.
  * @param string       $menu_name Menu name.
+ * @param string       $settings_callback Settings callback.
  * @param string|false $menu_slug Menu slug.
  * @param string|null  $icon_url Icon URL.
  * @param int|null     $position Menu position.
  * @param bool         $sub_menu_support Sub menu support.
  */
-function sync_add_sync_menu( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
+function sync_add_sync_menu( $wp_menu_slug, $menu_name, $settings_callback, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
 	global $sync_settings;
 
-	$sync_settings->add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug, $icon_url, $position, $sub_menu_support );
+	$sync_settings->add_sync_menus( $wp_menu_slug, $menu_name, $settings_callback, $menu_slug, $icon_url, $position, $sub_menu_support );
 }
 
 /**
@@ -58,13 +59,14 @@ function sync_add_sync_menu( $wp_menu_slug, $menu_name, $menu_slug = false, $ico
  *
  * @param string   $parent_menu_slug Parent menu slug.
  * @param string   $menu_name Menu name.
+ * @param string   $settings_callback Settings callback.
  * @param string   $menu_slug Menu slug.
  * @param int|null $position Menu position.
  */
-function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $menu_slug, $position = null ) {
+function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $settings_callback, $menu_slug, $position = null ) {
 	global $sync_settings;
 
-	return $sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $menu_slug, $position );
+	return $sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $settings_callback, $menu_slug, $position );
 }
 
 /**
@@ -102,6 +104,7 @@ add_action(
 			array(
 				'menu_name' => 'Cat',
 				'icon_url'  => null,
+				'callback'  => 'sync_register_settings_tools',
 			),
 			'site'
 		);
@@ -110,6 +113,7 @@ add_action(
 		sync_add_sync_menu(
 			'settings',
 			__( 'Sync Dashboard', 'wisesync' ),
+			'sync_register_settings_tools',
 			'dashboard',
 			null,
 			20,
@@ -118,16 +122,17 @@ add_action(
 				'menu_slug' => 'pika',
 			) 
 		);
-		sync_add_sync_sub_menu( 'settings', 'dashboard', __( 'Sync Logs', 'wisesync' ), 'logs', 30 );
-		sync_add_sync_sub_menu( 'settings', 'dashboard', __( 'Sync Settings', 'wisesync' ), 'settings', 40 );
+		sync_add_sync_sub_menu( 'settings', 'dashboard', 'sync_register_settings_tools', __( 'Sync Logs', 'wisesync' ), 'logs', 30 );
+		sync_add_sync_sub_menu( 'settings', 'dashboard', 'sync_register_settings_tools', __( 'Sync Settings', 'wisesync' ), 'settings', 40 );
 
 		// Example usage of sync_add_sync_menu without sub-menus.
-		sync_add_sync_menu( 'settings', __( 'Sync Reports', 'wisesync' ), 'reports', null, 50 );
+		sync_add_sync_menu( 'settings', __( 'Sync Reports', 'wisesync' ), 'sync_register_settings_tools', 'reports', null, 50 );
 
 		// Another example with sub-menus.
 		sync_add_sync_menu(
 			'settings',
 			__( 'Advanced Sync', 'wisesync' ),
+			'sync_register_settings_tools',
 			'advanced',
 			null,
 			60,
@@ -136,8 +141,8 @@ add_action(
 				'menu_slug' => 'wow',
 			) 
 		);
-		sync_add_sync_sub_menu( 'settings', 'advanced', __( 'Sync Tools', 'wisesync' ), 'tools', 70 );
-		sync_add_sync_sub_menu( 'settings', 'advanced', __( 'Sync Diagnostics', 'wisesync' ), 'diagnostics', 80 );
+		sync_add_sync_sub_menu( 'settings', 'advanced', 'sync_register_settings_tools', __( 'Sync Tools', 'wisesync' ), 'tools', 70 );
+		sync_add_sync_sub_menu( 'settings', 'advanced', 'sync_register_settings_tools', __( 'Sync Diagnostics', 'wisesync' ), 'diagnostics', 80 );
 	}
 );
 
@@ -146,10 +151,10 @@ add_action(
  *
  * Dynamically generate content for all menus and submenus.
  *
- * @param string $html_content HTML content.
+ * @param string $content HTML content.
  * @param array  $page_details Page details.
  */
-function sync_register_settings_dashboard( $html_content, $page_details ) {
+function sync_register_settings_dashboard( $content, $page_details ) {
 	$setting_array = array(
 		'flex' => array(
 			'direction' => 'column',
@@ -171,8 +176,12 @@ function sync_register_settings_dashboard( $html_content, $page_details ) {
 			),
 		),
 	);
-	$html_content  = sync_create_each_ajax_settings_page( $page_details, $setting_array );
-	return $html_content;
+
+	if ( 'menu_load' === $page_details['puspose'] ) {
+		return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	} elseif ( 'menu_submit' === $page_details['puspose'] ) {
+		return $content;
+	}
 }
 
 /**
@@ -180,10 +189,10 @@ function sync_register_settings_dashboard( $html_content, $page_details ) {
  *
  * Dynamically generate content for all menus and submenus.
  *
- * @param string $html_content HTML content.
+ * @param string $content HTML content.
  * @param array  $page_details Page details.
  */
-function sync_register_settings_tools( $html_content, $page_details ) {
+function sync_register_settings_tools( $content, $page_details ) {
 	$setting_array = array(
 		'flex' => array(
 			'direction' => 'row',
@@ -209,8 +218,11 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 			),
 		),
 	);
-	$html_content  = sync_create_single_ajax_settings_page( $page_details, $setting_array );
-	return $html_content;
+	if ( 'menu_load' === $page_details['puspose'] ) {
+		return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	} elseif ( 'menu_submit' === $page_details['puspose'] ) {
+		return $content;
+	}
 }
 
 /**
@@ -224,15 +236,3 @@ function sync_register_settings_tools( $html_content, $page_details ) {
 function default_show( $html_content, $page_details ) {
 	return 'Page Details' . wp_json_encode( $page_details );
 }
-
-// Update actions to dynamically load content for all menus and submenus.
-add_filter( 'sync_register_menu_settings', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_dashboard', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_dashboard_sub_pika', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_dashboard_sub_logs', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_dashboard_sub_settings', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_reports', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_advanced', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_advanced_sub_wow', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_advanced_sub_tools', 'sync_register_settings_tools', 10, 2 );
-add_filter( 'sync_register_menu_advanced_sub_diagnostics', 'sync_register_settings_tools', 10, 2 );

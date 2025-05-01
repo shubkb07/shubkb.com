@@ -32,6 +32,13 @@ class Sync_Settings {
 	private $sync_menus = array();
 
 	/**
+	 * Sync Ajax Instance.
+	 *
+	 * @var array
+	 */
+	private $sync_ajax_instance = null;
+
+	/**
 	 * Forms array.
 	 *
 	 * @var array
@@ -53,6 +60,11 @@ class Sync_Settings {
 	public function __construct() {
 
 		global $sync_ajax;
+
+		if ( $sync_ajax->is_ajax ) {
+			add_action( 'wp_loaded', array( $this, 'init_settings_page' ) );
+		}
+
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
 		
@@ -98,13 +110,15 @@ class Sync_Settings {
 		);
 
 		// Check if, $create_sync_menu is array and have keys menu_name (required) which is not empty and string, and icon_url (optional, default null, else string and null can be set in array), position will always be -1 and sub_menu will always be false.
-		if ( is_array( $create_sync_menu ) && isset( $create_sync_menu['menu_name'] ) && ! empty( $create_sync_menu['menu_name'] ) && is_string( $create_sync_menu['menu_name'] ) ) {
+		if ( is_array( $create_sync_menu ) && isset( $create_sync_menu['menu_name'] ) && ! empty( $create_sync_menu['menu_name'] ) && is_string( $create_sync_menu['menu_name'] ) && isset( $create_sync_menu['callback'] ) && is_callable( $create_sync_menu['callback'] ) ) {
 			$this->sync_menus[ $menu_slug ][ $menu_slug ] = array(
 				'menu_name' => $create_sync_menu['menu_name'],
 				'icon_url'  => isset( $create_sync_menu['icon_url'] ) ? $create_sync_menu['icon_url'] : null,
 				'position'  => -1,
 				'sub_menu'  => false,
 			);
+
+			add_filter( 'sync_register_menu_' . $menu_slug, $create_sync_menu['callback'], 10, 2 );
 		}
 	}
 
@@ -113,12 +127,13 @@ class Sync_Settings {
 	 *
 	 * @param string      $wp_menu_slug      WP Menu slug.
 	 * @param string      $menu_name         Menu name.
+	 * @param callback    $settings_callback  Settings callback.
 	 * @param string|bool $menu_slug         Menu slug (optional).
 	 * @param string|null $icon_url          Icon URL (optional).
 	 * @param int|null    $position          Menu position (optional).
 	 * @param bool|array  $sub_menu_support  Whether sub-menu support is enabled (optional).
 	 */
-	public function add_sync_menus( $wp_menu_slug, $menu_name, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
+	public function add_sync_menus( $wp_menu_slug, $menu_name, $settings_callback, $menu_slug = false, $icon_url = null, $position = null, $sub_menu_support = false ) {
 		// Validate inputs.
 		if ( empty( $wp_menu_slug ) || ( ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) && $this->menus[ $wp_menu_slug ]['create_sync_menu'] ) ) {
 			return;
@@ -156,6 +171,12 @@ class Sync_Settings {
 				),
 			) : false,
 		);
+
+		if ( $sub_menu_support ) {
+			add_filter( 'sync_register_menu_' . $menu_slug . '_sub_' . $sub_menu_support['menu_slug'], $settings_callback, 10, 2 );
+		} else {
+			add_filter( 'sync_register_menu_' . $menu_slug, $settings_callback, 10, 2 );
+		}
 	}
 
 	/**
@@ -163,11 +184,12 @@ class Sync_Settings {
 	 *
 	 * @param string   $wp_menu_slug WP Menu slug.
 	 * @param string   $parent_menu_slug Parent menu slug.
+	 * @param callback $settings_callback Settings callback.
 	 * @param string   $menu_name Menu name.
 	 * @param string   $menu_slug Menu slug.
 	 * @param int|null $position Menu position.
 	 */
-	public function add_sync_sub_menus( $wp_menu_slug, $parent_menu_slug, $menu_name, $menu_slug, $position = null ) {
+	public function add_sync_sub_menus( $wp_menu_slug, $parent_menu_slug, $settings_callback, $menu_name, $menu_slug, $position = null ) {
 		// Validate inputs.
 		if ( empty( $wp_menu_slug ) || ( ! is_string( $wp_menu_slug ) && isset( $this->menus[ $wp_menu_slug ] ) && ! isset( $this->sync_menus[ $wp_menu_slug ] ) ) ) {
 			return;
@@ -197,6 +219,8 @@ class Sync_Settings {
 			'menu_name' => $menu_name,
 			'position'  => $position,
 		);
+
+		add_filter( 'sync_register_menu_' . $parent_menu_slug . '_sub_' . $menu_slug, $settings_callback, 10, 2 );
 	}
 
 	/**
@@ -205,6 +229,8 @@ class Sync_Settings {
 	 * @since 1.0.0
 	 */
 	public function init_settings_page() {
+
+		global $sync_ajax;
 
 		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus['sync'] = array(
@@ -224,8 +250,69 @@ class Sync_Settings {
 		 */
 		apply_filters( 'sync_settings_page', $this->menus );
 
+		if ( $sync_ajax->is_ajax ) {
+			$this->init_ajax_response();
+			return;
+		}
+
 		$this->init_settings_pages();
 	}
+
+	/**
+	 * Initialize Ajax response.
+	 *
+	 * @since 1.0.0
+	 */
+	private function init_ajax_response() {
+
+		global $sync_ajax;
+
+		// Get Action Name.
+		$action_name = $sync_ajax->ajax_action_name;
+
+		// Check if it start with 'sync_save_' and end with '_settings'.
+		if ( strpos( $action_name, 'sync_save_' ) !== 0 || strpos( $action_name, '_settings' ) !== ( strlen( $action_name ) - strlen( '_settings' ) ) ) {
+			return;
+		}
+
+		// Trim the action name from the start 'sync_save_' and end '_settings'.
+		$action_name = substr( $action_name, strlen( 'sync_save_' ), -strlen( '_settings' ) );
+
+		// Divide action name in slug and parent slug.
+		$action_name_parts = explode( '_sub_', $action_name );
+
+		if ( count( $action_name_parts ) > 2 ) {
+			return; // Invalid action name.
+		}
+
+		if ( count( $action_name_parts ) === 2 ) {
+			$parent_slug = $action_name_parts[0];
+			$slug        = $action_name_parts[1];
+		} else {
+			$parent_slug = '';
+			$slug        = $action_name_parts[0];
+		}
+
+		$page_data = array(
+			'name'    => $action_name,
+			'slug'    => $slug,
+			'puspose' => 'menu_submit',
+		);
+
+		// Append the parent slug if it exists.
+		if ( ! empty( $parent_slug ) ) {
+			$page_data['parent_slug'] = $parent_slug;
+		}
+
+		apply_filters( 'sync_register_menu_' . $action_name, array(), $page_data );
+
+		sync_register_ajax_action( $sync_ajax->ajax_action_name, array( $this, 'settings_submit_handler' ), 'sync_nonce', $nonce_key = 'sync_nonce', $action_type = 'in', $options_capability = true );
+	}
+
+	/**
+	 * Settings Submit Handler.
+	 */
+	public function settings_submit_handler() {}
 
 	/**
 	 * Initialize settings pages.
@@ -271,16 +358,6 @@ class Sync_Settings {
 	}
 
 	/**
-	 * Settings AJAX.
-	 *
-	 * @since 1.0.0
-	 */
-	public function register_settings_ajax() {
-
-		sync_register_ajax( '', '' );
-	}
-
-	/**
 	 * Process icon.
 	 *
 	 * @param string $icon_url    Icon URL.
@@ -288,7 +365,7 @@ class Sync_Settings {
 	 *
 	 * @since 1.0.0
 	 */
-	public function process_icon( $icon_url, $return_html ) {
+	public function process_icon( $icon_url, $return_html = false ) {
 		if ( $return_html ) {
 			ob_start();
 		}
@@ -402,8 +479,9 @@ class Sync_Settings {
 
 			foreach ( $current_sync_menu as $menu_slug => $current_menu ) {
 				$page_data = array(
-					'name' => $current_menu['menu_name'],
-					'slug' => $menu_slug,
+					'name'    => $current_menu['menu_name'],
+					'slug'    => $menu_slug,
+					'puspose' => 'menu_load',
 				);
 	
 				// Apply filter for this menu page.
@@ -428,6 +506,7 @@ class Sync_Settings {
 							'name'        => $sub_menu['menu_name'],
 							'parent_slug' => $menu_slug,
 							'slug'        => $sub_menu_slug,
+							'puspose'     => 'menu_load',
 						);
 			
 						// Apply filter for this submenu page.
@@ -436,7 +515,7 @@ class Sync_Settings {
 							'', // Empty string as first parameter.
 							$sub_page_data // Page data as second parameter.
 						);
-			
+
 						if ( ! empty( $submenu_content ) ) {
 							?>
 				<template id="sync-subpage-<?php echo esc_attr( $menu_slug ); ?>-<?php echo esc_attr( $sub_menu_slug ); ?>">
@@ -466,14 +545,16 @@ class Sync_Settings {
 	 */
 	public function create_single_ajax_settings_page( $page_details, $settings_array, $submit_button_text = 'Save Changes', $refresh = false ) {
 		// Validate page details.
-		$slug        = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync';
-		$name        = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Sync';
-		$parent_slug = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
+		$slug          = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync';
+		$name          = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Sync';
+		$parent_slug   = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
+		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
+		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 
 		// Create nonce key.
-		$nonce_key = 'sync_setting_' . ( $parent_slug ? $parent_slug . '_' : '' ) . $slug;
+		$nonce_key = 'sync_setting_' . $full_slug;
 		$nonce     = wp_create_nonce( $nonce_key );
-		
+
 		// Start output buffering to collect HTML.
 		ob_start();
 		
@@ -483,9 +564,8 @@ class Sync_Settings {
 		
 		<form class="sync-settings-form" id="sync-form-<?php echo esc_attr( $slug ); ?>" data-slug="<?php echo esc_attr( $slug ); ?>">
 		
-		<input type="hidden" name="sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
-		<input type="hidden" name="sync_nonce_key" value="<?php echo esc_attr( $nonce_key ); ?>">
-		<input type="hidden" name="sync_action" value="save_<?php echo esc_attr( $slug ); ?>_settings">
+		<input type="hidden" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
+		<input type="hidden" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
 
 		<?php $this->generate_settings_html( $settings_array ); ?>
 		
