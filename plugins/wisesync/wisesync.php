@@ -40,18 +40,6 @@ define( 'WSYNC_PLUGIN_JS_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'js/' );
 define( 'WSYNC_PLUGIN_CSS_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'css/' );
 define( 'WSYNC_PLUGIN_IMG_DIR', WSYNC_PLUGIN_ASSETS_DIR . 'img/' );
 
-function sync_handle_my_ajax() {
-
-	// Do something with the data
-	$response = array(
-		'success' => true,
-	);
-
-	wp_send_json_success( $response );
-}
-add_action( 'wp_ajax_sync_custom_action', 'sync_handle_my_ajax' );
-add_action( 'wp_ajax_nopriv_sync_custom_action', 'sync_handle_my_ajax' );
-
 // Load Plugin Files.
 require_once WSYNC_PLUGIN_DIR . 'autoload.php';
 

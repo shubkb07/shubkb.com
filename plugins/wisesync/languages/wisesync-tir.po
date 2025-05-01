@@ -54,6 +54,10 @@ msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
 msgstr ""
 
+#: includes/classes/class-sync-ajax.php:117
+msgid "Invalid nonce"
+msgstr ""
+
 #: includes/functions/settings.php:100
 msgid "WiseSync Settings"
 msgstr ""
