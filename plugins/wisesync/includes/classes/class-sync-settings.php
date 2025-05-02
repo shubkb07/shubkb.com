@@ -327,12 +327,14 @@ class Sync_Settings {
 	 * @param array $sync_req Sync request data.
 	 */
 	public function settings_submit_handler( $sync_req ) {
+		// error_log( 'Settings Submit Handler' );
+		// error_log( 'Req: ' . print_r( $sync_req, true ) );
+		// error_log( 'Instance: ' . print_r( $this->sync_ajax_instance, true ) );
 		wp_send_json_success(
 			array(
-				'message'  => __( 'Settings saved successfully.', 'wisesync' ),
-				'data'     => $sync_req,
+				'message'  => 'Settings submitted successfully.',
 				'instance' => $this->sync_ajax_instance,
-			)
+			) 
 		);
 	}
 
@@ -563,9 +565,10 @@ class Sync_Settings {
 	 * @param string $submit_button_text Text for the submit button.
 	 * @param bool   $refresh            Whether to refresh the page after successful Ajax.
 	 * 
-	 * @return string HTML for the settings page
+	 * @return string|array HTML for the settings page or an array of settings submit.
 	 */
 	public function create_single_ajax_settings_page( $page_details, $settings_array, $submit_button_text = 'Save Changes', $refresh = false ) {
+
 		// Validate page details.
 		$slug          = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync';
 		$name          = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Sync';
@@ -573,36 +576,51 @@ class Sync_Settings {
 		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
 		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 
-		// Create nonce key.
-		$nonce_action = 'sync_setting_' . $full_slug;
-		$nonce        = wp_create_nonce( $nonce_action );
+		if ( isset( $page_details['puspose'] ) && 'menu_load' === $page_details['puspose'] ) {
 
-		// Start output buffering to collect HTML.
-		ob_start();
-		
-		// Begin container.
-		?>
-		<div class="sync-settings-container sync-single-form" data-refresh="<?php echo esc_attr( $refresh ? 'true' : 'false' ); ?>">
-		
-		<form class="sync-settings-form" id="sync-form-<?php echo esc_attr( $slug ); ?>" data-slug="<?php echo esc_attr( $slug ); ?>">
-		
-		<input type="hidden" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
-		<input type="hidden" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
-		<input type="hidden" name="sync_form_type" value="single">
+			// Create nonce key.
+			$nonce_action = 'sync_setting_' . $full_slug;
+			$nonce        = wp_create_nonce( $nonce_action );
 
-		<?php $this->generate_settings_html( $settings_array ); ?>
-		
-		<div class="sync-form-footer">
-		<button type="button" class="sync-button sync-primary-button sync-submit-button">
-		<span class="dashicons dashicons-saved"></span><?php echo esc_html( $submit_button_text ); ?>
-		</button>
-		<div class="sync-form-message"></div>
-		</div>
-		</form>
-		</div>
-		<?php
-		
-		return ob_get_clean();
+			// Start output buffering to collect HTML.
+			ob_start();
+			
+			// Begin container.
+			?>
+			<div class="sync-settings-container sync-single-form" data-refresh="<?php echo esc_attr( $refresh ? 'true' : 'false' ); ?>">
+			
+			<form class="sync-settings-form" id="sync-form-<?php echo esc_attr( $slug ); ?>" data-slug="<?php echo esc_attr( $slug ); ?>">
+			
+			<input type="hidden" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
+			<input type="hidden" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
+			<input type="hidden" name="sync_form_type" value="single">
+
+			<?php $this->generate_settings_html( $settings_array['html'] ); ?>
+			
+			<div class="sync-form-footer">
+			<button type="button" class="sync-button sync-primary-button sync-submit-button">
+			<span class="dashicons dashicons-saved"></span><?php echo esc_html( $submit_button_text ); ?>
+			</button>
+			<div class="sync-form-message"></div>
+			</div>
+			</form>
+			</div>
+			<?php
+
+			return ob_get_clean();
+		} elseif ( isset( $page_details['puspose'] ) && 'menu_submit' === $page_details['puspose'] ) {
+
+			if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
+				sync_send_json(
+					array(
+						'status'  => 'error',
+						'message' => __( 'Invalid settings array.', 'wisesync' ),
+					)
+				);
+			}
+
+			return $this->genrate_settings_submit_array( $page_details, $settings_array );
+		}
 	}
 
 	/**
@@ -611,38 +629,63 @@ class Sync_Settings {
 	 * @param array $page_details   Page information (slug, name, parent_slug).
 	 * @param array $settings_array Settings array structure.
 	 * 
-	 * @return string HTML for the settings page
+	 * @return string|array HTML for the settings page or an array of settings submit.
 	 */
 	public function create_each_ajax_settings_page( $page_details, $settings_array ) {
+
 		// Validate page details.
 		$slug          = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync-settings';
 		$name          = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Settings';
 		$parent_slug   = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
 		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
 		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
-		
-		// Create nonce key.
-		$nonce_action = 'sync_setting_' . $full_slug;
-		$nonce        = wp_create_nonce( $nonce_action );
-		
-		// Start output buffering to collect HTML.
-		ob_start();
-		
-		// Begin container.
-		?>
-		<div class="sync-settings-container sync-each-setting" data-slug="<?php echo esc_attr( $slug ); ?>">
-		
-		<input type="hidden" id="sync-nonce-<?php echo esc_attr( $slug ); ?>" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
-		<input type="hidden" id="sync-action" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
-		<input type="hidden" name="sync_form_type" value="ajax">
 
-		<?php $this->generate_settings_html( $settings_array, true ); ?>
-		<div class="sync-settings-message-area"></div>
-		</div>
+		if ( isset( $page_details['puspose'] ) && 'menu_load' === $page_details['puspose'] ) {
+			// Create nonce key.
+			$nonce_action = 'sync_setting_' . $full_slug;
+			$nonce        = wp_create_nonce( $nonce_action );
 
-		<?php
-		return ob_get_clean();
+			// Start output buffering to collect HTML.
+			ob_start();
+
+			// Begin container.
+			?>
+			<div class="sync-settings-container sync-each-setting" data-slug="<?php echo esc_attr( $slug ); ?>">
+
+			<input type="hidden" id="sync-nonce-<?php echo esc_attr( $slug ); ?>" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
+			<input type="hidden" id="sync-action" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
+			<input type="hidden" name="sync_form_type" value="ajax">
+
+			<?php $this->generate_settings_html( $settings_array, true ); ?>
+			<div class="sync-settings-message-area"></div>
+			</div>
+
+			<?php
+			return ob_get_clean();
+		} elseif ( isset( $page_details['puspose'] ) && 'menu_submit' === $page_details['puspose'] ) {
+
+			if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
+				sync_send_json(
+					array(
+						'status'  => 'error',
+						'message' => __( 'Invalid settings array.', 'wisesync' ),
+					)
+				);
+			}
+
+			return $this->genrate_settings_submit_array( $page_details, $settings_array );
+		}
 	}
+
+	/**
+	 * Generate settings submit array.
+	 * 
+	 * @param array $page_details   Page information (slug, name, parent_slug).
+	 * @param array $settings_array Settings array structure.
+	 * 
+	 * @return array Settings submit array.
+	 */
+	private function genrate_settings_submit_array( $page_details, $settings_array ) {}
 
 	/**
 	 * Generate HTML from settings array
@@ -1111,5 +1154,65 @@ class Sync_Settings {
 		if ( $return_html ) {
 			return ob_get_clean();
 		}
+	}
+
+	/**
+	 * Validate input sync options
+	 *
+	 * @param array $data Data to validate.
+	 * 
+	 * @return bool True if valid, false otherwise.
+	 */
+	public function validate_input_sync_options( $data ) {
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+	
+		$sync_options = array();
+	
+		/**
+		 * Recursively walk through the array to find 'sync_option' keys.
+		 *
+		 * @param array $array_data The array to walk through.
+		 *
+		 * @uses $walk to recurse.
+		 * @uses $sync_options to store found options.
+		 *
+		 * @return bool True if valid, false otherwise.
+		 */
+		$walk = function ( $array_data ) use ( &$walk, &$sync_options ) {
+			foreach ( $array_data as $key => $value ) {
+				if ( is_array( $value ) ) {
+					// If key starts with 'input_'.
+					if ( is_string( $key ) && strpos( $key, 'input_' ) === 0 ) {
+						// It must contain 'sync_option'.
+						if ( ! isset( $value['sync_option'] ) ) {
+							return false;
+						}
+						$option_value = $value['sync_option'];
+	
+						// sync_option must be string.
+						if ( ! is_string( $option_value ) ) {
+							return false;
+						}
+	
+						// Must be unique.
+						if ( in_array( $option_value, $sync_options, true ) ) {
+							return false;
+						}
+	
+						$sync_options[] = $option_value;
+					}
+	
+					// Recurse into nested array.
+					if ( $walk( $value ) === false ) {
+						return false;
+					}
+				}
+			}
+			return true;
+		};
+	
+		return $walk( $data );
 	}
 }

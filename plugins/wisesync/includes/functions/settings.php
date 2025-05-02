@@ -156,32 +156,38 @@ add_action(
  */
 function sync_register_settings_dashboard( $content, $page_details ) {
 	$setting_array = array(
-		'flex' => array(
-			'direction' => 'column',
-			'align'     => array(
-				'item'    => 'center',
-				'content' => 'flex-start',
-			),
-			'content'   => array(
-				'p'            => 'This is the dashboard settings page.',
-				'input_text'   => array(
-					'name'         => 'dashboard_input',
-					'value'        => '',
-					'place_holder' => 'Enter dashboard value',
+		'html'   => array(
+			'flex' => array(
+				'direction' => 'column',
+				'align'     => array(
+					'item'    => 'center',
+					'content' => 'flex-start',
 				),
-				'input_toggle' => array(
-					'name'  => 'dashboard_toggle',
-					'value' => false,
+				'content'   => array(
+					'p'            => 'This is the dashboard settings page.',
+					'input_text'   => array(
+						'name'         => 'dashboard_input',
+						'value'        => '',
+						'place_holder' => 'Enter dashboard value',
+						'sync_option'  => 'input_dashbaord',
+						'regex'        => '^[a-zA-Z0-9]+$',
+					),
+					'input_toggle' => array(
+						'name'        => 'dashboard_toggle',
+						'value'       => false,
+						'sync_option' => 'input_dashboard_toggle',
+					),
 				),
 			),
 		),
+		'submit' => array(
+			'type'           => 'seprate',
+			'return_html'    => true,
+			'should_refresh' => true,
+		),
 	);
 
-	if ( 'menu_load' === $page_details['puspose'] ) {
-		return sync_create_single_ajax_settings_page( $page_details, $setting_array );
-	} elseif ( 'menu_submit' === $page_details['puspose'] ) {
-		return $content;
-	}
+	return sync_create_each_ajax_settings_page( $page_details, $setting_array );
 }
 
 /**
@@ -194,37 +200,40 @@ function sync_register_settings_dashboard( $content, $page_details ) {
  */
 function sync_register_settings_tools( $content, $page_details ) {
 	$setting_array = array(
-		'flex' => array(
-			'direction' => 'row',
-			'align'     => array(
-				'item'    => 'flex-start',
-				'content' => 'center',
-			),
-			'content'   => array(
-				'p'           => 'This is the tools settings page.',
-				'input_radio' => array(
-					'name'    => 'tools_radio',
-					'value'   => 'option1',
-					'options' => array( 'option1', 'option2', 'option3' ),
+		'html'   => array(
+			'flex' => array(
+				'direction' => 'row',
+				'align'     => array(
+					'item'    => 'flex-start',
+					'content' => 'center',
 				),
-				'input_data'  => array(
-					'name'         => 'tools_data',
-					'value'        => '',
-					'place_holder' => 'Enter data value',
-				),
-				'break'       => array(
-					'count' => 1,
+				'content'   => array(
+					'p'           => 'This is the tools settings page.',
+					'input_radio' => array(
+						'name'        => 'tools_radio',
+						'value'       => 'option1',
+						'options'     => array( 'option1', 'option2', 'option3' ),
+						'sync_option' => 'input_tools_radio',
+					),
+					'input_data'  => array(
+						'name'         => 'tools_data',
+						'value'        => '',
+						'place_holder' => 'Enter data value',
+						'sync_option'  => 'input_tools_data',
+					),
+					'break'       => array(
+						'count' => 1,
+					),
 				),
 			),
 		),
+		'submit' => array(
+			'type'           => 'seprate',
+			'return_html'    => true,
+			'should_refresh' => true,
+		),
 	);
-	if ( 'menu_load' === $page_details['puspose'] ) {
-		return sync_create_single_ajax_settings_page( $page_details, $setting_array );
-	} elseif ( 'menu_submit' === $page_details['puspose'] ) {
-		return array(
-			'reason' => 'testing settings callback',
-		);
-	}
+	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
 }
 
 /**

@@ -28,11 +28,21 @@ function sync_register_ajax_action( $action_name, $callback, $nonce_action, $non
 /**
  * Sync Send Json Response.
  *
+ * Sends a JSON response to the client.
+ *
+ * @param array $data The data to send.
+ * @param int   $status_code The HTTP status code to send.
+ *
  * @package WiseSync
  * @since 1.0.0
  */
 function sync_send_json( $data, $status_code = 200 ) {
 	global $sync_ajax;
+
+	if ( ! is_array( $data ) && ! is_int( $data ) ) {
+		return;
+	}
+
 	if ( $sync_ajax->is_ajax ) {
 		$sync_ajax->send_json_response( $data, $status_code );
 	}
