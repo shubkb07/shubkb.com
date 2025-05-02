@@ -11,6 +11,6 @@ use Sync\{Sync_Settings, Sync_Ajax};
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
-
+ 
 $sync_ajax     = new Sync_Ajax();
 $sync_settings = new Sync_Settings();

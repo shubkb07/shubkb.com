@@ -54,38 +54,70 @@ msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
 msgstr ""
 
-#: includes/classes/class-sync-ajax.php:117
+#: includes/classes/class-sync-ajax.php:83
+msgid "Bad Request"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:96
+msgid "Unauthorized"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:109
+msgid "Forbidden"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:122
+msgid "Not Found"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:135
+msgid "Internal Server Error"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:148
+msgid "Unexpected Error"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:208
+msgid "Unauthorized access"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:212
 msgid "Invalid nonce"
 msgstr ""
 
-#: includes/functions/settings.php:100
+#: includes/classes/class-sync-settings.php:332
+msgid "Settings saved successfully."
+msgstr ""
+
+#: includes/functions/settings.php:102
 msgid "WiseSync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:112
+#: includes/functions/settings.php:115
 msgid "Sync Dashboard"
 msgstr ""
 
-#: includes/functions/settings.php:121
+#: includes/functions/settings.php:125
 msgid "Sync Logs"
 msgstr ""
 
-#: includes/functions/settings.php:122
+#: includes/functions/settings.php:126
 msgid "Sync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:125
+#: includes/functions/settings.php:129
 msgid "Sync Reports"
 msgstr ""
 
-#: includes/functions/settings.php:130
+#: includes/functions/settings.php:134
 msgid "Advanced Sync"
 msgstr ""
 
-#: includes/functions/settings.php:139
+#: includes/functions/settings.php:144
 msgid "Sync Tools"
 msgstr ""
 
-#: includes/functions/settings.php:140
+#: includes/functions/settings.php:145
 msgid "Sync Diagnostics"
 msgstr ""
