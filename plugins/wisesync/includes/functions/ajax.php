@@ -22,5 +22,18 @@
 function sync_register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false, $args = array() ) {
 	global $sync_ajax;
 
-	$sync_ajax->register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key = '_ajax_nonce', $action_type = false, $options_capability = false, $args = array() );
+	$sync_ajax->register_ajax_action( $action_name, $callback, $nonce_action, $nonce_key, $action_type, $options_capability, $args );
+}
+
+/**
+ * Sync Send Json Response.
+ *
+ * @package WiseSync
+ * @since 1.0.0
+ */
+function sync_send_json( $data, $status_code = 200 ) {
+	global $sync_ajax;
+	if ( $sync_ajax->is_ajax ) {
+		$sync_ajax->send_json_response( $data, $status_code );
+	}
 }

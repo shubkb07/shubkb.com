@@ -49,9 +49,109 @@ class Sync_Ajax {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( wp_doing_ajax() && isset( $_REQUEST['action'] ) && ! empty( $_REQUEST['action'] ) ) {
 			$this->is_ajax          = true;
 			$this->ajax_action_name = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) );
+			// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		}
+	}
+
+	/**
+	 * Send JSON Response
+	 *
+	 * Sends a JSON response with the specified data and status code.
+	 *
+	 * @param array $data Response data.
+	 * @param int   $status_code HTTP status code.
+	 */
+	public function send_json_response( $data, $status_code = 200 ) {
+		if ( ! $this->is_ajax ) {
+			return;
+		}
+
+		switch ( $status_code ) {
+			case 200:
+				wp_send_json_success( $data, $status_code );
+				break;
+
+			case 400:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Bad Request', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
+
+			case 401:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Unauthorized', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
+
+			case 403:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Forbidden', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
+
+			case 404:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Not Found', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
+
+			case 500:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Internal Server Error', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
+
+			default:
+				wp_send_json_error(
+					array_merge(
+						$data,
+						array(
+							'error_status' => __( 'Unexpected Error', 'wisesync' ),
+							'status_code'  => $status_code,
+						) 
+					),
+					$status_code 
+				);
+				break;
 		}
 	}
 
@@ -105,11 +205,11 @@ class Sync_Ajax {
 	 */
 	public function ajax_callback() {
 		if ( $this->ajax_action['options_capability'] && ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( array( 'error' => __( 'Unauthorized access', 'wisesync' ) ), 403 );
+			$this->send_json_response( array( 'error' => __( 'Unauthorized access', 'wisesync' ) ), 403 );
 		}
 
 		if ( ! wp_verify_nonce( $this->get_nonce_value( $_REQUEST, $this->ajax_action['nonce_key'] ), $this->ajax_action['nonce_action'] ) ) {
-			wp_send_json_error( array( 'error' => __( 'Invalid nonce', 'wisesync' ) ), 403 );
+			$this->send_json_response( array( 'error' => __( 'Invalid nonce', 'wisesync' ) ), 403 );
 		}
 
 		$ajax_request_data = array(

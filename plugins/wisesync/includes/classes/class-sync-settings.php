@@ -304,15 +304,37 @@ class Sync_Settings {
 			$page_data['parent_slug'] = $parent_slug;
 		}
 
-		apply_filters( 'sync_register_menu_' . $action_name, array(), $page_data );
+		$full_slug = $parent_slug ? $parent_slug . '_' . $slug : $slug;
 
-		sync_register_ajax_action( $sync_ajax->ajax_action_name, array( $this, 'settings_submit_handler' ), 'sync_nonce', $nonce_key = 'sync_nonce', $action_type = 'in', $options_capability = true );
+		// Create nonce key.
+		$nonce_action = 'sync_setting_' . $full_slug;
+
+		$this->sync_ajax_instance = apply_filters( 'sync_register_menu_' . $action_name, array(), $page_data );
+
+		sync_register_ajax_action(
+			$sync_ajax->ajax_action_name,
+			array( $this, 'settings_submit_handler' ),
+			$nonce_action,
+			'_sync_nonce',
+			'in',
+			true
+		);
 	}
 
 	/**
 	 * Settings Submit Handler.
+	 *
+	 * @param array $sync_req Sync request data.
 	 */
-	public function settings_submit_handler() {}
+	public function settings_submit_handler( $sync_req ) {
+		wp_send_json_success(
+			array(
+				'message'  => __( 'Settings saved successfully.', 'wisesync' ),
+				'data'     => $sync_req,
+				'instance' => $this->sync_ajax_instance,
+			)
+		);
+	}
 
 	/**
 	 * Initialize settings pages.
@@ -552,8 +574,8 @@ class Sync_Settings {
 		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 
 		// Create nonce key.
-		$nonce_key = 'sync_setting_' . $full_slug;
-		$nonce     = wp_create_nonce( $nonce_key );
+		$nonce_action = 'sync_setting_' . $full_slug;
+		$nonce        = wp_create_nonce( $nonce_action );
 
 		// Start output buffering to collect HTML.
 		ob_start();
@@ -566,6 +588,7 @@ class Sync_Settings {
 		
 		<input type="hidden" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
 		<input type="hidden" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
+		<input type="hidden" name="sync_form_type" value="single">
 
 		<?php $this->generate_settings_html( $settings_array ); ?>
 		
@@ -592,13 +615,15 @@ class Sync_Settings {
 	 */
 	public function create_each_ajax_settings_page( $page_details, $settings_array ) {
 		// Validate page details.
-		$slug        = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync-settings';
-		$name        = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Settings';
-		$parent_slug = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
+		$slug          = isset( $page_details['slug'] ) ? sanitize_title( $page_details['slug'] ) : 'sync-settings';
+		$name          = isset( $page_details['name'] ) ? sanitize_text_field( $page_details['name'] ) : 'Settings';
+		$parent_slug   = isset( $page_details['parent_slug'] ) ? sanitize_title( $page_details['parent_slug'] ) : '';
+		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
+		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 		
 		// Create nonce key.
-		$nonce_key = 'sync_setting_' . ( $parent_slug ? $parent_slug . '_' : '' ) . $slug;
-		$nonce     = wp_create_nonce( $nonce_key );
+		$nonce_action = 'sync_setting_' . $full_slug;
+		$nonce        = wp_create_nonce( $nonce_action );
 		
 		// Start output buffering to collect HTML.
 		ob_start();
@@ -607,9 +632,9 @@ class Sync_Settings {
 		?>
 		<div class="sync-settings-container sync-each-setting" data-slug="<?php echo esc_attr( $slug ); ?>">
 		
-		<input type="hidden" id="sync-nonce-<?php echo esc_attr( $slug ); ?>" name="sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
-		<input type="hidden" id="sync-nonce-key-<?php echo esc_attr( $slug ); ?>" name="sync_nonce_key" value="<?php echo esc_attr( $nonce_key ); ?>">
-		<input type="hidden" id="sync-action-<?php echo esc_attr( $slug ); ?>" name="sync_action" value="save_<?php echo esc_attr( $slug ); ?>_setting">
+		<input type="hidden" id="sync-nonce-<?php echo esc_attr( $slug ); ?>" name="_sync_nonce" value="<?php echo esc_attr( $nonce ); ?>">
+		<input type="hidden" id="sync-action" name="action" value="sync_save_<?php echo esc_attr( $full_slug_adv ); ?>_settings">
+		<input type="hidden" name="sync_form_type" value="ajax">
 
 		<?php $this->generate_settings_html( $settings_array, true ); ?>
 		<div class="sync-settings-message-area"></div>

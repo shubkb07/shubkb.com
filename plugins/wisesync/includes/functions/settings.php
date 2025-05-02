@@ -221,7 +221,9 @@ function sync_register_settings_tools( $content, $page_details ) {
 	if ( 'menu_load' === $page_details['puspose'] ) {
 		return sync_create_single_ajax_settings_page( $page_details, $setting_array );
 	} elseif ( 'menu_submit' === $page_details['puspose'] ) {
-		return $content;
+		return array(
+			'reason' => 'testing settings callback',
+		);
 	}
 }
 
