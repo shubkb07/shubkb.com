@@ -261,27 +261,27 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 					matched = true;
 					const newURL = e.newURL || window.location.href;
 					const oldURL = e.oldURL || '';
-					
+
 					// Extract hash values
-					const newHash = newURL.includes('#') ? newURL.split('#')[1] : '';
-					const oldHash = oldURL.includes('#') ? oldURL.split('#')[1] : '';
-					
+					const newHash = newURL.includes( '#' ) ? newURL.split( '#' )[ 1 ] : '';
+					const oldHash = oldURL.includes( '#' ) ? oldURL.split( '#' )[ 1 ] : '';
+
 					data.hashData = {
 						newURL,
 						oldURL,
 						newHash,
-						oldHash
+						oldHash,
 					};
-					
+
 					// Check for hash pattern match if specified in condition
-					if (handler.condition.hashPattern) {
-						if (typeof handler.condition.hashPattern === 'string') {
+					if ( handler.condition.hashPattern ) {
+						if ( 'string' === typeof handler.condition.hashPattern ) {
 							// Exact match
 							matched = newHash === handler.condition.hashPattern;
 							conditionMatchWith = handler.condition.hashPattern;
-						} else if (handler.condition.hashPattern instanceof RegExp) {
+						} else if ( handler.condition.hashPattern instanceof RegExp ) {
 							// Regex match
-							matched = handler.condition.hashPattern.test(newHash);
+							matched = handler.condition.hashPattern.test( newHash );
 							conditionMatchWith = handler.condition.hashPattern.toString();
 						}
 					}
@@ -325,11 +325,11 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 		};
 
 		// Select appropriate target for the event type
-		const targetEl = 
-			'scroll' === type ? window : 
-			'hashchange' === type ? window :
-			htmlDocument;
-			
+		const targetEl =
+			'scroll' === type ? window
+				: 'hashchange' === type ? window
+					: htmlDocument;
+
 		targetEl.addEventListener( type, listener, false );
 
 		eventList[ type ] = { listener, handlers };
@@ -359,10 +359,10 @@ function deRegisterEvent( eventName ) { // eslint-disable-line no-unused-vars
 			delete handlers[ eventName ];
 			// Remove listener when no more handlers for this eventType
 			if ( 0 === Object.keys( handlers ).length ) {
-				const targetEl = 
-					'scroll' === type ? window : 
-					'hashchange' === type ? window :
-					htmlDocument;
+				const targetEl =
+					'scroll' === type ? window
+						: 'hashchange' === type ? window
+							: htmlDocument;
 				targetEl.removeEventListener( type, listener, false );
 				delete eventList[ type ];
 			}

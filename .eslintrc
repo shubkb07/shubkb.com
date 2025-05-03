@@ -12,7 +12,8 @@
 	},
 	"globals": {
 		"wp": "readonly",
-		"_": "readonly"
+		"_": "readonly",
+    	"registerEvent": "readonly"
 	},
 	"plugins": [
 		"jsdoc"
@@ -66,6 +67,7 @@
 			"error",
 			"tab"
 		],
+		"no-nested-ternary": 0,
 		"space-before-function-paren": 0,
 		"no-tabs": 0,
 		"prefer-destructuring": 0,
