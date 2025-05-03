@@ -86,38 +86,39 @@ msgstr ""
 msgid "Invalid nonce"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:332
-msgid "Settings saved successfully."
+#: includes/classes/class-sync-settings.php:615
+#: includes/classes/class-sync-settings.php:669
+msgid "Invalid settings array."
 msgstr ""
 
-#: includes/functions/settings.php:102
+#: includes/functions/settings.php:103
 msgid "WiseSync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:115
+#: includes/functions/settings.php:116
 msgid "Sync Dashboard"
 msgstr ""
 
-#: includes/functions/settings.php:125
+#: includes/functions/settings.php:126
 msgid "Sync Logs"
 msgstr ""
 
-#: includes/functions/settings.php:126
+#: includes/functions/settings.php:127
 msgid "Sync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:129
+#: includes/functions/settings.php:130
 msgid "Sync Reports"
 msgstr ""
 
-#: includes/functions/settings.php:134
+#: includes/functions/settings.php:135
 msgid "Advanced Sync"
 msgstr ""
 
-#: includes/functions/settings.php:144
+#: includes/functions/settings.php:145
 msgid "Sync Tools"
 msgstr ""
 
-#: includes/functions/settings.php:145
+#: includes/functions/settings.php:146
 msgid "Sync Diagnostics"
 msgstr ""
