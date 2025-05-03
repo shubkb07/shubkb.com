@@ -722,56 +722,73 @@ class Sync_Settings {
 		return $settings_array['submit'];
 	}
 
-	/**
-	 * Generate HTML from settings array
-	 * 
-	 * @param array $settings_array Settings structure.
-	 * @param bool  $auto_save      Whether to enable auto-save for inputs.
-	 * @param bool  $return_html    Whether to return the HTML instead of echoing it.
-	 * 
-	 * @return string Generated HTML
-	 */
+		/**
+		 * Generate HTML from settings array
+		 * 
+		 * @param array $settings_array Settings structure.
+		 * @param bool  $auto_save      Whether to enable auto-save for inputs.
+		 * @param bool  $return_html    Whether to return the HTML instead of echoing it.
+		 * 
+		 * @return string Generated HTML
+		 */
 	private function generate_settings_html( $settings_array, $auto_save = false, $return_html = false ) {
 
 		if ( $return_html ) {
 			ob_start();
 		}
-		
+
 		foreach ( $settings_array as $type => $settings ) {
+
+			// Prepare custom attributes.
+			$custom_class    = is_array( $settings ) && ! empty( $settings['class'] ) ? ' ' . esc_attr( $settings['class'] ) : '';
+			$custom_style    = is_array( $settings ) && ! empty( $settings['style'] ) ? ' style="' . esc_attr( $settings['style'] ) . '"' : '';
+			$conditional_att = is_array( $settings ) && ! empty( $settings['on_condition'] ) ? ' data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"' : '';
+
 			switch ( $type ) {
+
 				case 'flex':
 					$this->generate_flex_container( $settings, $auto_save );
 					break;
-					
+
 				case 'p':
+					$text = is_array( $settings ) && isset( $settings['text'] ) ? $settings['text'] : $settings;
 					?>
-					<p class="sync-text"><?php echo esc_html( $settings ); ?></p>
+					<p class="sync-text<?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>>
+						<?php echo esc_html( $text ); ?>
+					</p>
 					<?php
 					break;
-					
-				case 'h1':
-				case 'h2':
-				case 'h3':
-				case 'h4':
-				case 'h5':
+
+				case 'h1': 
+				case 'h2': 
+				case 'h3': 
+				case 'h4': 
+				case 'h5': 
 				case 'h6':
+									$text = is_array( $settings ) && isset( $settings['text'] ) ? $settings['text'] : $settings;
 					?>
-					<<?php echo esc_attr( $type ); ?> class="sync-heading sync-<?php echo esc_attr( $type ); ?>"><?php echo esc_html( $settings ); ?></<?php echo esc_html( $type ); ?>>
-					<?php
+					<<?php echo esc_attr( $type ); ?> class="sync-heading sync-<?php echo esc_attr( $type ); ?><?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>>
+										<?php echo esc_html( $text ); ?>
+					</<?php echo esc_attr( $type ); ?>>
+										<?php
 					break;
-					
+
 				case 'span':
+					$text = is_array( $settings ) && isset( $settings['text'] ) ? $settings['text'] : $settings;
 					?>
-					<span class="sync-span"><?php echo esc_html( $settings ); ?></span>
+					<span class="sync-span<?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>>
+						<?php echo esc_html( $text ); ?>
+					</span>
 					<?php
 					break;
-					
+
 				case 'icon':
+					$icon = is_array( $settings ) && isset( $settings['icon'] ) ? $settings['icon'] : $settings;
 					?>
-					<span class="dashicons dashicons-<?php echo esc_attr( $settings ); ?>"></span>
+					<span class="dashicons dashicons-<?php echo esc_attr( $icon ); ?><?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>></span>
 					<?php
 					break;
-					
+
 				case 'break':
 					$count = isset( $settings['count'] ) ? intval( $settings['count'] ) : 1;
 					for ( $i = 0; $i < $count; $i++ ) {
@@ -780,8 +797,7 @@ class Sync_Settings {
 						<?php
 					}
 					break;
-					
-				// Input elements handled in other methods.
+
 				default:
 					if ( strpos( $type, 'input_' ) === 0 ) {
 						$this->generate_input( substr( $type, 6 ), $settings, $auto_save );
@@ -789,7 +805,7 @@ class Sync_Settings {
 					break;
 			}
 		}
-		
+
 		if ( $return_html ) {
 			return ob_get_clean();
 		}
@@ -798,9 +814,9 @@ class Sync_Settings {
 	/**
 	 * Generate a flex container
 	 * 
-	 * @param array $settings      Flex container settings.
-	 * @param bool  $auto_save     Whether to enable auto-save for inputs.
-	 * @param bool  $return_html   Whether to return the HTML instead of echoing it.
+	 * @param array $settings    Flex container settings.
+	 * @param bool  $auto_save   Whether to enable auto-save for inputs.
+	 * @param bool  $return_html Whether to return the HTML instead of echoing it.
 	 * 
 	 * @return string Generated HTML
 	 */
@@ -809,21 +825,30 @@ class Sync_Settings {
 		$direction     = isset( $settings['direction'] ) ? $settings['direction'] : 'column';
 		$align_items   = isset( $settings['align']['item'] ) ? $settings['align']['item'] : 'stretch';
 		$align_content = isset( $settings['align']['content'] ) ? $settings['align']['content'] : 'flex-start';
-		
+
+		// Custom class and conditional.
+		$custom_class    = ! empty( $settings['class'] ) ? ' ' . esc_attr( $settings['class'] ) : '';
+		$conditional_att = ! empty( $settings['on_condition'] ) ? ' data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"' : '';
+
+		// Build style attribute.
+		$style_string = 'flex-direction:' . esc_attr( $direction ) . '; align-items:' . esc_attr( $align_items ) . '; justify-content:' . esc_attr( $align_content ) . ';';
+		if ( ! empty( $settings['style'] ) ) {
+			$style_string .= ' ' . esc_attr( $settings['style'] );
+		}
+		$custom_style = ' style="' . $style_string . '"';
+
 		if ( $return_html ) {
 			ob_start();
 		}
-		
 		?>
-		<div class="sync-flex" style="flex-direction: <?php echo esc_attr( $direction ); ?>; align-items: <?php echo esc_attr( $align_items ); ?>; justify-content: <?php echo esc_attr( $align_content ); ?>;">
-		<?php
-		if ( isset( $settings['content'] ) && is_array( $settings['content'] ) ) {
-			$this->generate_settings_html( $settings['content'], $auto_save );
-		}
-		?>
+		<div class="sync-flex<?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>>
+			<?php
+			if ( isset( $settings['content'] ) && is_array( $settings['content'] ) ) {
+				$this->generate_settings_html( $settings['content'], $auto_save );
+			}
+			?>
 		</div>
 		<?php
-		
 		if ( $return_html ) {
 			return ob_get_clean();
 		}
@@ -845,516 +870,410 @@ class Sync_Settings {
 		$value       = isset( $settings['value'] ) ? $settings['value'] : '';
 		$placeholder = isset( $settings['place_holder'] ) ? $settings['place_holder'] : '';
 		$label       = isset( $settings['label'] ) ? $settings['label'] : '';
-		$required    = ( ! empty( $settings['required'] ) ) ? ' required' : '';
+		$required    = ! empty( $settings['required'] ) ? ' required' : '';
 		$description = isset( $settings['description'] ) ? $settings['description'] : '';
-	
+
+		// Wrapper custom attributes.
+		$wrapper_class = 'sync-input-wrapper sync-' . esc_attr( $type ) . '-wrapper';
+		if ( ! empty( $settings['class'] ) ) {
+			$wrapper_class .= ' ' . esc_attr( $settings['class'] );
+		}
+		$conditional_att = ! empty( $settings['on_condition'] ) ? ' data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"' : '';
+		$style_attr      = ! empty( $settings['style'] ) ? ' style="' . esc_attr( $settings['style'] ) . '"' : '';
+
 		if ( $return_html ) {
 			ob_start();
 		}
 		?>
-		<div class="sync-input-wrapper sync-<?php echo esc_attr( $type ); ?>-wrapper">
-	
-		<?php if ( ! empty( $label ) ) { ?>
-				<label
-					for="sync-<?php echo esc_attr( $name ); ?>"
-					class="sync-input-label"
-				><?php echo esc_html( $label ); ?></label>
-			<?php } ?>
-	
-		<?php
-		switch ( $type ) {
-			case 'text':
-				?>
+		<div class="<?php echo $wrapper_class; ?>"<?php echo $style_attr . $conditional_att; ?>>
+
+			<?php if ( ! empty( $label ) ) : ?>
+				<label for="sync-field-<?php echo esc_attr( $name ); ?>" class="sync-input-label"><?php echo esc_html( $label ); ?></label>
+			<?php endif; ?>
+
+			<?php
+			switch ( $type ) :
+
+				case 'text':
+					?>
 					<input
 						type="text"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-text-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-text-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>
 						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( isset( $settings['regex'] ) ) :
+							?>
+							data-regex-match="<?php echo esc_attr( $settings['regex'] ); ?>"<?php endif; ?>>
 					<?php
-				break;
-			case 'textarea':
-				?>
+					break;
+
+				case 'textarea': 
+					?>
 					<textarea
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-textarea"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-textarea"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>
 						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						><?php echo esc_textarea( $value ); ?></textarea>
+						if ( isset( $settings['regex'] ) ) :
+							?>
+							data-regex-match="<?php echo esc_attr( $settings['regex'] ); ?>"<?php endif; ?>><?php echo esc_textarea( $value ); ?></textarea>
 					<?php
-				break;
-			case 'radio':
-				if ( ! empty( $settings['options'] ) && is_array( $settings['options'] ) ) {
-					echo '<div class="sync-radio-group">';
-					foreach ( $settings['options'] as $option ) {
-						$opt_value = is_array( $option ) ? $option['value'] : $option;
-						$opt_label = is_array( $option ) ? $option['label'] : $option;
-						$checked   = ( $value === $opt_value ) ? ' checked' : '';
+					break;
+
+				case 'radio':
+					if ( ! empty( $settings['options'] ) && is_array( $settings['options'] ) ) :
 						?>
+						<div class="sync-radio-group">
+							<?php
+							foreach ( $settings['options'] as $option ) :
+								$opt_value = is_array( $option ) ? $option['value'] : $option;
+								$opt_label = is_array( $option ) ? $option['label'] : $option;
+								$checked   = ( $value === $opt_value ) ? ' checked' : '';
+								?>
 							<label class="sync-radio-label">
 								<input
 									type="radio"
 									name="<?php echo esc_attr( $name ); ?>"
-									value="<?php echo esc_attr( $opt_value ); ?>"<?php echo esc_attr( $checked ); ?>
-								<?php
-								if ( $auto_save ) {
-									echo 'data-autosave="true"'; }
-								?>
+									value="<?php echo esc_attr( $opt_value ); ?>"<?php echo $checked; ?>
 									data-default-value="<?php echo esc_attr( $value ); ?>"
 									<?php
-									if ( isset( $settings['regex'] ) ) {
-										echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-									?>
+									if ( $auto_save ) :
+										?>
+										data-autosave="true"<?php endif; ?>
 									<?php
-									if ( isset( $settings['on_condition'] ) ) {
-										echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-									?>
-									>
+									if ( isset( $settings['regex'] ) ) :
+										?>
+										data-regex-match="<?php echo esc_attr( $settings['regex'] ); ?>"<?php endif; ?>>
 								<span class="sync-radio-text"><?php echo esc_html( $opt_label ); ?></span>
 							</label>
-							<?php
-					}
-					echo '</div>';
-				}
-				break;
-			case 'toggle':
-				$checked = $value ? ' checked' : '';
-				?>
+							<?php endforeach; ?>
+						</div>
+						<?php
+				endif;
+					break;
+
+				case 'toggle':
+					$checked = $value ? ' checked' : '';
+					?>
 					<label class="sync-toggle">
 						<input
 							type="checkbox"
-							id="sync-<?php echo esc_attr( $name ); ?>"
+							id="sync-field-<?php echo esc_attr( $name ); ?>"
 							name="<?php echo esc_attr( $name ); ?>"
-							value="1"<?php echo esc_attr( $checked ); ?>
-						<?php
-						if ( $auto_save ) {
-							echo 'data-autosave="true"'; }
-						?>
+							value="1"<?php echo $checked; ?>
 							data-default-value="<?php echo esc_attr( $value ); ?>"
 							<?php
-							if ( isset( $settings['regex'] ) ) {
-								echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-							?>
-							<?php
-							if ( isset( $settings['on_condition'] ) ) {
-								echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-							?>
-							>
+							if ( $auto_save ) :
+								?>
+								data-autosave="true"<?php endif; ?>>
 						<span class="sync-toggle-slider"></span>
 					</label>
 					<?php
-				break;
-			case 'checkbox':
-				$checked = $value ? ' checked' : '';
-				?>
+					break;
+
+				case 'checkbox':
+					$checked = $value ? ' checked' : '';
+					?>
 					<label class="sync-checkbox-label">
 						<input
 							type="checkbox"
-							id="sync-<?php echo esc_attr( $name ); ?>"
+							id="sync-field-<?php echo esc_attr( $name ); ?>"
 							name="<?php echo esc_attr( $name ); ?>"
-							value="1"<?php echo esc_attr( $checked ); ?>
-						<?php
-						if ( $auto_save ) {
-							echo 'data-autosave="true"'; }
-						?>
+							value="1"<?php echo $checked; ?>
 							data-default-value="<?php echo esc_attr( $value ); ?>"
 							<?php
-							if ( isset( $settings['regex'] ) ) {
-								echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-							?>
-							<?php
-							if ( isset( $settings['on_condition'] ) ) {
-								echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-							?>
-							>
+							if ( $auto_save ) :
+								?>
+								data-autosave="true"<?php endif; ?>>
 						<span class="sync-checkbox-text"><?php echo esc_html( $label ); ?></span>
 					</label>
 					<?php
-				break;
-			case 'dropdown':
-				?>
-					<select
-						id="sync-<?php echo esc_attr( $name ); ?>"
-						name="<?php echo esc_attr( $name ); ?>"
-						class="sync-dropdown"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
+					break;
+
+				case 'dropdown': 
 					?>
+					<select
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
+						name="<?php echo esc_attr( $name ); ?>"
+						class="sync-dropdown"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
-						<?php if ( $placeholder ) { ?>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
+						<?php if ( $placeholder ) : ?>
 							<option value="" disabled selected><?php echo esc_html( $placeholder ); ?></option>
-						<?php } ?>
+						<?php endif; ?>
 						<?php
-						if ( ! empty( $settings['options'] ) && is_array( $settings['options'] ) ) {
-							foreach ( $settings['options'] as $option ) {
+						if ( ! empty( $settings['options'] ) && is_array( $settings['options'] ) ) :
+							foreach ( $settings['options'] as $option ) :
 								$opt_value = is_array( $option ) ? $option['value'] : $option;
 								$opt_label = is_array( $option ) ? $option['label'] : $option;
 								$selected  = ( $value === $opt_value ) ? ' selected' : '';
-								echo '<option value="' . esc_attr( $opt_value ) . '"' . esc_attr( $selected ) . '>' . esc_html( $opt_label ) . '</option>';
-							}
-						}
+								?>
+							<option value="<?php echo esc_attr( $opt_value ); ?>"<?php echo $selected; ?>><?php echo esc_html( $opt_label ); ?></option>
+								<?php
+						endforeach;
+endif;
 						?>
 					</select>
 					<?php
-				break;
-			case 'date':
-			case 'time':
-			case 'datetime':
-				$input_type = 'datetime' === $type ? 'datetime-local' : $type;
-				?>
+					break;
+
+				case 'date': 
+				case 'time': 
+				case 'datetime':
+					$input_type = 'datetime' === $type ? 'datetime-local' : $type;
+					?>
 					<input
 						type="<?php echo esc_attr( $input_type ); ?>"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
-						class="sync-input sync-<?php echo esc_attr( $type ); ?>-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-<?php echo esc_attr( $type ); ?>-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
-						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
 					<?php
-				break;
-			case 'number':
-				$min  = isset( $settings['min'] ) ? ' min="' . esc_attr( $settings['min'] ) . '"' : '';
-				$max  = isset( $settings['max'] ) ? ' max="' . esc_attr( $settings['max'] ) . '"' : '';
-				$step = isset( $settings['step'] ) ? ' step="' . esc_attr( $settings['step'] ) . '"' : '';
-				?>
+					if ( $auto_save ) :
+						?>
+									data-autosave="true"<?php endif; ?>>
+					<?php
+					break;
+
+				case 'number':
+					$min  = isset( $settings['min'] ) ? ' min="' . esc_attr( $settings['min'] ) . '"' : '';
+					$max  = isset( $settings['max'] ) ? ' max="' . esc_attr( $settings['max'] ) . '"' : '';
+					$step = isset( $settings['step'] ) ? ' step="' . esc_attr( $settings['step'] ) . '"' : '';
+					?>
 					<input
 						type="number"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
-						value="<?php echo esc_attr( $value ); ?>"<?php echo wp_kses_post( $min . $max . $step ); ?>
-						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-number-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						value="<?php echo esc_attr( $value ); ?>"<?php echo $min . $max . $step; ?>
+						class="sync-input sync-number-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 					<?php
-				break;
-			case 'password':
-				?>
+					break;
+
+				case 'password': 
+					?>
 					<input
 						type="password"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-password-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-password-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 					<?php
-				break;
-			case 'email':
-				?>
+					break;
+
+				case 'email': 
+					?>
 					<input
 						type="email"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-email-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-email-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 					<?php
-				break;
-			case 'url':
-				?>
+					break;
+
+				case 'url': 
+					?>
 					<input
 						type="url"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						class="sync-input sync-url-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-url-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 					<?php
-				break;
-			case 'color':
-				?>
+					break;
+
+				case 'color': 
+					?>
 					<input
 						type="color"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
 						value="<?php echo esc_attr( $value ); ?>"
-						class="sync-input sync-color-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						class="sync-input sync-color-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 					<?php
-				break;
-			case 'range':
-				$min  = isset( $settings['min'] ) ? ' min="' . esc_attr( $settings['min'] ) . '"' : '';
-				$max  = isset( $settings['max'] ) ? ' max="' . esc_attr( $settings['max'] ) . '"' : '';
-				$step = isset( $settings['step'] ) ? ' step="' . esc_attr( $settings['step'] ) . '"' : '';
-				?>
+					break;
+
+				case 'range':
+					$min  = isset( $settings['min'] ) ? ' min="' . esc_attr( $settings['min'] ) . '"' : '';
+					$max  = isset( $settings['max'] ) ? ' max="' . esc_attr( $settings['max'] ) . '"' : '';
+					$step = isset( $settings['step'] ) ? ' step="' . esc_attr( $settings['step'] ) . '"' : '';
+					?>
 					<input
 						type="range"
-						id="sync-<?php echo esc_attr( $name ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
 						name="<?php echo esc_attr( $name ); ?>"
-						value="<?php echo esc_attr( $value ); ?>"<?php echo wp_kses_post( $min . $max . $step ); ?>
-						class="sync-input sync-range-input"<?php echo esc_attr( $required ); ?>
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
-												data-default-value="<?php echo esc_attr( $value ); ?>"
-						<?php
-						if ( isset( $settings['regex'] ) ) {
-							echo 'data-regex-match="' . esc_attr( $settings['regex'] ) . '"'; }
-						?>
-						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
-					<span class="sync-range-value"><?php echo esc_html( $value ); ?></span>
-					<?php
-				break;
-			case 'button':
-				$button_text = isset( $settings['text'] ) ? $settings['text'] : 'Button';
-				$button_type = isset( $settings['button_type'] ) ? $settings['button_type'] : 'button';
-				$button_cls  = isset( $settings['class'] ) ? $settings['class'] : 'sync-button';
-				$icon_html   = isset( $settings['icon'] ) ? '<span class="dashicons dashicons-' . esc_attr( $settings['icon'] ) . '"></span>' : '';
-				?>
-					<button
-						type="<?php echo esc_attr( $button_type ); ?>"
-						id="sync-<?php echo esc_attr( $name ); ?>"
-						name="<?php echo esc_attr( $name ); ?>"
-						class="<?php echo esc_attr( $button_cls ); ?>"
-					<?php
-					if ( $auto_save ) {
-						echo 'data-autosave="true"'; }
-					?>
+						value="<?php echo esc_attr( $value ); ?>"<?php echo $min . $max . $step; ?>
+						class="sync-input sync-range-input"<?php echo $required; ?>
 						data-default-value="<?php echo esc_attr( $value ); ?>"
 						<?php
-						if ( isset( $settings['on_condition'] ) ) {
-							echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-						?>
-						>
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
+					<span class="sync-range-value"><?php echo esc_html( $value ); ?></span>
+					<?php
+					break;
+
+				case 'button':
+					$button_text = isset( $settings['text'] ) ? $settings['text'] : 'Button';
+					$button_type = isset( $settings['button_type'] ) ? $settings['button_type'] : 'button';
+					$button_cls  = isset( $settings['class'] ) ? esc_attr( $settings['class'] ) : 'sync-button';
+					$icon_html   = isset( $settings['icon'] ) ? '<span class="dashicons dashicons-' . esc_attr( $settings['icon'] ) . '"></span>' : '';
+					?>
+					<button
+						type="<?php echo esc_attr( $button_type ); ?>"
+						id="sync-field-<?php echo esc_attr( $name ); ?>"
+						name="<?php echo esc_attr( $name ); ?>"
+						class="<?php echo $button_cls; ?>"
+						<?php
+						if ( $auto_save ) :
+							?>
+							data-autosave="true"<?php endif; ?>>
 						<?php echo wp_kses_post( $icon_html . esc_html( $button_text ) ); ?>
 					</button>
 					<?php
-				break;
-			case 'data':
-				?>
+					break;
+
+				case 'data': 
+					?>
 					<div class="sync-data-input-container" data-name="<?php echo esc_attr( $name ); ?>">
 						<table class="sync-data-table">
 							<thead><tr><th>Key</th><th>Value</th><th></th></tr></thead>
 							<tbody>
-							<?php
-							if ( ! empty( $value ) && is_array( $value ) ) {
-								foreach ( $value as $k => $v ) {
-									?>
+								<?php
+								if ( is_array( $value ) ) :
+									foreach ( $value as $k => $v ) :
+										?>
 										<tr class="sync-data-row">
 											<td><input type="text" class="sync-data-key" value="<?php echo esc_attr( $k ); ?>"></td>
 											<td><input type="text" class="sync-data-value" value="<?php echo esc_attr( $v ); ?>"></td>
 											<td><button type="button" class="sync-data-remove"><span class="dashicons dashicons-trash"></span></button></td>
 										</tr>
 										<?php
-								}
-							}
-							?>
+									endforeach;
+								endif;
+								?>
 								<tr class="sync-data-row">
-									<td><input type="text" class="sync-data-key" placeholder="<?php echo esc_attr( 'Key' ); ?>"></td>
-									<td><input type="text" class="sync-data-value" placeholder="<?php echo esc_attr( 'Value' ); ?>"></td>
+									<td><input type="text" class="sync-data-key" placeholder="Key"></td>
+									<td><input type="text" class="sync-data-value" placeholder="Value"></td>
 									<td><button type="button" class="sync-data-remove"><span class="dashicons dashicons-trash"></span></button></td>
 								</tr>
 							</tbody>
 						</table>
 						<input
 							type="hidden"
-							id="sync-<?php echo esc_attr( $name ); ?>"
+							id="sync-field-<?php echo esc_attr( $name ); ?>"
 							name="<?php echo esc_attr( $name ); ?>"
 							value="<?php echo esc_attr( wp_json_encode( $value ) ); ?>"
+							data-default-value="<?php echo esc_attr( wp_json_encode( $value ) ); ?>"
 							<?php
-							if ( $auto_save ) {
-								echo 'data-autosave="true"'; }
-							?>
-							data-default-value="<?php echo esc_attr( $value ); ?>"
-							<?php
-							if ( isset( $settings['on_condition'] ) ) {
-								echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-							?>
-							>
-						<button type="button" class="sync-button sync-data-add">
-							<span class="dashicons dashicons-plus"></span> <?php echo esc_html( 'Add New Entry' ); ?>
-						</button>
+							if ( $auto_save ) :
+								?>
+								data-autosave="true"<?php endif; ?>>
+						<button type="button" class="sync-button sync-data-add"><span class="dashicons dashicons-plus"></span> Add New Entry</button>
 					</div>
 					<?php
-				break;
-			case 'file':
-				$file_url = is_array( $value ) && ! empty( $value['url'] ) ? $value['url'] : $value;
-				$file_id  = is_array( $value ) && ! empty( $value['id'] ) ? $value['id'] : '';
-				?>
+					break;
+
+				case 'file': 
+					?>
+					<?php
+					$file_url = is_array( $value ) && ! empty( $value['url'] ) ? $value['url'] : '';
+					$file_id  = is_array( $value ) && ! empty( $value['id'] ) ? $value['id'] : '';
+					?>
 					<div class="sync-file-upload-container">
-						<input
-							type="text"
-							id="sync-<?php echo esc_attr( $name ); ?>-url"
-							class="sync-file-url"
-							value="<?php echo esc_attr( $file_url ); ?>"
-							placeholder="<?php echo esc_attr( $placeholder ); ?>"
-							readonly>
+						<input type="text" id="sync-field-<?php echo esc_attr( $name ); ?>-url" class="sync-file-url" value="<?php echo esc_attr( $file_url ); ?>" placeholder="<?php echo esc_attr( $placeholder ); ?>" readonly>
 						<input
 							type="hidden"
-							id="sync-<?php echo esc_attr( $name ); ?>"
+							id="sync-field-<?php echo esc_attr( $name ); ?>"
 							name="<?php echo esc_attr( $name ); ?>"
 							value="<?php echo esc_attr( $file_id ); ?>"
-						<?php
-						if ( $auto_save ) {
-							echo 'data-autosave="true"'; }
-						?>
 							data-default-value="<?php echo esc_attr( $file_id ); ?>"
 							<?php
-							if ( isset( $settings['on_condition'] ) ) {
-								echo 'data-conditional-target="' . esc_attr( $settings['on_condition'] ) . '"'; }
-							?>
-							>
+							if ( $auto_save ) :
+								?>
+								data-autosave="true"<?php endif; ?>>
 						<button type="button" class="sync-button sync-file-upload-button">Select File</button>
 						<button type="button" class="sync-button sync-file-remove-button"<?php echo empty( $file_url ) ? ' style="display:none;"' : ''; ?>>Remove</button>
 					</div>
 					<?php
-				break;
-			default:
-				// Unknown type: no output.
-				break;
-		} // end switch
-	
-		if ( ! empty( $description ) ) {
-			echo '<p class="sync-input-description">' . esc_html( $description ) . '</p>';
-		}
-	
-		if ( $auto_save ) {
-			echo '<div class="sync-input-message" data-for="' . esc_attr( $name ) . '"></div>';
-		}
-		?>
+					break;
+
+			endswitch;
+			?>
+
+			<?php if ( ! empty( $description ) ) : ?>
+				<p class="sync-input-description"><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
+
+			<?php if ( $auto_save ) : ?>
+				<div class="sync-input-message" data-for="<?php echo esc_attr( $name ); ?>"></div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $settings['regex_message_error_content'] ) && is_array( $settings['regex_message_error_content'] ) ) : ?>
+				<div class="hidden" id="sync-field-<?php echo esc_attr( $name ); ?>-error">
+					<?php $this->generate_settings_html( $settings['regex_message_error_content'], false ); ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $settings['regex_message_success_content'] ) && is_array( $settings['regex_message_success_content'] ) ) : ?>
+				<div class="hidden" id="sync-field-<?php echo esc_attr( $name ); ?>-success">
+					<?php $this->generate_settings_html( $settings['regex_message_success_content'], false ); ?>
+				</div>
+			<?php endif; ?>
+
 		</div>
-			<?php
-			// Conditional placeholders.
-			if ( ! empty( $settings['conditional'] ) && is_array( $settings['conditional'] ) ) {
-				foreach ( $settings['conditional'] as $cond ) {
-					?>
-				<div
-					class="hidden conditionals"
-					data-conditional-input="<?php echo esc_attr( $name ); ?>"
-					data-conditional-name="<?php echo esc_attr( $cond['name'] ); ?>"
-					data-conditional-based="<?php echo esc_attr( $cond['based'] ); ?>"
-					data-conditional-with="<?php echo esc_attr( $cond['with'] ); ?>"
-				></div>
-					<?php
-				}
-			}
-	
-			if ( $return_html ) {
-				return ob_get_clean();
-			}
+		<?php
+		if ( $return_html ) {
+			return ob_get_clean();
+		}
 	}
+
 
 		/**
 		 * Sanitize form output

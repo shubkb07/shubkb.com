@@ -27,22 +27,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			'input',
 			{ selector: '.sync-single-form input' },
 			function ( e, data ) {
-				console.log( 'Single form input changed:', data.targetElement );
-				console.log( 'New value:', data.targetElement.value );
-
-				// get input form selector
-				const form = data.targetElement.closest( '.sync-single-form form' );
-				console.log( 'Form:', form );
-				console.log( 'Form ID:', form.id );
-				console.log( 'Form action:', form.action );
-				console.log( 'Form method:', form.method );
-				console.log( 'Form data:', new FormData( form ) );
-
-				// Get nonce.
-				const nonce = form.querySelector( 'input[name="sync_nonce"]' );
-				if ( nonce ) {
-					console.log( 'Nonce:', nonce.value );
-				}
+				cconsole.log;
 			}
 		);
 
@@ -52,23 +37,48 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	}
 
 	/**
+	 * Send AJAX request with form data as application/x-www-form-urlencoded
 	 *
-	 * @param action
-	 * @param nonce
-	 * @param data
-	 * @param method
+	 * @param {HTMLFormElement} form   The form element whose inputs to send
+	 * @param {string}          method HTTP method to use (defaults to "POST")
+	 * @return {void}
 	 */
-	function ajaxRequest( action, nonce, data, method = 'POST' ) {
-		const contructedData = {
-			action,
-			nonce,
-		};
-		fetch( window.ajaxurl, {
-			method: 'POST',
-			credentials: 'same-origin',
-			data: contructedData,
-		} ).then( ( response ) => {} );
-	}
+	function ajaxRequest( form, method = 'POST' ) {
+		if ( ! ( form instanceof HTMLFormElement ) ) {
+		  console.error( 'ajaxRequest: first argument must be a <form> element' );
+		  return;
+		}
+
+		// Gather all inputs into a FormData instance
+		const formData = new FormData( form );
+
+		// Convert to URL-encoded string
+		const urlParams = new URLSearchParams();
+		for ( const [ key, value ] of formData.entries() ) {
+		  urlParams.append( key, value );
+		}
+
+		// Fire off the request
+		fetch( form.action, {
+		  method,
+		  headers: {
+				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+		  },
+		  body: urlParams.toString(),
+		} )
+			.then( ( response ) => {
+		  if ( ! response.ok ) {
+		  			throw new Error( `Server returned ${ response.status } ${ response.statusText }` );
+		  }
+		  return response.json();
+			} )
+			.then( ( json ) => {
+		  console.log( 'ajaxRequest response:', json );
+			} )
+			.catch( ( err ) => {
+		  console.error( 'ajaxRequest error:', err );
+			} );
+	  }
 
 	/**
 	 * Mobile menu toggle
