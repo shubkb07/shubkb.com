@@ -73,25 +73,26 @@ function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $settings_callba
  * Create a single AJAX settings page.
  *
  * @param array $page_details Page details.
- * @param array $setting_array Settings array.
+ * @param array $settings_array Settings array.
  * @param bool  $refresh Refresh flag.
  */
-function sync_create_single_ajax_settings_page( $page_details, $setting_array, $refresh = false ) {
+function sync_create_single_ajax_settings_page( $page_details, $settings_array, $refresh = false ) {
 	global $sync_settings;
 
-	return $sync_settings->create_single_ajax_settings_page( $page_details, $setting_array, $refresh );
+
+	return $sync_settings->create_single_ajax_settings_page( $page_details, $settings_array, $refresh );
 }
 
 /**
  * Create each AJAX settings page.
  *
  * @param array $page_details Page details.
- * @param array $setting_array Settings array.
+ * @param array $settings_array Settings array.
  */
-function sync_create_each_ajax_settings_page( $page_details, $setting_array ) {
+function sync_create_each_ajax_settings_page( $page_details, $settings_array ) {
 	global $sync_settings;
 
-	return $sync_settings->create_each_ajax_settings_page( $page_details, $setting_array );
+	return $sync_settings->create_each_ajax_settings_page( $page_details, $settings_array );
 }
 
 add_action(
@@ -155,7 +156,7 @@ add_action(
  * @param array  $page_details Page details.
  */
 function sync_register_settings_dashboard( $content, $page_details ) {
-	$setting_array = array(
+	$settings_array = array(
 		'html'   => array(
 			'flex' => array(
 				'direction' => 'column',
@@ -181,13 +182,13 @@ function sync_register_settings_dashboard( $content, $page_details ) {
 			),
 		),
 		'submit' => array(
-			'type'           => 'seprate',
+			'seprate'        => 'seo_setup',
 			'return_html'    => true,
 			'should_refresh' => true,
 		),
 	);
 
-	return sync_create_each_ajax_settings_page( $page_details, $setting_array );
+	return sync_create_each_ajax_settings_page( $page_details, $settings_array );
 }
 
 /**
@@ -199,7 +200,7 @@ function sync_register_settings_dashboard( $content, $page_details ) {
  * @param array  $page_details Page details.
  */
 function sync_register_settings_tools( $content, $page_details ) {
-	$setting_array = array(
+	$settings_array = array(
 		'html'   => array(
 			'flex' => array(
 				'direction' => 'row',
@@ -228,12 +229,12 @@ function sync_register_settings_tools( $content, $page_details ) {
 			),
 		),
 		'submit' => array(
-			'type'           => 'seprate',
+			'seprate'        => 'link_tools_setup',
 			'return_html'    => true,
 			'should_refresh' => true,
 		),
 	);
-	return sync_create_single_ajax_settings_page( $page_details, $setting_array );
+	return sync_create_single_ajax_settings_page( $page_details, $settings_array );
 }
 
 /**
