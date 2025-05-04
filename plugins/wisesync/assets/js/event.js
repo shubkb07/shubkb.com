@@ -1,10 +1,12 @@
 /**
  * A global, delegated event manager that supports registration and deregistration
  * of named handlers with rich condition matching and callback data.
+ * Now with debounce support.
  */
 
 const eventList = {};
 const htmlDocument = document.getElementsByTagName( 'html' )[ 0 ];
+const debounceTimers = {}; // Store debounce timers for each event handler
 
 // Commonly used event types
 const validEventTypes = new Set( [
@@ -32,7 +34,7 @@ const validEventTypes = new Set( [
 	'touchmove',
 	'touchend',
 	'touchcancel',
-	'hashchange', // Added hashchange event
+	'hashchange',
 ] );
 
 /**
@@ -51,9 +53,10 @@ function isValidEventType( eventType ) {
  * @param {string}   eventType DOM event type (e.g. 'click', 'scroll', 'input')
  * @param {Object}   condition Matching conditions (selector, key/value, thresholds)
  * @param {Function} callback  Function(e, data) to invoke when matched
+ * @param {number}   debounce  Milliseconds to debounce the callback (default: 0, no debounce)
  * @return {void}
  */
-function registerEvent( eventName, eventType, condition, callback ) { // eslint-disable-line no-unused-vars
+function registerEvent( eventName, eventType, condition, callback, debounce = 0 ) { // eslint-disable-line no-unused-vars
 	if ( 'string' !== typeof eventName || ! eventName.trim() ) {
 		throw new Error( 'registerEvent: eventName must be a non-empty string.' );
 	}
@@ -66,6 +69,9 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 	}
 	if ( 'function' !== typeof callback ) {
 		throw new Error( 'registerEvent: callback must be a function.' );
+	}
+	if ( 'number' !== typeof debounce || 0 > debounce ) {
+		throw new Error( 'registerEvent: debounce must be a non-negative number.' );
 	}
 
 	// Initialize global listener for this type if first time
@@ -285,6 +291,14 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 							conditionMatchWith = handler.condition.hashPattern.toString();
 						}
 					}
+				} else if ( 'resize' === type ) {
+					matched = true;
+					data.resizeData = {
+						innerWidth: window.innerWidth,
+						innerHeight: window.innerHeight,
+						outerWidth: window.outerWidth,
+						outerHeight: window.outerHeight,
+					};
 				} else {
 					matched = true;
 				}
@@ -294,12 +308,35 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 					data.triggeredCount = handler.triggeredCount;
 					data.conditionMatchWith = conditionMatchWith;
 
-					try {
-						handler.callback( e, data );
-					} catch ( err ) {
-						// Log error in callback
-						// eslint-disable-next-line no-console
-						console.error( `Error in "${ name }" callback:`, err );
+					// Execute the callback with debounce if applicable
+					if ( 0 < handler.debounce ) {
+						const debounceKey = `${ eventName }_${ type }`;
+
+						// Clear any existing timer for this handler
+						if ( debounceTimers[ debounceKey ] ) {
+							clearTimeout( debounceTimers[ debounceKey ] );
+						}
+
+						// Set a new timer
+						debounceTimers[ debounceKey ] = setTimeout( () => {
+							try {
+								handler.callback( e, data );
+							} catch ( err ) {
+								// Log error in callback
+								// eslint-disable-next-line no-console
+								console.error( `Error in "${ name }" callback:`, err );
+							}
+							delete debounceTimers[ debounceKey ];
+						}, handler.debounce );
+					} else {
+						// No debounce, execute immediately
+						try {
+							handler.callback( e, data );
+						} catch ( err ) {
+							// Log error in callback
+							// eslint-disable-next-line no-console
+							console.error( `Error in "${ name }" callback:`, err );
+						}
 					}
 				}
 			} );
@@ -326,20 +363,19 @@ function registerEvent( eventName, eventType, condition, callback ) { // eslint-
 
 		// Select appropriate target for the event type
 		const targetEl =
-			'scroll' === type ? window
-				: 'hashchange' === type ? window
-					: htmlDocument;
+			[ 'scroll', 'resize', 'hashchange' ].includes( type ) ? window : htmlDocument;
 
 		targetEl.addEventListener( type, listener, false );
 
 		eventList[ type ] = { listener, handlers };
 	}
 
-	// Store the handler
+	// Store the handler with debounce value
 	eventList[ type ].handlers[ eventName ] = {
 		condition,
 		callback,
 		triggeredCount: 0,
+		debounce,
 	};
 }
 
@@ -354,15 +390,21 @@ function deRegisterEvent( eventName ) { // eslint-disable-line no-unused-vars
 	if ( 'string' !== typeof eventName || ! eventName.trim() ) {
 		throw new Error( 'deRegisterEvent: eventName must be a non-empty string.' );
 	}
+
+	// Clear any existing debounce timer for this handler
+	const debounceKey = Object.keys( debounceTimers ).find( ( key ) => key.startsWith( `${ eventName }_` ) );
+	if ( debounceKey ) {
+		clearTimeout( debounceTimers[ debounceKey ] );
+		delete debounceTimers[ debounceKey ];
+	}
+
 	for ( const [ type, { listener, handlers } ] of Object.entries( eventList ) ) {
 		if ( handlers[ eventName ] ) {
 			delete handlers[ eventName ];
 			// Remove listener when no more handlers for this eventType
 			if ( 0 === Object.keys( handlers ).length ) {
 				const targetEl =
-					'scroll' === type ? window
-						: 'hashchange' === type ? window
-							: htmlDocument;
+					[ 'scroll', 'resize', 'hashchange' ].includes( type ) ? window : htmlDocument;
 				targetEl.removeEventListener( type, listener, false );
 				delete eventList[ type ];
 			}

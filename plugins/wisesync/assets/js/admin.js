@@ -23,17 +23,132 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		} );
 
 		registerEvent(
-			'sync-settings-single-ajax-form-submit',
+			'sync-settings-single-ajax-form-input',
 			'input',
-			{ selector: '.sync-single-form input' },
-			function ( e, data ) {
-				cconsole.log;
-			}
+			{ selector: '.sync-single-form :is(input, textarea)' },
+			syncSettingsSingleAjaxFormSubmit,
+			1000
+		);
+
+		registerEvent(
+			'sync-settings-single-ajax-form-submit',
+			'click',
+			{ selector: '.sync-single-form .sync-button.sync-submit-button' },
+			syncSettingsSingleAjaxFormSubmit
 		);
 
 		// registerEvent(
 		// 	'sync-settings-each-ajax-form-submit'
 		// );
+	}
+
+	/**
+	 * Handle AJAX form submission for single forms
+	 *
+	 * @param {Event} e    Event object
+	 * @param {JSON}  data Prased Event Data
+	 */
+	function syncSettingsSingleAjaxFormSubmit ( e, data ) {
+		const formElement = data.targetElement.closest( 'form' );
+		const inputElements = formElement.querySelectorAll( 'input, textarea' );
+		const formButton = formElement.querySelector( '.sync-button.sync-submit-button' );
+		if ( checkRequiredInputs( inputElements ) && checkRegexMatchForForm( inputElements ) ) {
+			// Get Form Button and enable it
+			formButton.removeAttribute( 'disabled' );
+		} else {
+			// Get Form Button and disable it
+			formButton.setAttribute( 'disabled', 'disabled' );
+		}
+		if ( 'click' === data.eventType && 'sync-settings-single-ajax-form-submit' === data.eventName ) {
+			if ( checkRequiredInputs( inputElements ) && checkRegexMatchForForm( inputElements ) ) {
+				ajaxRequest( formElement, 'POST' );
+			}
+		}
+	}
+
+	/**
+	 * Check if inputElements have required attribute, then check if they are empty
+	 *
+	 * @param {NodeList} inputElements - NodeList of input elements
+	 * @return {boolean} - True if all required inputs are filled, false otherwise
+	 */
+	function checkRequiredInputs( inputElements ) {
+		let allFilled = true;
+
+		inputElements.forEach( function ( input ) {
+			if ( input.hasAttribute( 'required' ) && ! input.value.trim() ) {
+				allFilled = false;
+			}
+		} );
+
+		return allFilled;
+	}
+
+	/**
+	 * Check if field is valid or not by regex
+	 *
+	 * It will check if input field have attribute data-regex-match or not,
+	 * if yes then is value is matching that regex,
+	 * if yes then return true else false.
+	 * @param {NodeList} inputElements - NodeList of input elements
+	 * @return {boolean} - True if all required inputs are filled, false otherwise
+	 */
+	function checkRegexMatchForForm( inputElements ) {
+		let allValid = true;
+
+		// Loop through all input elements
+		inputElements.forEach( function( input ) {
+			// If any single validation fails, the overall result should be false
+			// Important: We still check all inputs but remember if any failed
+			const isValid = checkRegexMatchOfInput( input );
+			if ( ! isValid ) {
+				allValid = false;
+				// Don't return early - we want to validate all fields to show all errors
+			}
+		} );
+		return allValid;
+	}
+
+	/**
+	 * Check if field is valid or not by regex
+	 *
+	 * It will check if input field have attribute data-regex-match or not,
+	 * if yes then is value is matching that regex,
+	 * if yes then return true else false.
+	 * @param {Element} inputElement - NodeList of input elements
+	 * @return {boolean} - True if all required inputs are filled, false otherwise
+	 */
+	function checkRegexMatchOfInput( inputElement ) {
+		// If no regex attribute, consider it valid
+		if ( ! inputElement.hasAttribute( 'data-regex-match' ) ) {
+			return true;
+		  }
+
+		  const patternStr = inputElement.getAttribute( 'data-regex-match' );
+		  const inputValue = inputElement.value.trim();
+		  let pattern,
+		  	flags = '';
+
+		  // Handle pattern with or without regex literal syntax
+		  if ( patternStr.startsWith( '/' ) ) {
+			const lastSlashIndex = patternStr.lastIndexOf( '/' );
+			if ( 0 < lastSlashIndex ) {
+			  // Extract pattern between slashes and any flags after the last slash
+			  pattern = patternStr.slice( 1, lastSlashIndex );
+			  flags = patternStr.slice( lastSlashIndex + 1 );
+			} else {
+			  pattern = patternStr;
+			}
+		  } else {
+			pattern = patternStr;
+		  }
+
+		  try {
+			const regex = new RegExp( pattern, flags );
+			return regex.test( inputValue );
+		  } catch ( e ) {
+			return false;
+		  }
 	}
 
 	/**
@@ -59,7 +174,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 
 		// Fire off the request
-		fetch( form.action, {
+		fetch( window.ajaxurl, {
 		  method,
 		  headers: {
 				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',

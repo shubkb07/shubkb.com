@@ -86,8 +86,7 @@ msgstr ""
 msgid "Invalid nonce"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:615
-#: includes/classes/class-sync-settings.php:669
+#: includes/classes/class-sync-settings.php:671
 msgid "Invalid settings array."
 msgstr ""
 

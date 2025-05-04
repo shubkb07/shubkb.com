@@ -202,38 +202,225 @@ function sync_register_settings_dashboard( $content, $page_details ) {
 function sync_register_settings_tools( $content, $page_details ) {
 	$settings_array = array(
 		'html'   => array(
-			'flex' => array(
-				'direction' => 'row',
-				'align'     => array(
-					'item'    => 'flex-start',
-					'content' => 'center',
+			// Heading with custom class, style, and conditional display.
+			'h2'    => array(
+				'text'         => 'Section Title',
+				'class'        => 'section-title',
+				'style'        => 'margin-bottom:1rem;',
+				'on_condition' => 'toggle_example',
+			),
+	
+			// Paragraph with custom styling.
+			'p'     => array(
+				'text'         => 'This paragraph appears only if the toggle is on.',
+				'class'        => 'intro-text',
+				'style'        => 'font-style:italic;',
+				'on_condition' => 'toggle_example',
+			),
+
+			// Break line.
+			'break' => array(
+				'count' => 2,
+				'style' => 'margin-bottom:1rem;',
+			),
+	
+			// Flex container holding a row of inputs.
+			'flex'  => array(
+				'direction'    => 'row',
+				'align'        => array(
+					'item'    => 'center',
+					'content' => 'space-between',
 				),
-				'content'   => array(
-					'p'           => 'This is the tools settings page.',
-					'input_radio' => array(
-						'name'        => 'tools_radio',
-						'value'       => 'option1',
-						'options'     => array( 'option1', 'option2', 'option3' ),
-						'sync_option' => 'input_tools_radio',
+				'class'        => 'flex-row',
+				'style'        => 'gap:1rem;',
+				'on_condition' => 'checkbox_example',
+				'content'      => array(
+	
+					// Text input with regex and error/success messages.
+					'input_text'     => array(
+						'name'                          => 'text_example',
+						'label'                         => 'Text Field',
+						'value'                         => 'default',
+						'place_holder'                  => 'Enter at least 6 chars',
+						'required'                      => true,
+						'regex'                         => '/^.{6,}$/',
+						'description'                   => 'Must be 6 or more characters.',
+						'class'                         => 'wide-input',
+						'style'                         => 'width:100%;',
+						'on_condition'                  => 'toggle_example',
+						'regex_message_error_content'   => array(
+							'p' => array(
+								'text'  => 'Too short!',
+								'class' => 'error-message',
+							),
+						),
+						'regex_message_success_content' => array(
+							'p' => array(
+								'text'  => 'Looks good!',
+								'class' => 'success-message',
+							),
+						),
 					),
-					'input_data'  => array(
-						'name'         => 'tools_data',
+	
+					// Textarea.
+					'input_textarea' => array(
+						'name'         => 'textarea_example',
+						'label'        => 'Description',
+						'value'        => 'Some long text...',
+						'place_holder' => 'Type here...',
+						'description'  => 'You can write multiple lines.',
+						'class'        => 'tall-textarea',
+						'style'        => 'height:4rem;',
+					),
+	
+					// Radio buttons.
+					'input_radio'    => array(
+						'name'    => 'radio_example',
+						'value'   => 'opt2',
+						'options' => array(
+							array(
+								'value' => 'opt1',
+								'label' => 'Option 1',
+							),
+							array(
+								'value' => 'opt2',
+								'label' => 'Option 2',
+							),
+						),
+						'label'   => 'Choose One',
+						'class'   => 'radio-group',
+					),
+	
+					// Toggle (checkbox styled).
+					'input_toggle'   => array(
+						'name'        => 'toggle_example',
+						'value'       => 1,
+						'label'       => 'Enable Feature',
+						'description' => 'Turn this on to enable.',
+					),
+	
+					// Simple checkbox.
+					'input_checkbox' => array(
+						'name'  => 'checkbox_example',
+						'value' => 0,
+						'label' => 'Show Flex',
+					),
+	
+					// Dropdown select.
+					'input_dropdown' => array(
+						'name'        => 'dropdown_example',
+						'value'       => 'b',
+						'placeholder' => 'Select an option',
+						'options'     => array(
+							array(
+								'value' => 'a',
+								'label' => 'Alpha',
+							),
+							array(
+								'value' => 'b',
+								'label' => 'Beta',
+							),
+							array(
+								'value' => 'c',
+								'label' => 'Gamma',
+							),
+						),
+					),
+	
+					// Date, Time, and DateTime.
+					'input_date'     => array(
+						'name'  => 'date_example',
+						'value' => '2025-05-03',
+					),
+					'input_time'     => array(
+						'name'  => 'time_example',
+						'value' => '14:30',
+					),
+					'input_datetime' => array(
+						'name'  => 'datetime_example',
+						'value' => '2025-05-03T14:30',
+					),
+	
+					// Number input.
+					'input_number'   => array(
+						'name'  => 'number_example',
+						'value' => 5,
+						'min'   => 1,
+						'max'   => 10,
+						'step'  => 1,
+					),
+	
+					// Password.
+					'input_password' => array(
+						'name'         => 'password_example',
 						'value'        => '',
-						'place_holder' => 'Enter data value',
-						'sync_option'  => 'input_tools_data',
+						'place_holder' => 'Enter password',
 					),
-					'break'       => array(
-						'count' => 1,
+	
+					// Email.
+					'input_email'    => array(
+						'name'  => 'email_example',
+						'value' => 'user@example.com',
 					),
+	
+					// URL.
+					'input_url'      => array(
+						'name'  => 'url_example',
+						'value' => 'https://example.com',
+					),
+	
+					// Color picker.
+					'input_color'    => array(
+						'name'  => 'color_example',
+						'value' => '#ff0000',
+					),
+	
+					// Range slider.
+					'input_range'    => array(
+						'name'  => 'range_example',
+						'value' => 50,
+						'min'   => 0,
+						'max'   => 100,
+						'step'  => 5,
+					),
+	
+					// Button.
+					'input_button'   => array(
+						'name'        => 'button_example',
+						'text'        => 'Click Me',
+						'button_type' => 'button',
+						'class'       => 'sync-button-primary',
+						'icon'        => 'admin-generic',
+					),
+	
+					// Data table.
+					'input_data'     => array(
+						'name'  => 'data_example',
+						'value' => array(
+							'key1' => 'value1',
+							'key2' => 'value2',
+						),
+					),
+	
+					// File upload.
+					'input_file'     => array(
+						'name'         => 'file_example',
+						'value'        => array(
+							'id'  => 0,
+							'url' => '',
+						),
+						'place_holder' => 'No file selected',
+					),
+	
 				),
 			),
 		),
 		'submit' => array(
-			'seprate'        => 'link_tools_setup',
+			'seprate'        => 'test_action',
 			'return_html'    => true,
-			'should_refresh' => true,
+			'should_refresh' => false,
 		),
-	);
+	);  
 	return sync_create_single_ajax_settings_page( $page_details, $settings_array );
 }
 
