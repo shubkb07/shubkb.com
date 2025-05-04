@@ -270,6 +270,8 @@ class Sync_Settings {
 		// Get Action Name.
 		$action_name = $sync_ajax->ajax_action_name;
 
+		error_log( 'Reached Action Name: ' . $action_name );
+
 		// Check if it start with 'sync_save_' and end with '_settings'.
 		if ( strpos( $action_name, 'sync_save_' ) !== 0 || strpos( $action_name, '_settings' ) !== ( strlen( $action_name ) - strlen( '_settings' ) ) ) {
 			return;
@@ -596,7 +598,7 @@ class Sync_Settings {
 			<?php $this->generate_settings_html( $settings_array['html'] ); ?>
 			
 			<div class="sync-form-footer">
-			<button type="button" class="sync-button sync-primary-button sync-submit-button">
+			<button type="button" class="sync-button sync-primary-button sync-submit-button" disabled>
 			<span class="dashicons dashicons-saved"></span><?php echo esc_html( $submit_button_text ); ?>
 			</button>
 			<div class="sync-form-message"></div>
@@ -608,14 +610,14 @@ class Sync_Settings {
 			return ob_get_clean();
 		} elseif ( isset( $page_details['puspose'] ) && 'menu_submit' === $page_details['puspose'] ) {
 
-			if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
-				sync_send_json(
-					array(
-						'status'  => 'error',
-						'message' => __( 'Invalid settings array.', 'wisesync' ),
-					)
-				);
-			}
+			// if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
+			// 	sync_send_json(
+			// 		array(
+			// 			'status'  => 'error',
+			// 			'message' => __( 'Invalid settings array.', 'wisesync' ),
+			// 		)
+			// 	);
+			// }
 
 			return $this->genrate_settings_submit_array( $settings_array );
 		}
@@ -793,7 +795,7 @@ class Sync_Settings {
 					$count = isset( $settings['count'] ) ? intval( $settings['count'] ) : 1;
 					for ( $i = 0; $i < $count; $i++ ) {
 						?>
-						<br>
+						<br class="<?php echo $custom_class; ?>"<?php echo $custom_style . $conditional_att; ?>>
 						<?php
 					}
 					break;
