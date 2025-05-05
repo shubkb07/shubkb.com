@@ -222,6 +222,7 @@ function sync_register_settings_tools( $content, $page_details ) {
 			'break' => array(
 				'count' => 2,
 				'style' => 'margin-bottom:1rem;',
+				'class' => 'gaping'
 			),
 	
 			// Flex container holding a row of inputs.
