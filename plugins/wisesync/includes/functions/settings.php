@@ -222,7 +222,7 @@ function sync_register_settings_tools( $content, $page_details ) {
 			'break' => array(
 				'count' => 2,
 				'style' => 'margin-bottom:1rem;',
-				'class' => 'gaping'
+				'class' => 'gaping',
 			),
 	
 			// Flex container holding a row of inputs.
@@ -240,6 +240,7 @@ function sync_register_settings_tools( $content, $page_details ) {
 					// Text input with regex and error/success messages.
 					'input_text'     => array(
 						'name'                          => 'text_example',
+						'sync_option'                   => 'input_text_example',
 						'label'                         => 'Text Field',
 						'value'                         => 'default',
 						'place_holder'                  => 'Enter at least 6 chars',
@@ -266,6 +267,7 @@ function sync_register_settings_tools( $content, $page_details ) {
 					// Textarea.
 					'input_textarea' => array(
 						'name'         => 'textarea_example',
+						'sync_option'  => 'input_textarea_example',
 						'label'        => 'Description',
 						'value'        => 'Some long text...',
 						'place_holder' => 'Type here...',
@@ -276,9 +278,10 @@ function sync_register_settings_tools( $content, $page_details ) {
 	
 					// Radio buttons.
 					'input_radio'    => array(
-						'name'    => 'radio_example',
-						'value'   => 'opt2',
-						'options' => array(
+						'name'        => 'radio_example',
+						'sync_option' => 'input_radio_example',
+						'value'       => 'opt2',
+						'options'     => array(
 							array(
 								'value' => 'opt1',
 								'label' => 'Option 1',
@@ -288,13 +291,14 @@ function sync_register_settings_tools( $content, $page_details ) {
 								'label' => 'Option 2',
 							),
 						),
-						'label'   => 'Choose One',
-						'class'   => 'radio-group',
+						'label'       => 'Choose One',
+						'class'       => 'radio-group',
 					),
 	
 					// Toggle (checkbox styled).
 					'input_toggle'   => array(
 						'name'        => 'toggle_example',
+						'sync_option' => 'input_toggle_example',
 						'value'       => 1,
 						'label'       => 'Enable Feature',
 						'description' => 'Turn this on to enable.',
@@ -302,14 +306,16 @@ function sync_register_settings_tools( $content, $page_details ) {
 	
 					// Simple checkbox.
 					'input_checkbox' => array(
-						'name'  => 'checkbox_example',
-						'value' => 0,
-						'label' => 'Show Flex',
+						'sync_option' => 'input_checkbox_example',
+						'name'        => 'checkbox_example',
+						'value'       => 0,
+						'label'       => 'Show Flex',
 					),
 	
 					// Dropdown select.
 					'input_dropdown' => array(
 						'name'        => 'dropdown_example',
+						'sync_option' => 'input_dropdown_example',
 						'value'       => 'b',
 						'placeholder' => 'Select an option',
 						'options'     => array(
@@ -330,64 +336,74 @@ function sync_register_settings_tools( $content, $page_details ) {
 	
 					// Date, Time, and DateTime.
 					'input_date'     => array(
-						'name'  => 'date_example',
-						'value' => '2025-05-03',
+						'name'        => 'date_example',
+						'sync_option' => 'input_date_example',
+						'value'       => '2025-05-03',
 					),
 					'input_time'     => array(
-						'name'  => 'time_example',
-						'value' => '14:30',
+						'name'        => 'time_example',
+						'sync_option' => 'input_time_example',
+						'value'       => '14:30',
 					),
 					'input_datetime' => array(
-						'name'  => 'datetime_example',
-						'value' => '2025-05-03T14:30',
+						'name'        => 'datetime_example',
+						'sync_option' => 'input_datetime_example',
+						'value'       => '2025-05-03T14:30',
 					),
 	
 					// Number input.
 					'input_number'   => array(
-						'name'  => 'number_example',
-						'value' => 5,
-						'min'   => 1,
-						'max'   => 10,
-						'step'  => 1,
+						'name'        => 'number_example',
+						'sync_option' => 'input_number_example',
+						'value'       => 5,
+						'min'         => 1,
+						'max'         => 10,
+						'step'        => 1,
 					),
 	
 					// Password.
 					'input_password' => array(
 						'name'         => 'password_example',
+						'sync_option'  => 'input_password_example',
 						'value'        => '',
 						'place_holder' => 'Enter password',
 					),
 	
 					// Email.
 					'input_email'    => array(
-						'name'  => 'email_example',
-						'value' => 'user@example.com',
+						'name'        => 'email_example',
+						'sync_option' => 'input_email_example',
+						'value'       => 'user@example.com',
 					),
 	
 					// URL.
 					'input_url'      => array(
-						'name'  => 'url_example',
-						'value' => 'https://example.com',
+						'name'        => 'url_example',
+						'sync_option' => 'input_url_example',
+						'value'       => 'https://example.com',
 					),
 	
 					// Color picker.
 					'input_color'    => array(
-						'name'  => 'color_example',
-						'value' => '#ff0000',
+						'name'        => 'color_example',
+						'sync_option' => 'input_color_example',
+						'value'       => '#ff0000',
 					),
 	
 					// Range slider.
 					'input_range'    => array(
-						'name'  => 'range_example',
-						'value' => 50,
-						'min'   => 0,
-						'max'   => 100,
-						'step'  => 5,
+						'name'        => 'range_example',
+						'sync_option' => 'input_range_example',
+						'value'       => 50,
+						'min'         => 0,
+						'max'         => 100,
+						'step'        => 5,
 					),
 	
 					// Button.
 					'input_button'   => array(
 						'name'        => 'button_example',
+						'sync_option' => 'input_button_example',
 						'text'        => 'Click Me',
 						'button_type' => 'button',
 						'class'       => 'sync-button-primary',
@@ -396,8 +412,9 @@ function sync_register_settings_tools( $content, $page_details ) {
 	
 					// Data table.
 					'input_data'     => array(
-						'name'  => 'data_example',
-						'value' => array(
+						'name'        => 'data_example',
+						'sync_option' => 'input_data_example',
+						'value'       => array(
 							'key1' => 'value1',
 							'key2' => 'value2',
 						),
@@ -406,6 +423,7 @@ function sync_register_settings_tools( $content, $page_details ) {
 					// File upload.
 					'input_file'     => array(
 						'name'         => 'file_example',
+						'sync_option'  => 'input_file_example',
 						'value'        => array(
 							'id'  => 0,
 							'url' => '',

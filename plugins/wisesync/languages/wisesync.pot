@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-05T18:13:28+00:00\n"
+"POT-Creation-Date: 2025-05-06T15:38:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: wisesync\n"
@@ -67,7 +67,18 @@ msgstr ""
 msgid "Invalid nonce"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:671
+#. translators: %s is the name of the field that is required.
+#: includes/classes/class-sync-settings.php:338
+msgid "Field \"%s\" is required."
+msgstr ""
+
+#. translators: %s is the name of the field that is invalid.
+#: includes/classes/class-sync-settings.php:352
+msgid "Field \"%s\" is invalid."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:685
+#: includes/classes/class-sync-settings.php:739
 msgid "Invalid settings array."
 msgstr ""
 
