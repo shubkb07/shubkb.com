@@ -17,7 +17,6 @@ namespace Sync;
  */
 class Sync_Settings {
 
-
 	/**
 	 * Menus array.
 	 *
