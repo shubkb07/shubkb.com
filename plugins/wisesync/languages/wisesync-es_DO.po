@@ -87,48 +87,50 @@ msgid "Invalid nonce"
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:337
+#: includes/classes/class-sync-settings.php:345
+#, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:351
+#: includes/classes/class-sync-settings.php:359
+#, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:684
-#: includes/classes/class-sync-settings.php:738
+#: includes/classes/class-sync-settings.php:769
+#: includes/classes/class-sync-settings.php:826
 msgid "Invalid settings array."
 msgstr ""
 
-#: includes/functions/settings.php:103
+#: includes/functions/settings.php:133
 msgid "WiseSync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:116
+#: includes/functions/settings.php:146
 msgid "Sync Dashboard"
 msgstr ""
 
-#: includes/functions/settings.php:126
+#: includes/functions/settings.php:156
 msgid "Sync Logs"
 msgstr ""
 
-#: includes/functions/settings.php:127
+#: includes/functions/settings.php:157
 msgid "Sync Settings"
 msgstr ""
 
-#: includes/functions/settings.php:130
+#: includes/functions/settings.php:160
 msgid "Sync Reports"
 msgstr ""
 
-#: includes/functions/settings.php:135
+#: includes/functions/settings.php:165
 msgid "Advanced Sync"
 msgstr ""
 
-#: includes/functions/settings.php:145
+#: includes/functions/settings.php:175
 msgid "Sync Tools"
 msgstr ""
 
-#: includes/functions/settings.php:146
+#: includes/functions/settings.php:176
 msgid "Sync Diagnostics"
 msgstr ""

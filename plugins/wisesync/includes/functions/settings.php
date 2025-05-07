@@ -69,6 +69,36 @@ function sync_add_sync_sub_menu( $parent_menu_slug, $menu_name, $settings_callba
 	return $sync_settings->add_sync_sub_menus( $parent_menu_slug, $menu_name, $settings_callback, $menu_slug, $position );
 }
 
+
+/**
+ * Register Widget Settings for WordPress Widgets.
+ *
+ * @param string $widget_slug Widget slug.
+ * @param string $widget_name Widget name.
+ * @param string $widget_callback Widget callback.
+ *
+ * @return bool True if the widget settings were registered, false otherwise.
+ */
+function sync_register_widget_settings( $widget_slug, $widget_name, $widget_callback ) {
+	global $sync_settings;
+
+	return $sync_settings->register_widget_settings( $widget_slug, $widget_name, $widget_callback );
+}
+
+/**
+ * Register Sync Widget.
+ *
+ * @param array $settings_array Settings Array.
+ * @param bool  $return_html Return HTML flag.
+ *
+ * @return void|string HTML Code of Widget.
+ */
+function sync_create_widget_settings( $settings_array, $return_html = false ) {
+	global $sync_settings;
+
+	return $sync_settings->create_widget_settings( $settings_array, $return_html );
+}
+
 /**
  * Create a single AJAX settings page.
  *
@@ -144,8 +174,49 @@ add_action(
 		);
 		sync_add_sync_sub_menu( 'settings', 'advanced', 'sync_register_settings_tools', __( 'Sync Tools', 'wisesync' ), 'tools', 70 );
 		sync_add_sync_sub_menu( 'settings', 'advanced', 'sync_register_settings_tools', __( 'Sync Diagnostics', 'wisesync' ), 'diagnostics', 80 );
+
+		sync_register_widget_settings( 'meow', 'Meow', 'meowww' );
 	}
 );
+
+/**
+ * Meow
+ */
+function meowww() {
+	$settings_array = array(
+		'html'   => array(
+			'flex' => array(
+				'direction' => 'column',
+				'align'     => array(
+					'item'    => 'center',
+					'content' => 'flex-start',
+				),
+				'content'   => array(
+					'p'            => 'This is the dashboard settings page.',
+					'input_text'   => array(
+						'name'         => 'dashboard_input',
+						'value'        => '',
+						'place_holder' => 'Enter dashboard value',
+						'sync_option'  => 'input_dashbaord',
+						'regex'        => '^[a-zA-Z0-9]+$',
+					),
+					'input_toggle' => array(
+						'name'        => 'dashboard_toggle',
+						'value'       => false,
+						'sync_option' => 'input_dashboard_toggle',
+					),
+				),
+			),
+		),
+		'submit' => array(
+			'seprate'        => 'seo_setup',
+			'return_html'    => true,
+			'should_refresh' => true,
+		),
+	);
+
+	sync_create_widget_settings( $settings_array );
+}
 
 /**
  * Dashboard Settings Page
