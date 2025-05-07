@@ -32,6 +32,13 @@ class Sync_Settings {
 	private $sync_menus = array();
 
 	/**
+	 * Sync Widgets Array.
+	 *
+	 * @var array
+	 */
+	private $sync_widgets = array();
+
+	/**
 	 * Sync Ajax Instance.
 	 *
 	 * @var array
@@ -49,6 +56,7 @@ class Sync_Settings {
 		// Register actions for both regular and AJAX requests.
 		add_action( 'admin_menu', array( $this, 'init_settings_page' ) );
 		add_action( 'network_admin_menu', array( $this, 'init_settings_page' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'init_widgets' ) );
 
 		if ( isset( $sync_ajax ) && $sync_ajax->is_ajax ) {
 			add_action( 'wp_loaded', array( $this, 'init_settings_page' ) );
@@ -625,6 +633,80 @@ class Sync_Settings {
 	}
 
 	/**
+	 * Initialize WordPress Dashboard Wigget.
+	 */
+	public function init_widgets() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		if ( ! isset( $this->sync_widgets ) || empty( $this->sync_widgets ) ) {
+			return;
+		}
+
+		foreach ( $this->sync_widgets as $widget_slug => $widget_data ) {
+			// Register the widget.
+			wp_add_dashboard_widget( $widget_slug, $widget_data['name'], $widget_data['callback'] );
+		}
+	}
+
+	/**
+	 * Register Widget Settings.
+	 *
+	 * @param string $widget_slug Widget slug.
+	 * @param string $widget_name Widget name.
+	 * @param string $widget_callback Widget callback.
+	 */
+	public function register_widget_settings( $widget_slug, $widget_name, $widget_callback ) {
+
+		if ( empty( $widget_slug ) || ! is_string( $widget_slug ) || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $widget_slug ) ) {
+			return;
+		}
+
+		if ( empty( $widget_name ) || ! is_string( $widget_name ) ) {
+			return;
+		}
+
+		if ( empty( $widget_callback ) || ! is_callable( $widget_callback ) ) {
+			return;
+		}
+
+		$this->sync_widgets[ $widget_slug ] = array(
+			'name'     => $widget_name,
+			'callback' => $widget_callback,
+		);
+	}
+
+	/**
+	 * No form settings.
+	 *
+	 * @param array $settings_array Settings array structure.
+	 * @param bool  $return_html    Whether to return the HTML instead of echoing it.
+	 *
+	 * @return string|array HTML for the settings page or an array of settings submit.
+	 */
+	public function create_widget_settings( $settings_array, $return_html = false ) {
+		if ( isset( $settings_array['html'] ) && is_array( $settings_array['html'] ) ) {
+			// Start output buffering to collect HTML.
+			if ( $return_html ) {
+				ob_start();
+			}
+
+			// Generate a container for the widget settings.
+			?>
+			<div class="sync-widget-container">
+				<?php $this->generate_settings_html( $settings_array['html'] ); ?>
+			</div>
+			<?php
+
+			// Return the HTML if requested.
+			if ( $return_html ) {
+				return ob_get_clean();
+			}
+		}
+	}
+
+	/**
 	 * Create a settings page with a single form that submits all settings at once via Ajax
 	 * 
 	 * @param array  $page_details       Page information (slug, name, parent_slug).
@@ -648,6 +730,9 @@ class Sync_Settings {
 			// Create nonce key.
 			$nonce_action = 'sync_setting_' . $full_slug;
 			$nonce        = wp_create_nonce( $nonce_action );
+
+			// Get saved values, if present and replace the default values.
+			$settings_array = $this->get_settings_values( $settings_array );
 
 			// Start output buffering to collect HTML.
 			ob_start();
@@ -712,6 +797,9 @@ class Sync_Settings {
 			$nonce_action = 'sync_setting_' . $full_slug;
 			$nonce        = wp_create_nonce( $nonce_action );
 
+			// Get saved values, if present and replace the default values.
+			$settings_array = $this->get_settings_values( $settings_array );
+
 			// Start output buffering to collect HTML.
 			ob_start();
 
@@ -744,6 +832,83 @@ class Sync_Settings {
 		}
 	}
 
+	/**
+	 * Get settings values.
+	 *
+	 * If Values are present in the database, replace the default values with the saved values.
+	 *
+	 * @param array $settings_array Settings array structure.
+	 *
+	 * @return array Updated Settings values Array.
+	 */
+	private function get_settings_values( $settings_array ) {
+		// No settings array, return empty array.
+		if ( empty( $settings_array ) || ! is_array( $settings_array ) ) {
+			return array();
+		}
+
+		// Get submit configuration if available.
+		$seprate = false;
+		if ( isset( $settings_array['submit']['seprate'] ) ) {
+			$seprate = $settings_array['submit']['seprate'];
+		}
+
+		// Process the HTML input settings.
+		if ( isset( $settings_array['html'] ) && is_array( $settings_array['html'] ) ) {
+			$this->process_settings_values( $settings_array['html'], $seprate );
+		}
+
+		return $settings_array;
+	}
+
+	/**
+	 * Process settings values recursively.
+	 *
+	 * @param array       $settings Reference to settings array to update.
+	 * @param string|bool $seprate  Whether settings are stored separately.
+	 */
+	private function process_settings_values( &$settings, $seprate ) {
+		foreach ( $settings as $type => &$value ) {
+			if ( is_array( $value ) ) {
+				// If this is an input field, update its value from the database.
+				if ( is_string( $type ) && 0 === strpos( $type, 'input_' ) ) {
+					if ( isset( $value['name'] ) && isset( $value['sync_option'] ) ) {
+						$option_name = $value['sync_option'];
+						$db_value    = null;
+
+						if ( is_string( $seprate ) && $seprate ) {
+							// Each input stored as separate option.
+							$db_value = get_option( sanitize_key( "{$seprate}_{$option_name}" ) );
+							if ( null !== $db_value ) {
+								$value['value'] = $db_value;
+							}
+						} else {
+							// All inputs stored in a single JSON-encoded option.
+							$parent_slug = isset( $value['parent_slug'] ) ? $value['parent_slug'] . '_' : '';
+							$slug        = isset( $value['slug'] ) ? $value['slug'] : '';
+							$full_slug   = $parent_slug . $slug;
+
+							// If neither is set, try to determine from context.
+							if ( empty( $full_slug ) ) {
+								$full_slug = sanitize_key( str_replace( 'input_', '', $type ) );
+							}
+
+							$json_data = get_option( sanitize_key( $full_slug ) );
+							if ( $json_data ) {
+								$data = json_decode( $json_data, true );
+								if ( is_array( $data ) && isset( $data[ $option_name ] ) ) {
+									$value['value'] = $data[ $option_name ];
+								}
+							}
+						}
+					}
+				}
+
+				// Process any nested fields or containers.
+				$this->process_settings_values( $value, $seprate );
+			}
+		}
+	}
 
 	/**
 	 * Generate settings submit array.
