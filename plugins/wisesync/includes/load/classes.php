@@ -6,7 +6,7 @@
  * @since    1.0.0
  */
 
-use Sync\{Sync_Settings, Sync_Ajax, Sync_CLI, Sync_Filesystem, Sync_Site_Health, Sync_Remote_Request, Sync_Post, Sync_User};
+use Sync\{Sync_Settings, Sync_Ajax, Sync_CLI, Sync_Filesystem, Sync_Site_Health, Sync_Remote_Request, Sync_Post, Sync_User, Sync_Helpers};
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.

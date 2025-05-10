@@ -5,6 +5,9 @@
  * The frontend display is handled by PHP and the viewScript
  */
 
+/**
+ *
+ */
 export default function save() {
 	// Return null to use the block's PHP render callback
 	return null;

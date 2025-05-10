@@ -48,7 +48,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * @param {Event} e    Event object
 	 * @param {JSON}  data Prased Event Data
 	 */
-	function syncSettingsSingleAjaxFormSubmit ( e, data ) {
+	function syncSettingsSingleAjaxFormSubmit( e, data ) {
 		const formElement = data.targetElement.closest( 'form' );
 		const inputElements = formElement.querySelectorAll( 'input, textarea' );
 		const formButton = formElement.querySelector( '.sync-button.sync-submit-button' );
@@ -97,7 +97,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		let allValid = true;
 
 		// Loop through all input elements
-		inputElements.forEach( function( input ) {
+		inputElements.forEach( function ( input ) {
 			// If any single validation fails, the overall result should be false
 			// Important: We still check all inputs but remember if any failed
 			const isValid = checkRegexMatchOfInput( input );
@@ -122,33 +122,33 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		// If no regex attribute, consider it valid
 		if ( ! inputElement.hasAttribute( 'data-regex-match' ) ) {
 			return true;
-		  }
+		}
 
-		  const patternStr = inputElement.getAttribute( 'data-regex-match' );
-		  const inputValue = inputElement.value.trim();
-		  let pattern,
-		  	flags = '';
+		const patternStr = inputElement.getAttribute( 'data-regex-match' );
+		const inputValue = inputElement.value.trim();
+		let pattern,
+			flags = '';
 
-		  // Handle pattern with or without regex literal syntax
-		  if ( patternStr.startsWith( '/' ) ) {
+		// Handle pattern with or without regex literal syntax
+		if ( patternStr.startsWith( '/' ) ) {
 			const lastSlashIndex = patternStr.lastIndexOf( '/' );
 			if ( 0 < lastSlashIndex ) {
-			  // Extract pattern between slashes and any flags after the last slash
-			  pattern = patternStr.slice( 1, lastSlashIndex );
-			  flags = patternStr.slice( lastSlashIndex + 1 );
+				// Extract pattern between slashes and any flags after the last slash
+				pattern = patternStr.slice( 1, lastSlashIndex );
+				flags = patternStr.slice( lastSlashIndex + 1 );
 			} else {
-			  pattern = patternStr;
+				pattern = patternStr;
 			}
-		  } else {
+		} else {
 			pattern = patternStr;
-		  }
+		}
 
-		  try {
+		try {
 			const regex = new RegExp( pattern, flags );
 			return regex.test( inputValue );
-		  } catch ( e ) {
+		} catch ( e ) {
 			return false;
-		  }
+		}
 	}
 
 	/**
@@ -160,8 +160,8 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 */
 	function ajaxRequest( form, method = 'POST' ) {
 		if ( ! ( form instanceof HTMLFormElement ) ) {
-		  console.error( 'ajaxRequest: first argument must be a <form> element' );
-		  return;
+			console.error( 'ajaxRequest: first argument must be a <form> element' );
+			return;
 		}
 
 		// Gather all inputs into a FormData instance
@@ -170,30 +170,30 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		// Convert to URL-encoded string
 		const urlParams = new URLSearchParams();
 		for ( const [ key, value ] of formData.entries() ) {
-		  urlParams.append( key, value );
+			urlParams.append( key, value );
 		}
 
 		// Fire off the request
 		fetch( window.ajaxurl, {
-		  method,
-		  headers: {
+			method,
+			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-		  },
-		  body: urlParams.toString(),
+			},
+			body: urlParams.toString(),
 		} )
 			.then( ( response ) => {
-		  if ( ! response.ok ) {
-		  			throw new Error( `Server returned ${ response.status } ${ response.statusText }` );
-		  }
-		  return response.json();
+				if ( ! response.ok ) {
+					throw new Error( `Server returned ${ response.status } ${ response.statusText }` );
+				}
+				return response.json();
 			} )
 			.then( ( json ) => {
-		  console.log( 'ajaxRequest response:', json );
+				console.log( 'ajaxRequest response:', json );
 			} )
 			.catch( ( err ) => {
-		  console.error( 'ajaxRequest error:', err );
+				console.error( 'ajaxRequest error:', err );
 			} );
-	  }
+	}
 
 	/**
 	 * Mobile menu toggle
@@ -546,5 +546,78 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 
 		requestAnimationFrame( animate );
+	}
+
+	// Site Health Check
+
+	// Copy Sync Logs button
+	const syncLogsCopyBtn = document.querySelector( '.copy-sync-info' );
+	if ( syncLogsCopyBtn ) {
+		syncLogsCopyBtn.addEventListener( 'click', function ( e ) {
+			e.preventDefault();
+
+			const button = this;
+			const originalText = button.textContent;
+			const textarea = document.querySelector( '.sync-logs' );
+
+			// Copy to clipboard
+			textarea.select();
+			document.execCommand( 'copy' );
+
+			// Visual feedback
+			button.textContent = 'Copied!';
+
+			setTimeout( function () {
+				button.textContent = originalText;
+			}, 2000 );
+		} );
+	}
+
+	// Copy All Sync Information button
+	const allSyncInfoBtn = document.querySelector( '.copy-all-sync-info' );
+	if ( allSyncInfoBtn ) {
+		allSyncInfoBtn.addEventListener( 'click', function ( e ) {
+			e.preventDefault();
+
+			const button = this;
+			const originalText = button.textContent;
+			const feedback = document.querySelector( '.copy-feedback' );
+			const textarea = document.getElementById( 'complete-sync-info' );
+
+			// Copy to clipboard
+			textarea.style.display = 'block';
+			textarea.select();
+			document.execCommand( 'copy' );
+			textarea.style.display = 'none';
+
+			// Visual feedback
+			button.textContent = 'Copied!';
+			feedback.textContent = 'Sync information copied to clipboard';
+			feedback.classList.add( 'visible' );
+
+			setTimeout( function () {
+				button.textContent = originalText;
+				feedback.classList.remove( 'visible' );
+				setTimeout( function () {
+					feedback.textContent = '';
+				}, 300 );
+			}, 2000 );
+		} );
+	}
+
+	// Modern clipboard API implementation (as fallback for newer browsers)
+	if ( navigator.clipboard && window.isSecureContext ) {
+		const modernCopyButtons = document.querySelectorAll( '.copy-sync-info, .copy-all-sync-info' );
+
+		modernCopyButtons.forEach( function ( button ) {
+			button.addEventListener( 'click', function ( e ) {
+				const isSyncLogs = button.classList.contains( 'copy-sync-info' );
+				const textToCopy = isSyncLogs
+					? document.querySelector( '.sync-logs' ).value
+					: document.getElementById( 'complete-sync-info' ).value;
+
+				navigator.clipboard.writeText( textToCopy );
+			} );
+		} );
 	}
 } );
