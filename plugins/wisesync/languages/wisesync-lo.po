@@ -98,8 +98,8 @@ msgstr ""
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:769
-#: includes/classes/class-sync-settings.php:826
+#: includes/classes/class-sync-settings.php:773
+#: includes/classes/class-sync-settings.php:830
 msgid "Invalid settings array."
 msgstr ""
 
@@ -131,36 +131,4 @@ msgstr ""
 
 #: includes/classes/class-sync-site-health.php:239
 msgid "Copy Logs"
-msgstr ""
-
-#: includes/functions/settings.php:133
-msgid "WiseSync Settings"
-msgstr ""
-
-#: includes/functions/settings.php:146
-msgid "Sync Dashboard"
-msgstr ""
-
-#: includes/functions/settings.php:156
-msgid "Sync Logs"
-msgstr ""
-
-#: includes/functions/settings.php:157
-msgid "Sync Settings"
-msgstr ""
-
-#: includes/functions/settings.php:160
-msgid "Sync Reports"
-msgstr ""
-
-#: includes/functions/settings.php:165
-msgid "Advanced Sync"
-msgstr ""
-
-#: includes/functions/settings.php:175
-msgid "Sync Tools"
-msgstr ""
-
-#: includes/functions/settings.php:176
-msgid "Sync Diagnostics"
 msgstr ""

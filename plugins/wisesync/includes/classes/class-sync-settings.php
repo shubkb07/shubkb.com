@@ -656,25 +656,29 @@ class Sync_Settings {
 	 * @param string $widget_slug Widget slug.
 	 * @param string $widget_name Widget name.
 	 * @param string $widget_callback Widget callback.
+	 *
+	 * @return bool True on success, false on failure.
 	 */
 	public function register_widget_settings( $widget_slug, $widget_name, $widget_callback ) {
 
 		if ( empty( $widget_slug ) || ! is_string( $widget_slug ) || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $widget_slug ) ) {
-			return;
+			return false;
 		}
 
 		if ( empty( $widget_name ) || ! is_string( $widget_name ) ) {
-			return;
+			return false;
 		}
 
 		if ( empty( $widget_callback ) || ! is_callable( $widget_callback ) ) {
-			return;
+			return false;
 		}
 
 		$this->sync_widgets[ $widget_slug ] = array(
 			'name'     => $widget_name,
 			'callback' => $widget_callback,
 		);
+
+		return true;
 	}
 
 	/**
