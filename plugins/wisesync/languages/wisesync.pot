@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-10T15:13:51+00:00\n"
+"POT-Creation-Date: 2025-05-11T12:13:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wisesync\n"
@@ -84,6 +84,36 @@ msgstr ""
 msgid "Invalid settings array."
 msgstr ""
 
+#. translators: Tab heading for Site Health navigation.
+#: includes/classes/class-sync-site-health.php:48
+msgctxt "Site Health"
+msgid "Sync"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:92
+msgid "Good"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:96
+msgid "Recommended"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:100
+msgid "Critical"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:104
+msgid "Should be improved"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:163
+msgid "Sync Info"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:239
+msgid "Copy Logs"
+msgstr ""
+
 #: includes/functions/block.php:26
 msgid "Sync Blocks"
 msgstr ""
@@ -125,434 +155,434 @@ msgid "Sync Diagnostics"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:68
+#: blocks/src/cookie-banner/edit.js:75
 msgid "Bottom"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:69
+#: blocks/src/cookie-banner/edit.js:76
 msgid "Top"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:70
+#: blocks/src/cookie-banner/edit.js:77
 msgid "Center"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:74
+#: blocks/src/cookie-banner/edit.js:81
 msgid "Bottom Right"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:75
+#: blocks/src/cookie-banner/edit.js:82
 msgid "Bottom Left"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:76
+#: blocks/src/cookie-banner/edit.js:83
 msgid "Top Right"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:77
+#: blocks/src/cookie-banner/edit.js:84
 msgid "Top Left"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:81
+#: blocks/src/cookie-banner/edit.js:88
 msgid "Opt-in (Explicit Consent)"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:82
+#: blocks/src/cookie-banner/edit.js:89
 msgid "Opt-out (Implied Consent)"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:83
+#: blocks/src/cookie-banner/edit.js:90
 msgid "Notice Only"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:84
+#: blocks/src/cookie-banner/edit.js:91
 msgid "Deemed Consent"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:85
+#: blocks/src/cookie-banner/edit.js:92
 msgid "Implied Consent"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:105
+#: blocks/src/cookie-banner/edit.js:112
 msgid "Visibility"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:110
+#: blocks/src/cookie-banner/edit.js:117
 msgid "General"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:114
+#: blocks/src/cookie-banner/edit.js:121
 msgid "Cookie Categories"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:118
+#: blocks/src/cookie-banner/edit.js:125
 msgid "Appearance"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:122
+#: blocks/src/cookie-banner/edit.js:129
 msgid "Advanced"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:126
+#: blocks/src/cookie-banner/edit.js:133
 msgid "Restrictions"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:130
+#: blocks/src/cookie-banner/edit.js:137
 msgid "Compliance"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:137
+#: blocks/src/cookie-banner/edit.js:144
 msgid "Banner Visibility"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:139
+#: blocks/src/cookie-banner/edit.js:146
 msgid "Show Banner"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:142
+#: blocks/src/cookie-banner/edit.js:149
 msgid "Toggle to show or minimize the banner. When hidden, it will be minimized to the bottom of the page."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:145
+#: blocks/src/cookie-banner/edit.js:152
 msgid "Note: This setting only affects the editor preview and frontend display. The banner will still be functional when minimized, and users can access it via the floating button."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:154
+#: blocks/src/cookie-banner/edit.js:161
 msgid "Banner Content"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:156
+#: blocks/src/cookie-banner/edit.js:163
 msgid "Banner Title"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:161
+#: blocks/src/cookie-banner/edit.js:168
 msgid "Banner Description"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:167
+#: blocks/src/cookie-banner/edit.js:174
 msgid "Privacy Policy Link"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:170
+#: blocks/src/cookie-banner/edit.js:177
 msgid "Enter the URL to your Privacy Policy page"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:173
+#: blocks/src/cookie-banner/edit.js:180
 msgid "Privacy Policy Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:178
+#: blocks/src/cookie-banner/edit.js:185
 msgid "Privacy Policy Version"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:181
+#: blocks/src/cookie-banner/edit.js:188
 msgid "Optional: Set a version identifier (like a date) to track policy changes"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:184
+#: blocks/src/cookie-banner/edit.js:191
 msgid "Terms Link"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:187
+#: blocks/src/cookie-banner/edit.js:194
 msgid "Enter the URL to your Terms of Service page"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:190
+#: blocks/src/cookie-banner/edit.js:197
 msgid "Terms Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:195
+#: blocks/src/cookie-banner/edit.js:202
 msgid "Terms Version"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:198
+#: blocks/src/cookie-banner/edit.js:205
 msgid "Optional: Set a version identifier (like a date) to track terms changes"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:201
+#: blocks/src/cookie-banner/edit.js:208
 msgid "Check for Version Changes"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:204
+#: blocks/src/cookie-banner/edit.js:211
 msgid "When enabled, users will be asked to re-consent when your privacy policy or terms change"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:207
+#: blocks/src/cookie-banner/edit.js:214
 msgid "Button Labels"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:209
+#: blocks/src/cookie-banner/edit.js:216
 msgid "Accept All Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:214
+#: blocks/src/cookie-banner/edit.js:221
 msgid "Reject All Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:219
+#: blocks/src/cookie-banner/edit.js:226
 msgid "Customize Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:224
+#: blocks/src/cookie-banner/edit.js:231
 msgid "Save Preferences Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:236
+#: blocks/src/cookie-banner/edit.js:243
 msgid "Cookie Types Configuration"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:238
+#: blocks/src/cookie-banner/edit.js:245
 msgid "Enable or disable different cookie categories. Note that necessary cookies cannot be disabled."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:241
-#: blocks/src/cookie-banner/edit.js:278
+#: blocks/src/cookie-banner/edit.js:248
+#: blocks/src/cookie-banner/edit.js:285
 msgid "Functional Cookies"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:246
-#: blocks/src/cookie-banner/edit.js:294
+#: blocks/src/cookie-banner/edit.js:253
+#: blocks/src/cookie-banner/edit.js:301
 msgid "Analytical Cookies"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:251
-#: blocks/src/cookie-banner/edit.js:310
+#: blocks/src/cookie-banner/edit.js:258
+#: blocks/src/cookie-banner/edit.js:317
 msgid "Advertising Cookies"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:256
-#: blocks/src/cookie-banner/edit.js:326
+#: blocks/src/cookie-banner/edit.js:263
+#: blocks/src/cookie-banner/edit.js:333
 msgid "Tracking Cookies"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:262
+#: blocks/src/cookie-banner/edit.js:269
 msgid "Necessary Cookies"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:264
-#: blocks/src/cookie-banner/edit.js:280
-#: blocks/src/cookie-banner/edit.js:296
-#: blocks/src/cookie-banner/edit.js:312
-#: blocks/src/cookie-banner/edit.js:328
+#: blocks/src/cookie-banner/edit.js:271
+#: blocks/src/cookie-banner/edit.js:287
+#: blocks/src/cookie-banner/edit.js:303
+#: blocks/src/cookie-banner/edit.js:319
+#: blocks/src/cookie-banner/edit.js:335
 msgid "Title"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:269
-#: blocks/src/cookie-banner/edit.js:285
-#: blocks/src/cookie-banner/edit.js:301
-#: blocks/src/cookie-banner/edit.js:317
-#: blocks/src/cookie-banner/edit.js:333
+#: blocks/src/cookie-banner/edit.js:276
+#: blocks/src/cookie-banner/edit.js:292
+#: blocks/src/cookie-banner/edit.js:308
+#: blocks/src/cookie-banner/edit.js:324
+#: blocks/src/cookie-banner/edit.js:340
 msgid "Description"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:274
+#: blocks/src/cookie-banner/edit.js:281
 msgid "Necessary cookies are always enabled and cannot be rejected."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:347
+#: blocks/src/cookie-banner/edit.js:354
 msgid "Layout Settings"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:349
+#: blocks/src/cookie-banner/edit.js:356
 msgid "Banner Position"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:355
+#: blocks/src/cookie-banner/edit.js:362
 msgid "Floating Button Position"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:361
+#: blocks/src/cookie-banner/edit.js:368
 msgid "Colors"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:363
+#: blocks/src/cookie-banner/edit.js:370
 msgid "Primary Color"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:371
+#: blocks/src/cookie-banner/edit.js:378
 msgid "Text Color"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:379
+#: blocks/src/cookie-banner/edit.js:386
 msgid "Background Color"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:394
+#: blocks/src/cookie-banner/edit.js:401
 msgid "Cookie Settings"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:396
+#: blocks/src/cookie-banner/edit.js:403
 msgid "Cookie Expiration (days)"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:403
+#: blocks/src/cookie-banner/edit.js:410
 msgid "Consent Model"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:407
+#: blocks/src/cookie-banner/edit.js:414
 msgid "Select the consent model to use based on your region's legal requirements. This will be overridden by GeoIP detection if enabled."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:410
+#: blocks/src/cookie-banner/edit.js:417
 msgid "Note: The cookie expiration setting may be automatically adjusted based on the visitor's location to comply with local regulations."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:420
+#: blocks/src/cookie-banner/edit.js:427
 msgid "Block Usage Restrictions"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:422
+#: blocks/src/cookie-banner/edit.js:429
 msgid "Show Only in Site Editor"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:425
+#: blocks/src/cookie-banner/edit.js:432
 msgid "When enabled, this block will only be visible when added to a template in the Site Editor, not in individual posts or pages."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:435
+#: blocks/src/cookie-banner/edit.js:442
 msgid "Regional Compliance"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:437
+#: blocks/src/cookie-banner/edit.js:444
 msgid "The banner will automatically adjust to comply with privacy regulations based on the visitor's location."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:440
+#: blocks/src/cookie-banner/edit.js:447
 msgid "Show Do Not Sell Link"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:443
+#: blocks/src/cookie-banner/edit.js:450
 msgid "Display a \"Do Not Sell or Share My Personal Information\" link (required for CCPA/CPRA compliance)."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:449
+#: blocks/src/cookie-banner/edit.js:456
 msgid "Do Not Sell Link"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:452
+#: blocks/src/cookie-banner/edit.js:459
 msgid "URL to your Do Not Sell or Share My Personal Information page"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:455
+#: blocks/src/cookie-banner/edit.js:462
 msgid "Do Not Sell Text"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:463
+#: blocks/src/cookie-banner/edit.js:470
 msgid "Note: GeoIP detection will override some of these settings to ensure compliance with local laws."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:480
+#: blocks/src/cookie-banner/edit.js:487
 msgid "This Cookie Banner block is configured to only be shown when used in the Site Editor. It will not be visible on individual posts or pages."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:485
+#: blocks/src/cookie-banner/edit.js:492
 msgid "Cookie Consent Banner"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:486
+#: blocks/src/cookie-banner/edit.js:493
 msgid "Configure the cookie consent banner settings in the sidebar. This block will display a GDPR compliant cookie consent banner on the frontend of your site."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:578
+#: blocks/src/cookie-banner/edit.js:585
 msgid "Banner minimized. Toggle visibility in block settings."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:593
+#: blocks/src/cookie-banner/edit.js:600
 msgid "This block has a preview in the editor but will adapt to the visitor's location on the frontend."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:594
+#: blocks/src/cookie-banner/edit.js:601
 msgid "Banner is minimized. Users can still access settings via the floating button."
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:598
+#: blocks/src/cookie-banner/edit.js:605
 msgid "Learn more about"
 msgstr ""
 
 #: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:600
+#: blocks/src/cookie-banner/edit.js:607
 msgid "GDPR Cookie Compliance"
 msgstr ""
 

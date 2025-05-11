@@ -103,6 +103,36 @@ msgstr ""
 msgid "Invalid settings array."
 msgstr ""
 
+#. translators: Tab heading for Site Health navigation.
+#: includes/classes/class-sync-site-health.php:48
+msgctxt "Site Health"
+msgid "Sync"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:92
+msgid "Good"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:96
+msgid "Recommended"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:100
+msgid "Critical"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:104
+msgid "Should be improved"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:163
+msgid "Sync Info"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:239
+msgid "Copy Logs"
+msgstr ""
+
 #: includes/functions/settings.php:133
 msgid "WiseSync Settings"
 msgstr ""
