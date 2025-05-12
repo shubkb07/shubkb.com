@@ -15,6 +15,26 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Output an admin notice with optional title and styled icon,
+ *
+ * @param string       $message        The notice message (may include basic HTML).
+ * @param string       $title          Optional title, rendered in an <h2>.
+ * @param string       $status         One of 'error', 'warning', 'success' or 'info'
+ *                                     (you may also pass 'notice-error', etc.; shorthand is normalized).
+ * @param bool         $is_dismissible Whether the notice is dismissible. Default true.
+ * @param false|string $icon           False for no icon, or a string:
+ *                                     – If it starts with 'dashicons-', renders that Dashicon.
+ *                                     – Otherwise escaped and rendered as text/emoji.
+ * @return void
+ * @throws \InvalidArgumentException If $message is not a string.
+ */
+function sync_generate_admin_notice( $message, $title = '', $status = 'success', $is_dismissible = true, $icon = false ) {
+	global $sync_settings;
+
+	$sync_settings->generate_admin_notice( $message, $title, $status, $is_dismissible, $icon );
+}
+
+/**
  * Initialize settings page.
  *
  * @param string     $menu_slug Menu slug.
