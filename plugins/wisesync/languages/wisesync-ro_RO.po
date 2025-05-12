@@ -87,19 +87,19 @@ msgid "Invalid nonce"
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:345
+#: includes/classes/class-sync-settings.php:490
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:359
+#: includes/classes/class-sync-settings.php:504
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:773
-#: includes/classes/class-sync-settings.php:830
+#: includes/classes/class-sync-settings.php:918
+#: includes/classes/class-sync-settings.php:975
 msgid "Invalid settings array."
 msgstr ""
 

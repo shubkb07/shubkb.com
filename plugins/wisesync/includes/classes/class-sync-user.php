@@ -309,7 +309,7 @@ class Sync_User {
 	 */
 	public function register_roles() {
 		foreach ( $this->roles as $role ) {
-			
+			sync_add_role( $role['role'], $role['display_name'], $role['capabilities'] );
 		}
 	}
 

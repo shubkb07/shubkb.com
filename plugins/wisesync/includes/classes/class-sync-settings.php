@@ -61,7 +61,152 @@ class Sync_Settings {
 		if ( isset( $sync_ajax ) && $sync_ajax->is_ajax ) {
 			add_action( 'wp_loaded', array( $this, 'init_settings_page' ) );
 		}
+
+		add_action( 'admin_notices', array( $this, 'init_admin_notices' ) );
 	}
+
+	/**
+	 * Init Admin Notices.
+	 */
+	public function init_admin_notices() {
+		$admin_notice_callbacks = array();
+		$admin_notice_callbacks = apply_filters( 'sync_add_dmin_notice', $admin_notice_callbacks );
+		foreach ( $admin_notice_callbacks as $admin_notice_callback ) {
+			call_user_func( $admin_notice_callback );
+		}
+	}
+
+	/**
+	 * Output an admin notice with optional title and styled icon,
+	 *
+	 * @param string       $message        The notice message (may include basic HTML).
+	 * @param string       $title          Optional title, rendered in an <h2>.
+	 * @param string       $status         One of 'error', 'warning', 'success' or 'info'
+	 *                                     (you may also pass 'notice-error', etc.; shorthand is normalized).
+	 * @param bool         $is_dismissible Whether the notice is dismissible. Default true.
+	 * @param false|string $icon           False for no icon, or a string:
+	 *                                     – If it starts with 'dashicons-', renders that Dashicon.
+	 *                                     – Otherwise escaped and rendered as text/emoji.
+	 * @return void
+	 * @throws \InvalidArgumentException If $message is not a string.
+	 */
+	public function generate_admin_notice( $message, $title = '', $status = 'success', $is_dismissible = true, $icon = false ) {
+		// 1️⃣ Validate message
+		if ( ! is_string( $message ) ) {
+			throw new \InvalidArgumentException( 'generate_admin_notice(): $message must be a string.' );
+		}
+
+		// 2️⃣ Normalize status to one of error|warning|success|info
+		$allowed = array( 'error', 'warning', 'success', 'info' );
+		$status  = preg_replace( '/^notice-/', '', $status );
+		if ( ! in_array( $status, $allowed, true ) ) {
+			$status = 'success';
+		}
+
+		// 3️⃣ Define color schemes for different statuses
+		$color_schemes = array(
+			'success' => array(
+				'icon_bg'        => '#50c878',
+				'icon_color'     => '#ffffff',
+				'text_color'     => '#333',
+				'subtitle_color' => '#666',
+				'default_icon'   => 'dashicons-yes',
+			),
+			'error'   => array(
+				'icon_bg'        => '#dc3545',
+				'icon_color'     => '#ffffff',
+				'text_color'     => '#333',
+				'subtitle_color' => '#666',
+				'default_icon'   => 'dashicons-warning',
+			),
+			'warning' => array(
+				'icon_bg'        => '#ffc107',
+				'icon_color'     => '#000000',
+				'text_color'     => '#333',
+				'subtitle_color' => '#666',
+				'default_icon'   => 'dashicons-info',
+			),
+			'info'    => array(
+				'icon_bg'        => '#2196f3',
+				'icon_color'     => '#ffffff',
+				'text_color'     => '#333',
+				'subtitle_color' => '#666',
+				'default_icon'   => 'dashicons-info',
+			),
+		);
+		$scheme        = $color_schemes[ $status ];
+
+		// 4️⃣ Determine icon
+		$icon_content = '';
+		if ( false !== $icon ) {
+			if ( true === $icon ) {
+				$icon = $scheme['default_icon'];
+			}
+			if ( is_string( $icon ) ) {
+				if ( 0 === strpos( $icon, 'dashicons-' ) ) {
+					// Dashicons handling.
+					$icon_content = sprintf(
+						'<span class="dashicons %s" style="font-size: 1em; color: %s;"></span>',
+						esc_attr( $icon ),
+						esc_attr( $scheme['icon_color'] )
+					);
+				} else {
+					// Text or custom icon.
+					$icon_content = sprintf(
+						'<span style="font-size: 1em; color: %s;">%s</span>',
+						esc_attr( $scheme['icon_color'] ),
+						esc_html( $icon )
+					);
+				}
+			}
+			$icon_content = '<span class="sync-admin-notice-icon" style="
+         background-color:' . esc_attr( $scheme['icon_bg'] ) . ';
+         color:' . esc_attr( $scheme['icon_color'] ) . ';"
+>' . $icon_content . '</span>';
+		}
+
+		// 5️⃣ Build title HTML
+		$title_html = '';
+		if ( $title && is_string( $title ) ) {
+			$title_html = sprintf(
+				'<h1 style="margin: 0; padding: 0; font-size: 1.5em; color: %s; font-weight: bold;">%s</h1>',
+				esc_attr( $scheme['text_color'] ),
+				esc_html( $title )
+			);
+		}
+
+		// 6️⃣ Build message HTML
+		$message_html = sprintf(
+			'<p style="margin: 0.5em 0 0; padding: 0; color: %s; font-size: 1.1em;">%s</p>',
+			esc_attr( $scheme['subtitle_color'] ),
+			wp_kses_post( $message )
+		);
+
+		// 7️⃣ Compose full notice HTML
+		$full_notice_html = sprintf(
+			'<div class="sync-admin-notice">
+				<div class="sync-admin-notice-item" style="margin-right: 10px;">%s</div>
+				<div class="sync-admin-notice-item">
+					%s
+					%s
+				</div>
+			</div>',
+			$icon_content,
+			$title_html,
+			$message_html
+		);
+
+		// 8️⃣ Delegate to core API
+		wp_admin_notice(
+			$full_notice_html,
+			array(
+				'type'           => $status,
+				'dismissible'    => (bool) $is_dismissible,
+				'paragraph_wrap' => false, // Prevent additional wrapping.
+			)
+		);
+	}
+
 
 	/**
 	 * Add WP menu.
@@ -775,7 +920,7 @@ class Sync_Settings {
 				);
 			}
 
-			return $this->genrate_settings_submit_array( $settings_array, $page_details );
+			return $this->generate_settings_submit_array( $settings_array, $page_details );
 		}
 	}
 
@@ -832,7 +977,7 @@ class Sync_Settings {
 				);
 			}
 
-			return $this->genrate_settings_submit_array( $settings_array, $page_details );
+			return $this->generate_settings_submit_array( $settings_array, $page_details );
 		}
 	}
 
@@ -922,7 +1067,7 @@ class Sync_Settings {
 	 * 
 	 * @return array Settings submit array.
 	 */
-	private function genrate_settings_submit_array( $settings_array, $page_details ) {
+	private function generate_settings_submit_array( $settings_array, $page_details ) {
 		$inputs = array();
 
 		// Only walk through the design/html portion.
@@ -1550,7 +1695,7 @@ class Sync_Settings {
 	/**
 	 * Sanitize form output
 	 *
-	 * @param String $html HTML to sanitize.
+	 * @param string $html HTML to sanitize.
 	 * @param bool   $return_html Whether to return the HTML instead of echoing it.
 	 */
 	public function sanitize_form_output( $html, $return_html = false ) {
