@@ -64,7 +64,7 @@ class Sync_User {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Initialize hooks for user operations
+		// Initialize hooks for user operations.
 		add_action( 'init', array( $this, 'register_roles' ), 10 );
 		add_action( 'init', array( $this, 'update_role_capabilities' ), 11 );
 		add_action( 'init', array( $this, 'register_users' ), 12 );
@@ -288,13 +288,13 @@ class Sync_User {
 			if ( isset( $meta_op['user'] ) && isset( $meta_op['meta_key'] ) && isset( $meta_op['action'] ) ) {
 				$action = $meta_op['action'];
 				
-				if ( $action === 'add' ) {
+				if ( 'add' === $action ) {
 					$unique = isset( $meta_op['unique'] ) ? $meta_op['unique'] : false;
 					$this->add_user_meta( $meta_op['user'], $meta_op['meta_key'], $meta_op['meta_value'], $unique );
-				} elseif ( $action === 'update' ) {
+				} elseif ( 'update' === $action ) {
 					$prev_value = isset( $meta_op['prev_value'] ) ? $meta_op['prev_value'] : '';
 					$this->update_user_meta( $meta_op['user'], $meta_op['meta_key'], $meta_op['meta_value'], $prev_value );
-				} elseif ( $action === 'delete' ) {
+				} elseif ( 'delete' === $action ) {
 					$meta_value = isset( $meta_op['meta_value'] ) ? $meta_op['meta_value'] : '';
 					$this->delete_user_meta( $meta_op['user'], $meta_op['meta_key'], $meta_value );
 				}
@@ -309,7 +309,7 @@ class Sync_User {
 	 */
 	public function register_roles() {
 		foreach ( $this->roles as $role ) {
-			add_role( $role['role'], $role['display_name'], $role['capabilities'] );
+			
 		}
 	}
 
@@ -343,7 +343,7 @@ class Sync_User {
 				'user_pass'  => $user['password'],
 			);
 
-			// Add optional user data
+			// Add optional user data.
 			if ( isset( $user['first_name'] ) ) {
 				$userdata['first_name'] = $user['first_name'];
 			}
@@ -365,7 +365,7 @@ class Sync_User {
 
 			$user_id = wp_insert_user( $userdata );
 
-			// Set user meta if present
+			// Set user meta if present.
 			if ( ! is_wp_error( $user_id ) && isset( $user['meta'] ) && is_array( $user['meta'] ) ) {
 				foreach ( $user['meta'] as $meta_key => $meta_value ) {
 					update_user_meta( $user_id, $meta_key, $meta_value );
@@ -401,15 +401,15 @@ class Sync_User {
 			$user_id = $this->get_user_id( $metadata['user'] );
 			
 			if ( $user_id ) {
-				if ( $metadata['action'] === 'add' ) {
+				if ( 'add' === $metadata['action'] ) {
 					add_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'], $metadata['unique'] );
-				} elseif ( $metadata['action'] === 'update' ) {
+				} elseif ( 'update' === $metadata['action'] ) {
 					if ( ! empty( $metadata['prev_value'] ) ) {
 						update_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'], $metadata['prev_value'] );
 					} else {
 						update_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'] );
 					}
-				} elseif ( $metadata['action'] === 'delete' ) {
+				} elseif ( 'delete' === $metadata['action'] ) {
 					if ( ! empty( $metadata['meta_value'] ) ) {
 						delete_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'] );
 					} else {
@@ -447,7 +447,7 @@ class Sync_User {
 	 * @return Sync_User Current instance for chaining.
 	 */
 	public function remove_role( $role ) {
-		// This will be executed directly since we can't queue it up
+		// This will be executed directly since we can't queue it up.
 		remove_role( $role );
 		
 		return $this;

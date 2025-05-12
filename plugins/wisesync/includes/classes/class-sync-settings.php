@@ -222,7 +222,7 @@ class Sync_Settings {
 
 		global $sync_ajax;
 
-		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', false, 'dashicons-sort', is_network_admin() ? 23 : 63 );
+		add_menu_page( 'Sync', 'Sync', 'manage_options', 'sync', '', 'dashicons-sort', is_network_admin() ? 23 : 63 );
 		$this->menus['sync'] = array(
 			'menu_name'        => 'Sync',
 			'position'         => -1,
@@ -994,10 +994,10 @@ class Sync_Settings {
 	 * @param array $settings_array Settings structure.
 	 * @param bool  $auto_save      Whether to enable auto-save for inputs.
 	 * @param bool  $return_html    Whether to return the HTML instead of echoing it.
-	 * 
-	 * @return string Generated HTML
+	 *
+	 * @return string|void Generated HTML
 	 */
-	private function generate_settings_html( $settings_array, $auto_save = false, $return_html = false ) {
+	public function generate_settings_html( $settings_array, $auto_save = false, $return_html = false ) {
 
 		if ( $return_html ) {
 			ob_start();
@@ -1084,9 +1084,9 @@ class Sync_Settings {
 	 * @param bool  $auto_save   Whether to enable auto-save for inputs.
 	 * @param bool  $return_html Whether to return the HTML instead of echoing it.
 	 * 
-	 * @return string Generated HTML
+	 * @return string|void Generated HTML
 	 */
-	private function generate_flex_container( $settings, $auto_save = false, $return_html = false ) {
+	public function generate_flex_container( $settings, $auto_save = false, $return_html = false ) {
 		// Default flex settings.
 		$direction     = isset( $settings['direction'] ) ? $settings['direction'] : 'column';
 		$align_items   = isset( $settings['align']['item'] ) ? $settings['align']['item'] : 'stretch';
@@ -1128,9 +1128,9 @@ class Sync_Settings {
 	 * @param bool   $auto_save   Whether to enable auto-save.
 	 * @param bool   $return_html Whether to return the HTML instead of echoing it.
 	 * 
-	 * @return string Generated HTML
+	 * @return string|void Generated HTML
 	 */
-	private function generate_input( $type, $settings, $auto_save = false, $return_html = false ) {
+	public function generate_input( $type, $settings, $auto_save = false, $return_html = false ) {
 		// Common attributes.
 		$name        = isset( $settings['name'] ) ? $settings['name'] : '';
 		$value       = isset( $settings['value'] ) ? $settings['value'] : '';
@@ -1553,7 +1553,7 @@ class Sync_Settings {
 	 * @param String $html HTML to sanitize.
 	 * @param bool   $return_html Whether to return the HTML instead of echoing it.
 	 */
-	private function sanitize_form_output( $html, $return_html = false ) {
+	public function sanitize_form_output( $html, $return_html = false ) {
 		if ( $return_html ) {
 			ob_start();
 		}
