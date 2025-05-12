@@ -1,5 +1,6 @@
 /vendor/
 /node_modules/
+/mu-plugins-temp/
 /.env
 /.env.local
 /.env.development.local

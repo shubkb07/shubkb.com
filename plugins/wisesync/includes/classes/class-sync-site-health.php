@@ -108,7 +108,7 @@ class Sync_Site_Health {
 
 		$this->registered_sections[ $section_slug ]['items'][] = array(
 			'type'         => 'table',
-			'idx'          => $this->text_to_kebab_case( $name ),
+			'idx'          => _wp_to_kebab_case( $name ),
 			'name'         => $name,
 			'description'  => $description,
 			'data'         => $section_data,
@@ -136,7 +136,7 @@ class Sync_Site_Health {
 
 		$this->registered_sections[ $section_slug ]['items'][] = array(
 			'type'                 => 'log',
-			'idx'                  => $this->text_to_kebab_case( $name ),
+			'idx'                  => _wp_to_kebab_case( $name ),
 			'name'                 => $name,
 			'description'          => $description,
 			'data'                 => $section_data,
@@ -270,47 +270,5 @@ class Sync_Site_Health {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Convert an arbitrary text string to kebab-case.
-	 *
-	 * @param string $text Input text to convert.
-	 * @return string Kebab-cased string.
-	 * @throws \InvalidArgumentException If the input is not a string.
-	 */
-	private function text_to_kebab_case( $text ) {
-		// 1. Validate input type.
-		if ( ! is_string( $text ) ) {
-			throw new \InvalidArgumentException( 'text_to_kebab_case(): Expected a string.' );
-		}
-
-		// 2. Transliterate Unicode to ASCII if possible.
-		if ( extension_loaded( 'intl' ) ) {
-			$transliterator = \Transliterator::create( 'Any-Latin; Latin-ASCII' );
-			if ( $transliterator instanceof \Transliterator ) {
-				$text = $transliterator->transliterate( $text );
-			}
-		} else {
-			// iconv fallback (may drop some chars).
-			$converted = iconv( 'UTF-8', 'ASCII//TRANSLIT', $text );
-			if ( false !== $converted ) {
-				$text = $converted;
-			}
-		}
-
-		// 3. Lowercase everything.
-		$text = strtolower( $text );
-
-		// 4. Remove apostrophes (’ or ').
-		$text = preg_replace( '/[\'’]/u', '', $text );
-
-		// 5. Replace any sequence of non-alphanumeric chars with a single hyphen.
-		$text = preg_replace( '/[^a-z0-9]+/', '-', $text );
-
-		// 6. Trim leading/trailing hyphens.
-		$text = trim( $text, '-' );
-
-		return $text;
 	}
 }
