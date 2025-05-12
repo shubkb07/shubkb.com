@@ -91,19 +91,18 @@ class Sync_Settings {
 	 * @throws \InvalidArgumentException If $message is not a string.
 	 */
 	public function generate_admin_notice( $message, $title = '', $status = 'success', $is_dismissible = true, $icon = false ) {
-		// 1️⃣ Validate message
+
 		if ( ! is_string( $message ) ) {
 			throw new \InvalidArgumentException( 'generate_admin_notice(): $message must be a string.' );
 		}
 
-		// 2️⃣ Normalize status to one of error|warning|success|info
 		$allowed = array( 'error', 'warning', 'success', 'info' );
 		$status  = preg_replace( '/^notice-/', '', $status );
 		if ( ! in_array( $status, $allowed, true ) ) {
 			$status = 'success';
 		}
 
-		// 3️⃣ Define color schemes for different statuses
+		// Define color schemes for different statuses.
 		$color_schemes = array(
 			'success' => array(
 				'icon_bg'        => '#50c878',
@@ -136,7 +135,7 @@ class Sync_Settings {
 		);
 		$scheme        = $color_schemes[ $status ];
 
-		// 4️⃣ Determine icon
+		// Determine icon.
 		$icon_content = '';
 		if ( false !== $icon ) {
 			if ( true === $icon ) {
@@ -165,7 +164,7 @@ class Sync_Settings {
 >' . $icon_content . '</span>';
 		}
 
-		// 5️⃣ Build title HTML
+		// Build title HTML.
 		$title_html = '';
 		if ( $title && is_string( $title ) ) {
 			$title_html = sprintf(
@@ -175,14 +174,12 @@ class Sync_Settings {
 			);
 		}
 
-		// 6️⃣ Build message HTML
 		$message_html = sprintf(
 			'<p style="margin: 0.5em 0 0; padding: 0; color: %s; font-size: 1.1em;">%s</p>',
 			esc_attr( $scheme['subtitle_color'] ),
 			wp_kses_post( $message )
 		);
 
-		// 7️⃣ Compose full notice HTML
 		$full_notice_html = sprintf(
 			'<div class="sync-admin-notice">
 				<div class="sync-admin-notice-item" style="margin-right: 10px;">%s</div>
@@ -196,7 +193,6 @@ class Sync_Settings {
 			$message_html
 		);
 
-		// 8️⃣ Delegate to core API
 		wp_admin_notice(
 			$full_notice_html,
 			array(
