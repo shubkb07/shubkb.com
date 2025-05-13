@@ -227,11 +227,11 @@ class Sync_User {
 	 */
 	public function add_user_meta( $user_identifier, $meta_key, $meta_value, $unique = false ) {
 		$this->user_metadata[] = array(
-			'user'       => $user_identifier,
-			'meta_key'   => $meta_key,
-			'meta_value' => $meta_value,
-			'unique'     => $unique,
-			'action'     => 'add',
+			'user'            => $user_identifier,
+			'user_meta_key'   => $meta_key,
+			'user_meta_value' => $meta_value,
+			'unique'          => $unique,
+			'action'          => 'add',
 		);
 
 		return $this;
@@ -248,11 +248,11 @@ class Sync_User {
 	 */
 	public function update_user_meta( $user_identifier, $meta_key, $meta_value, $prev_value = '' ) {
 		$this->user_metadata[] = array(
-			'user'       => $user_identifier,
-			'meta_key'   => $meta_key,
-			'meta_value' => $meta_value,
-			'prev_value' => $prev_value,
-			'action'     => 'update',
+			'user'            => $user_identifier,
+			'user_meta_key'   => $meta_key,
+			'user_meta_value' => $meta_value,
+			'prev_value'      => $prev_value,
+			'action'          => 'update',
 		);
 
 		return $this;
@@ -268,10 +268,10 @@ class Sync_User {
 	 */
 	public function delete_user_meta( $user_identifier, $meta_key, $meta_value = '' ) {
 		$this->user_metadata[] = array(
-			'user'       => $user_identifier,
-			'meta_key'   => $meta_key,
-			'meta_value' => $meta_value,
-			'action'     => 'delete',
+			'user'            => $user_identifier,
+			'user_meta_key'   => $meta_key,
+			'user_meta_value' => $meta_value,
+			'action'          => 'delete',
 		);
 
 		return $this;
@@ -287,7 +287,7 @@ class Sync_User {
 		foreach ( $metadata as $meta_op ) {
 			if ( isset( $meta_op['user'] ) && isset( $meta_op['meta_key'] ) && isset( $meta_op['action'] ) ) {
 				$action = $meta_op['action'];
-				
+
 				if ( 'add' === $action ) {
 					$unique = isset( $meta_op['unique'] ) ? $meta_op['unique'] : false;
 					$this->add_user_meta( $meta_op['user'], $meta_op['meta_key'], $meta_op['meta_value'], $unique );
@@ -319,7 +319,7 @@ class Sync_User {
 	public function update_role_capabilities() {
 		foreach ( $this->role_capabilities as $role_cap ) {
 			$role = get_role( $role_cap['role'] );
-			
+
 			if ( $role ) {
 				foreach ( $role_cap['capabilities'] as $capability => $grant ) {
 					if ( $role_cap['remove'] ) {
@@ -380,10 +380,10 @@ class Sync_User {
 	public function update_user_roles() {
 		foreach ( $this->user_roles as $user_role ) {
 			$user_id = $this->get_user_id( $user_role['user'] );
-			
+
 			if ( $user_id ) {
 				$user = new \WP_User( $user_id );
-				
+
 				if ( $user_role['append'] ) {
 					$user->add_role( $user_role['role'] );
 				} else {
@@ -399,21 +399,21 @@ class Sync_User {
 	public function update_user_metadata() {
 		foreach ( $this->user_metadata as $metadata ) {
 			$user_id = $this->get_user_id( $metadata['user'] );
-			
+
 			if ( $user_id ) {
 				if ( 'add' === $metadata['action'] ) {
-					add_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'], $metadata['unique'] );
+					add_user_meta( $user_id, $metadata['user_meta_key'], $metadata['user_meta_value'], $metadata['unique'] );
 				} elseif ( 'update' === $metadata['action'] ) {
 					if ( ! empty( $metadata['prev_value'] ) ) {
-						update_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'], $metadata['prev_value'] );
+						update_user_meta( $user_id, $metadata['user_meta_key'], $metadata['user_meta_value'], $metadata['prev_value'] );
 					} else {
-						update_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'] );
+						update_user_meta( $user_id, $metadata['user_meta_key'], $metadata['user_meta_value'] );
 					}
 				} elseif ( 'delete' === $metadata['action'] ) {
-					if ( ! empty( $metadata['meta_value'] ) ) {
-						delete_user_meta( $user_id, $metadata['meta_key'], $metadata['meta_value'] );
+					if ( ! empty( $metadata['user_meta_value'] ) ) {
+						delete_user_meta( $user_id, $metadata['user_meta_key'], $metadata['user_meta_value'] );
 					} else {
-						delete_user_meta( $user_id, $metadata['meta_key'] );
+						delete_user_meta( $user_id, $metadata['user_meta_key'] );
 					}
 				}
 			}
@@ -430,14 +430,30 @@ class Sync_User {
 		if ( is_numeric( $user_identifier ) ) {
 			return absint( $user_identifier );
 		}
-		
+
 		if ( is_email( $user_identifier ) ) {
 			$user = get_user_by( 'email', $user_identifier );
 		} else {
 			$user = get_user_by( 'login', $user_identifier );
 		}
-		
+
 		return $user ? $user->ID : false;
+	}
+
+	/**
+	 * Retrieve user meta.
+	 *
+	 * @param mixed  $user_identifier User ID or email or username.
+	 * @param string $meta_key        Meta key.
+	 * @param bool   $single          Whether to return a single value.
+	 * @return mixed User meta value or empty string.
+	 */
+	public function get_user_meta( $user_identifier, $meta_key, $single = true ) {
+		$user_id = $this->get_user_id( $user_identifier );
+		if ( $user_id ) {
+			return get_user_meta( $user_id, $meta_key, $single );
+		}
+		return '';
 	}
 
 	/**
@@ -449,7 +465,7 @@ class Sync_User {
 	public function remove_role( $role ) {
 		// This will be executed directly since we can't queue it up.
 		remove_role( $role );
-		
+
 		return $this;
 	}
 
@@ -462,11 +478,11 @@ class Sync_User {
 	 */
 	public function delete_user( $user_identifier, $reassign = null ) {
 		$user_id = $this->get_user_id( $user_identifier );
-		
+
 		if ( $user_id ) {
 			return wp_delete_user( $user_id, $reassign );
 		}
-		
+
 		return false;
 	}
 
@@ -480,12 +496,12 @@ class Sync_User {
 	 */
 	public function user_can( $user_identifier, $capability, $args = null ) {
 		$user_id = $this->get_user_id( $user_identifier );
-		
+
 		if ( $user_id ) {
 			$user = new \WP_User( $user_id );
 			return $user->has_cap( $capability, $args );
 		}
-		
+
 		return false;
 	}
 
@@ -518,11 +534,11 @@ class Sync_User {
 	 */
 	public function get_role_capabilities( $role ) {
 		$role_obj = get_role( $role );
-		
+
 		if ( $role_obj ) {
 			return $role_obj->capabilities;
 		}
-		
+
 		return false;
 	}
 }
