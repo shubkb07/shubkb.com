@@ -1,0 +1,17 @@
+/**
+ * SyncCache Optimization CSS
+ *
+ * Styles for optimization features like lazy loading.
+ *
+ * @package SyncCache
+ */
+
+/* Lazy loading styles */
+img.sync-lazy {
+    opacity: 0;
+    transition: opacity 0.3s ease-in;
+}
+
+img.sync-lazy.loaded {
+    opacity: 1;
+}
