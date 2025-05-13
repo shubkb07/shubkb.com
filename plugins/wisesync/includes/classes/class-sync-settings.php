@@ -145,7 +145,7 @@ class Sync_Settings {
 				if ( 0 === strpos( $icon, 'dashicons-' ) ) {
 					// Dashicons handling.
 					$icon_content = sprintf(
-						'<span class="dashicons %s" style="font-size: 1em; color: %s;"></span>',
+						'<span class="dashicons %s" style="font-size: 0.9em; color: %s;"></span>',
 						esc_attr( $icon ),
 						esc_attr( $scheme['icon_color'] )
 					);
@@ -175,7 +175,7 @@ class Sync_Settings {
 		}
 
 		$message_html = sprintf(
-			'<p style="margin: 0.5em 0 0; padding: 0; color: %s; font-size: 1.1em;">%s</p>',
+			'<p style="margin: 0.5em 0 0; padding: 0; color: %s; font-size: 1.4em;">%s</p>',
 			esc_attr( $scheme['subtitle_color'] ),
 			wp_kses_post( $message )
 		);
