@@ -15,6 +15,34 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Edit wp-config.php file to add or remove code blocks between sync markers
+ *
+ * @param string $code   The code block to add or remove.
+ * @param string $action The action to perform ("add" or "remove").
+ *
+ * @return bool|string   True on success, error message on failure
+ */
+function sync_edit_wp_config( $code, $action = 'add' ) {
+	global $sync_settings;
+
+	return $sync_settings->edit_wp_config( $code, $action );
+}
+
+/**
+ * Edit .htaccess file to add or remove code blocks between sync markers
+ *
+ * @param string $code   The code block to add or remove.
+ * @param string $action The action to perform ("add" or "remove").
+ * @param string $path   Optional custom path to .htaccess file. Default is site root.
+ * @return bool|string   True on success, error message on failure
+ */
+function edit_htaccess( $code, $action = 'add', $path = '' ) {
+	global $sync_settings;
+
+	return $sync_settings->edit_htaccess( $code, $action, $path );
+}
+
+/**
  * Output an admin notice with optional title and styled icon,
  *
  * @param string       $message        The notice message (may include basic HTML).

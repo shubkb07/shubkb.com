@@ -197,8 +197,8 @@ class SyncCache {
 	 * @param array $config Configuration array.
 	 */
 	public function __construct( $config ) {
-		$this->config        = $config;
-		$this->request_uri   = $this->get_request_uri();
+		$this->config         = $config;
+		$this->request_uri    = $this->get_request_uri();
 		$this->request_method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 		// Set cache path.
@@ -273,8 +273,7 @@ class SyncCache {
 		$is_dev_environment = false;
 
 		// Common development environment checks.
-		if ( 
-			defined( 'WP_DEBUG' ) && WP_DEBUG || 
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG || 
 			defined( 'WP_LOCAL_DEV' ) && WP_LOCAL_DEV ||
 			isset( $_SERVER['REMOTE_ADDR'] ) && in_array( $_SERVER['REMOTE_ADDR'], array( '127.0.0.1', '::1' ), true ) ||
 			( isset( $_SERVER['HTTP_HOST'] ) && preg_match( '/local(host)?|dev(elopment)?|\.(test|dev)$/', $_SERVER['HTTP_HOST'] ) )
@@ -283,8 +282,7 @@ class SyncCache {
 		}
 
 		// Check for specific environment constants.
-		if ( 
-			( defined( 'WP_ENVIRONMENT_TYPE' ) && in_array( WP_ENVIRONMENT_TYPE, array( 'local', 'development', 'staging' ), true ) ) ||
+		if ( ( defined( 'WP_ENVIRONMENT_TYPE' ) && in_array( WP_ENVIRONMENT_TYPE, array( 'local', 'development', 'staging' ), true ) ) ||
 			( defined( 'VIP_GO_ENV' ) && in_array( VIP_GO_ENV, array( 'develop', 'preprod', 'local', 'dev' ), true ) )
 		) {
 			$is_dev_environment = true;
@@ -404,7 +402,7 @@ class SyncCache {
 		if ( isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ) {
 			$langs = explode( ',', $_SERVER['HTTP_ACCEPT_LANGUAGE'] );
 			if ( ! empty( $langs ) ) {
-				$lang = explode( ';', $langs[0] );
+				$lang                = explode( ';', $langs[0] );
 				$this->user_language = substr( $lang[0], 0, 2 );
 			}
 		}
@@ -856,7 +854,7 @@ class SyncCache {
 	 */
 	private function is_cache_expired( $created ) {
 		$lifetime = (int) $this->config['cache_lifetime'];
-		$now = time();
+		$now      = time();
 		
 		return ( $now - $created ) > $lifetime;
 	}
@@ -874,7 +872,7 @@ class SyncCache {
 		
 		// Set cache control headers based on lifetime.
 		$max_age = (int) $this->config['cache_lifetime'];
-		$age = time() - $created;
+		$age     = time() - $created;
 		
 		if ( $is_stale ) {
 			// For stale content, indicate it's stale but revalidating.
@@ -926,7 +924,7 @@ class SyncCache {
 		
 		// Stats file path.
 		$stats_file = $this->cache_path . 'stats/daily-' . $today . '.json';
-		$stats_dir = dirname( $stats_file );
+		$stats_dir  = dirname( $stats_file );
 		
 		// Ensure directory exists.
 		if ( ! is_dir( $stats_dir ) ) {
@@ -945,22 +943,22 @@ class SyncCache {
 		// Initialize stats structure if needed.
 		if ( empty( $stats ) ) {
 			$stats = array(
-				'date'      => $today,
-				'hits'      => 0,
-				'misses'    => 0,
-				'stale'     => 0,
-				'pages'     => array(),
-				'hours'     => array_fill( 0, 24, 0 ),
+				'date'   => $today,
+				'hits'   => 0,
+				'misses' => 0,
+				'stale'  => 0,
+				'pages'  => array(),
+				'hours'  => array_fill( 0, 24, 0 ),
 			);
 		}
 		
 		// Update stats based on type.
 		if ( $type === 'hit' ) {
-			$stats['hits']++;
+			++$stats['hits'];
 		} elseif ( $type === 'miss' ) {
-			$stats['misses']++;
+			++$stats['misses'];
 		} elseif ( $type === 'stale' ) {
-			$stats['stale']++;
+			++$stats['stale'];
 		}
 		
 		// Record page hit.
@@ -971,11 +969,11 @@ class SyncCache {
 				'count' => 0,
 			);
 		}
-		$stats['pages'][ $url_key ]['count']++;
+		++$stats['pages'][ $url_key ]['count'];
 		
 		// Record hour hit.
 		$current_hour = (int) gmdate( 'G' );
-		$stats['hours'][ $current_hour ]++;
+		++$stats['hours'][ $current_hour ];
 		
 		// Save stats back to file.
 		@file_put_contents( $stats_file, json_encode( $stats ) );
@@ -1113,29 +1111,45 @@ class SyncCache {
 		
 		// Parse site URL.
 		$parsed_site_url = parse_url( $site_url );
-		$site_domain = $parsed_site_url['host'];
+		$site_domain     = $parsed_site_url['host'];
 		
 		// Get the CDN URL.
 		$cdn_url = rtrim( $this->config['cdn_url'], '/' );
 		
 		// Get file extensions to apply CDN to.
 		$extensions = $this->config['cdn_includes'] ?? array(
-			'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-			'.css', '.js', '.woff', '.woff2', '.ttf', '.eot',
+			'.jpg',
+			'.jpeg',
+			'.png',
+			'.gif',
+			'.webp',
+			'.svg',
+			'.css',
+			'.js',
+			'.woff',
+			'.woff2',
+			'.ttf',
+			'.eot',
 		);
 		
 		// Build regex pattern for matching URLs.
-		$extensions_pattern = implode( '|', array_map( function( $ext ) {
-			return preg_quote( $ext, '/' );
-		}, $extensions ) );
+		$extensions_pattern = implode(
+			'|',
+			array_map(
+				function ( $ext ) {
+					return preg_quote( $ext, '/' );
+				},
+				$extensions 
+			) 
+		);
 		
 		// Replace URLs in different attributes.
 		$content = preg_replace(
 			'/(<(?:img|script|link|source|video|audio)[^>]*(?:src|href|srcset|data-[^=]+)\s*=\s*["\'])([^"\']+)(' . $extensions_pattern . ')(["\'][^>]*>)/i',
-			function( $matches ) use ( $site_domain, $cdn_url ) {
+			function ( $matches ) use ( $site_domain, $cdn_url ) {
 				$prefix = $matches[1];
-				$url = $matches[2];
-				$ext = $matches[3];
+				$url    = $matches[2];
+				$ext    = $matches[3];
 				$suffix = $matches[4];
 				
 				// Skip external and absolute URLs.
@@ -1240,7 +1254,7 @@ class SyncCache {
 			}
 			
 			// Update lock.
-			$lock_count++;
+			++$lock_count;
 			@file_put_contents( $lock_file, time() . ':' . $lock_count );
 		}
 		

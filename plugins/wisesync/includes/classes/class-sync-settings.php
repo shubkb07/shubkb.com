@@ -66,6 +66,399 @@ class Sync_Settings {
 	}
 
 	/**
+	 * Core file editing functionality for both wp-config.php and .htaccess
+	 *
+	 * @param string $file_path     Path to the file to edit.
+	 * @param string $code          The code block to add or remove.
+	 * @param string $action        The action to perform ("add" or "remove").
+	 * @param string $start_marker  The start marker string.
+	 * @param string $end_marker    The end marker string.
+	 * @param string $context       The filesystem context.
+	 * @param bool   $create_file   Whether to create the file if it doesn't exist.
+	 * @param array  $options       Additional options for specific file types.
+	 * @return bool|string True on success, error message on failure
+	 */
+	private function edit_file( $file_path, $code, $action, $start_marker, $end_marker, $context, $create_file = false, $options = array() ) {
+		global $sync_filesystem;
+
+		// Get the file basename for error messages.
+		$file_basename = basename( $file_path );
+
+		// Validate action parameter.
+		$action = 'remove' === strtolower( $action ) ? 'remove' : 'add';
+	
+		// Check if file exists and is readable/writable.
+		if ( ! $sync_filesystem->exists( $file_path ) ) {
+			// For add action, we'll create the file if requested.
+			if ( 'add' === $action && $create_file ) {
+				if ( false === $sync_filesystem->put_contents( $file_path, '', $context ) ) {
+					return "Error: Could not create {$file_basename} at {$file_path}";
+				}
+			} else {
+				return "Error: {$file_basename} not found at {$file_path}";
+			}
+		}
+	
+		if ( ! $sync_filesystem->is_readable( $file_path ) ) {
+			return "Error: {$file_basename} is not readable";
+		}
+	
+		if ( ! $sync_filesystem->is_writable( $file_path ) ) {
+			return "Error: {$file_basename} is not writable";
+		}
+	
+		// Read file content.
+		$file_content = $sync_filesystem->get_contents( $file_path );
+		if ( false === $file_content ) {
+			return "Error: Failed to read {$file_basename}";
+		}
+	
+		// Normalize the code by removing extra whitespace for comparison purposes.
+		$normalized_code = preg_replace( '/\s+/', ' ', trim( $code ) );
+	
+		// Initialize variables for specific comparison strategies.
+		$code_signature         = '';
+		$code_define_matches    = array();
+		$code_rules_match       = array();
+		$code_extracts          = array();
+		$has_rules              = false;
+		$define_check_pattern   = '';
+		$extracted_code_pattern = '';
+	
+		// Set up the appropriate comparison strategy based on file type.
+		if ( isset( $options['file_type'] ) && 'php' === $options['file_type'] ) {
+			// Extract actual code content between quotes for more accurate PHP code comparison.
+			$extracted_code_pattern = '/[\'"]([^\'"]*)[\'"]|value:\s*(\w+)|([A-Z_]+)\s*,\s*(\w+)/';
+			preg_match_all( $extracted_code_pattern, $code, $code_extracts );
+		
+			// Extract constant name and value separately for define() comparison.
+			$define_pattern = '/define\s*\(\s*[\'"]([A-Z_]+)[\'"].*?(true|false|\d+|[\'"][^\'"]*[\'"])\s*\)/i';
+			preg_match( $define_pattern, $code, $code_define_matches );
+		
+			// Build code signature for comparison.
+			if ( ! empty( $code_extracts[0] ) ) {
+				foreach ( $code_extracts[0] as $extract ) {
+					$code_signature .= $extract;
+				}
+				$code_signature = preg_replace( '/\s+/', '', $code_signature );
+			}
+		} elseif ( isset( $options['file_type'] ) && 'htaccess' === $options['file_type'] ) {
+			// For special htaccess rule comparison.
+			$rule_pattern = '/^(?:\s*RewriteRule\s+\^\(?([^\s]+)\)?\$?\s+([^\s]+))|(?:\s*RewriteCond\s+%\{([^\}]+)\}\s+([^\s]+))/i';
+			$has_rules    = preg_match_all( $rule_pattern, $code, $code_rules_match );
+		}
+	
+		// Check for existing markers and remove both if only one exists or in wrong order.
+		$start_pos = strpos( $file_content, $start_marker );
+		$end_pos   = strpos( $file_content, $end_marker );
+	
+		// Check if markers exist but are in wrong order or only one exists.
+		if ( ( false === $start_pos && false !== $end_pos ) || 
+		( false !== $start_pos && false === $end_pos ) ||
+		( false !== $start_pos && false !== $end_pos && $start_pos > $end_pos ) ) {
+		
+			// Remove both markers wherever they are found.
+			$file_content = str_replace( $start_marker . "\n", '', $file_content );
+			$file_content = str_replace( $end_marker . "\n", '', $file_content );
+			$file_content = str_replace( $start_marker, '', $file_content );
+			$file_content = str_replace( $end_marker, '', $file_content );
+		}
+	
+		// Find and remove matching code lines (accounting for whitespace differences).
+		$lines      = explode( "\n", $file_content );
+		$new_lines  = array();
+		$code_found = false;
+	
+		foreach ( $lines as $line ) {
+			$skip_line = false;
+		
+			// Normalize this line for comparison.
+			$normalized_line = preg_replace( '/\s+/', ' ', trim( $line ) );
+		
+			// Check if this line matches our code (ignoring whitespace differences).
+			if ( $normalized_line === $normalized_code ) {
+				$code_found = true;
+				$skip_line  = true;
+			} elseif ( isset( $options['file_type'] ) && 'php' === $options['file_type'] && ! empty( $extracted_code_pattern ) ) {
+				// PHP-specific comparisons.
+			
+				// If basic comparison fails, try signature-based comparison.
+				preg_match_all( $extracted_code_pattern, $line, $line_extracts );
+				$line_signature = '';
+			
+				if ( ! empty( $line_extracts[0] ) ) {
+					foreach ( $line_extracts[0] as $extract ) {
+						$line_signature .= $extract;
+					}
+					$line_signature = preg_replace( '/\s+/', '', $line_signature );
+				}
+			
+				// Special handling for define statements.
+				if ( ! empty( $code_define_matches ) ) {
+					preg_match( $define_pattern, $line, $line_define_matches );
+				
+					// If we have define matches for both the code and the current line.
+					if ( ! empty( $code_define_matches ) && ! empty( $line_define_matches ) ) {
+						// Compare constant name and value directly.
+						if ( $code_define_matches[1] === $line_define_matches[1] ) {
+							// Same constant name, compare values with normalization.
+							$code_value = preg_replace( '/\s+|value:\s*/', '', $code_define_matches[2] );
+							$line_value = preg_replace( '/\s+|value:\s*/', '', $line_define_matches[2] );
+						
+							if ( $code_value === $line_value ) {
+								$code_found = true;
+								$skip_line  = true;
+							}
+						}
+					}
+				}
+			
+				// If the core content matches (despite spacing differences), remove it.
+				if ( ! $skip_line && ! empty( $line_signature ) && ! empty( $code_signature ) && $line_signature === $code_signature ) {
+					$code_found = true;
+					$skip_line  = true;
+				}
+			} elseif ( isset( $options['file_type'] ) && 'htaccess' === $options['file_type'] && $has_rules ) {
+				// .htaccess-specific comparisons.
+			
+				// Special handling for RewriteRule and RewriteCond.
+				$line_rules_match = array();
+				if ( preg_match( $rule_pattern, $line, $line_rules_match ) ) {
+					// Compare the key parts of rules (patterns and substitutions).
+					foreach ( $code_rules_match[0] as $code_rule_index => $code_rule ) {
+						$code_pattern = ! empty( $code_rules_match[1][ $code_rule_index ] ) ? 
+						$code_rules_match[1][ $code_rule_index ] : 
+						$code_rules_match[3][ $code_rule_index ];
+					
+						$code_subst = ! empty( $code_rules_match[2][ $code_rule_index ] ) ? 
+						$code_rules_match[2][ $code_rule_index ] : 
+						$code_rules_match[4][ $code_rule_index ];
+					
+						$line_pattern = ! empty( $line_rules_match[1] ) ? 
+						$line_rules_match[1] : 
+						$line_rules_match[3];
+					
+						$line_subst = ! empty( $line_rules_match[2] ) ? 
+						$line_rules_match[2] : 
+						$line_rules_match[4];
+					
+						// If both pattern and substitution match (ignoring whitespace).
+						if ( trim( $code_pattern ) === trim( $line_pattern ) && 
+						trim( $code_subst ) === trim( $line_subst ) ) {
+							$code_found = true;
+							$skip_line  = true;
+							break;
+						}
+					}
+				}
+			}
+		
+			// Add the line to our new content if we're not skipping it.
+			if ( ! $skip_line ) {
+				$new_lines[] = $line;
+			}
+		}
+	
+		// Only rebuild the file if we found and removed matching code.
+		if ( $code_found ) {
+			$file_content = implode( "\n", $new_lines );
+		}
+	
+		// If action is remove, just save the file without adding the code back.
+		if ( 'remove' === $action ) {
+			// Write the file back.
+			if ( false === $sync_filesystem->put_contents( $file_path, $file_content, $context ) ) {
+				return "Error: Failed to write to {$file_basename}";
+			}
+			return true;
+		}
+	
+		// For "add" action, proceed to add the markers and code.
+	
+		// Check for existing marker block.
+		$start_pos = strpos( $file_content, $start_marker );
+		$end_pos   = strpos( $file_content, $end_marker );
+	
+		if ( false !== $start_pos && false !== $end_pos && $start_pos < $end_pos ) {
+			// Markers exist and are in correct order.
+		
+			// Check if the code already exists inside the markers.
+			$marked_block            = substr( $file_content, $start_pos, $end_pos - $start_pos );
+			$normalized_marked_block = preg_replace( '/\s+/', ' ', $marked_block );
+			$already_exists          = false;
+		
+			// Simple normalization check first.
+			if ( false !== strpos( $normalized_marked_block, $normalized_code ) ) {
+				$already_exists = true;
+			} elseif ( isset( $options['file_type'] ) && 'php' === $options['file_type'] ) {
+				// PHP-specific existence checks inside marker block.
+			
+				// Special check for define statements inside the marked block.
+				if ( ! empty( $code_define_matches ) ) {
+					$define_check_pattern = '/define\s*\(\s*[\'"]' . preg_quote( $code_define_matches[1], '/' ) . '[\'"].*?(true|false|\d+|[\'"][^\'"]*[\'"])\s*\)/i';
+					if ( preg_match( $define_check_pattern, $marked_block, $marker_define_match ) ) {
+						// Found the same constant being defined, check if values match.
+						$code_value   = preg_replace( '/\s+|value:\s*/', '', $code_define_matches[2] );
+						$marker_value = preg_replace( '/\s+|value:\s*/', '', $marker_define_match[1] );
+					
+						if ( $code_value === $marker_value ) {
+							$already_exists = true;
+						}
+					}
+				}
+			
+				// If define check didn't find it, try extract-based comparison.
+				if ( ! $already_exists && ! empty( $extracted_code_pattern ) ) {
+					// Extract content within quotes from the marker block for comparison.
+					preg_match_all( $extracted_code_pattern, $marked_block, $block_extracts );
+				
+					// Iterate through each potential match in the block.
+					if ( ! empty( $block_extracts[0] ) && ! empty( $code_extracts[0] ) ) {
+						foreach ( $block_extracts[0] as $key => $extract ) {
+							// Reconstruct a potential full line to check against our signature.
+							$block_line_signature = '';
+							$max_elements         = count( $code_extracts[0] );
+							$block_extracts_count = count( $block_extracts[0] );
+						
+							for ( $i = 0; $i < $max_elements && ( $key + $i ) < $block_extracts_count; $i++ ) {
+								$block_line_signature .= $block_extracts[0][ $key + $i ];
+							}
+							$block_line_signature = preg_replace( '/\s+/', '', $block_line_signature );
+						
+							if ( $block_line_signature === $code_signature ) {
+								$already_exists = true;
+								break;
+							}
+						}
+					}
+				}
+			} elseif ( isset( $options['file_type'] ) && 'htaccess' === $options['file_type'] && $has_rules ) {
+				// .htaccess-specific existence checks inside marker block.
+			
+				// Check for rule matches inside the marker block.
+				$marked_lines = explode( "\n", $marked_block );
+			
+				foreach ( $marked_lines as $marked_line ) {
+					$line_rules_match = array();
+					if ( preg_match( $rule_pattern, $marked_line, $line_rules_match ) ) {
+						// Compare the key parts of rules (patterns and substitutions).
+						foreach ( $code_rules_match[0] as $code_rule_index => $code_rule ) {
+							$code_pattern = ! empty( $code_rules_match[1][ $code_rule_index ] ) ? 
+							$code_rules_match[1][ $code_rule_index ] : 
+							$code_rules_match[3][ $code_rule_index ];
+						
+							$code_subst = ! empty( $code_rules_match[2][ $code_rule_index ] ) ? 
+							$code_rules_match[2][ $code_rule_index ] : 
+							$code_rules_match[4][ $code_rule_index ];
+						
+							$line_pattern = ! empty( $line_rules_match[1] ) ? 
+							$line_rules_match[1] : 
+							$line_rules_match[3];
+						
+							$line_subst = ! empty( $line_rules_match[2] ) ? 
+							$line_rules_match[2] : 
+							$line_rules_match[4];
+						
+							// If both pattern and substitution match (ignoring whitespace).
+							if ( trim( $code_pattern ) === trim( $line_pattern ) && 
+							trim( $code_subst ) === trim( $line_subst ) ) {
+								$already_exists = true;
+								break 2; // Exit both loops.
+							}
+						}
+					}
+				}
+			}
+		
+			// Only add if code doesn't already exist in the marker block.
+			if ( ! $already_exists ) {
+				// Insert code before end marker.
+				$before       = substr( $file_content, 0, $end_pos );
+				$after        = substr( $file_content, $end_pos );
+				$file_content = $before . $code . "\n" . $after;
+			}
+		} elseif ( isset( $options['insertion_point'] ) && 'php' === $options['insertion_point'] ) {
+			// Special handling for PHP files (after <?php tag).
+			$php_pos = strpos( $file_content, '<?php' );
+			
+			if ( false === $php_pos ) {
+				return "Error: <?php tag not found in {$file_basename}";
+			}
+			
+				// Find the position right after the <?php line.
+				$line_end = strpos( $file_content, "\n", $php_pos );
+			if ( false === $line_end ) {
+				$line_end = strlen( $file_content );
+			}
+			
+				$before = substr( $file_content, 0, $line_end + 1 );
+				$after  = substr( $file_content, $line_end + 1 );
+			
+				// Add the new block with markers.
+				$new_block    = $start_marker . "\n" . $code . "\n" . $end_marker . "\n";
+				$file_content = $before . $new_block . $after;
+		} else {
+			// Default behavior for other files (append to end).
+			
+			// First ensure the file ends with a newline.
+			if ( ! empty( $file_content ) && "\n" !== substr( $file_content, -1 ) ) {
+				$file_content .= "\n";
+			}
+			
+			// Add the new block with markers.
+			$new_block     = $start_marker . "\n" . $code . "\n" . $end_marker . "\n";
+			$file_content .= $new_block;
+		}
+	
+		// Write the file back.
+		if ( false === $sync_filesystem->put_contents( $file_path, $file_content, $context ) ) {
+			return "Error: Failed to write to {$file_basename}";
+		}
+	
+		return true;
+	}
+
+	/**
+	 * Edit wp-config.php file to add or remove code blocks between sync markers
+	 *
+	 * @param string $code   The code block to add or remove.
+	 * @param string $action The action to perform ("add" or "remove").
+	 * @return bool|string   True on success, error message on failure
+	 */
+	public function edit_wp_config( $code, $action = 'add' ) {
+		$config_path  = ABSPATH . 'wp-config.php';
+		$start_marker = '/* Sync Edit Start */';
+		$end_marker   = '/* Sync Edit End */';
+		$context      = 'sync_wp_config_access';
+		$options      = array(
+			'file_type'       => 'php',
+			'insertion_point' => 'php',
+		);
+	
+		return $this->edit_file( $config_path, $code, $action, $start_marker, $end_marker, $context, false, $options );
+	}
+
+	/**
+	 * Edit .htaccess file to add or remove code blocks between sync markers
+	 *
+	 * @param string $code   The code block to add or remove.
+	 * @param string $action The action to perform ("add" or "remove").
+	 * @param string $path   Optional custom path to .htaccess file. Default is site root.
+	 * @return bool|string   True on success, error message on failure
+	 */
+	public function edit_htaccess( $code, $action = 'add', $path = '' ) {
+		$htaccess_path = empty( $path ) ? ABSPATH . '.htaccess' : $path;
+		$start_marker  = '# Sync Edit Start';
+		$end_marker    = '# Sync Edit End';
+		$context       = 'sync_htaccess_access';
+		$options       = array(
+			'file_type' => 'htaccess',
+		);
+	
+		return $this->edit_file( $htaccess_path, $code, $action, $start_marker, $end_marker, $context, true, $options );
+	}
+
+	/**
 	 * Init Admin Notices.
 	 */
 	public function init_admin_notices() {
