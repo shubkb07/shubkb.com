@@ -166,58 +166,58 @@ class Sync_Advanced_Cache {
 		
 		// Create configuration array.
 		$config = array(
-			'cache_enabled'              => true,
-			'cache_path'                 => WP_CONTENT_DIR . '/cache/sync-cache',
-			'fallback_path'              => 'wp-content/cache/sync-cache',
-			'cache_lifetime'             => isset( $settings['cache_lifetime'] ) ? (int) $settings['cache_lifetime'] : 86400,
-			'cache_exclude_urls'         => isset( $settings['exclude_urls'] ) ? explode( "\n", $settings['exclude_urls'] ) : array(
+			'cache_enabled'             => true,
+			'cache_path'                => WP_CONTENT_DIR . '/cache/sync-cache',
+			'fallback_path'             => 'wp-content/cache/sync-cache',
+			'cache_lifetime'            => isset( $settings['cache_lifetime'] ) ? (int) $settings['cache_lifetime'] : 86400,
+			'cache_exclude_urls'        => isset( $settings['exclude_urls'] ) ? explode( "\n", $settings['exclude_urls'] ) : array(
 				'/wp-admin/',
 				'/wp-login.php',
 				'/cart',
 				'/checkout',
 				'/my-account',
 			),
-			'cache_exclude_cookies'      => isset( $settings['exclude_cookies'] ) ? explode( "\n", $settings['exclude_cookies'] ) : array(
+			'cache_exclude_cookies'     => isset( $settings['exclude_cookies'] ) ? explode( "\n", $settings['exclude_cookies'] ) : array(
 				'wp-postpass_',
 				'wordpress_logged_in_',
 				'comment_author_',
 				'woocommerce_items_in_cart',
 			),
-			'cache_exclude_user_agents'  => isset( $settings['exclude_user_agents'] ) ? explode( "\n", $settings['exclude_user_agents'] ) : array(
+			'cache_exclude_user_agents' => isset( $settings['exclude_user_agents'] ) ? explode( "\n", $settings['exclude_user_agents'] ) : array(
 				'bot',
 				'crawler',
 				'spider',
 			),
-			'cache_mobile'               => isset( $settings['cache_mobile'] ) ? (bool) $settings['cache_mobile'] : true,
-			'cache_tablet'               => isset( $settings['cache_tablet'] ) ? (bool) $settings['cache_tablet'] : true,
-			'separate_mobile_cache'      => isset( $settings['separate_mobile_cache'] ) ? (bool) $settings['separate_mobile_cache'] : true,
-			'cache_logged_in_users'      => isset( $settings['cache_logged_in_users'] ) ? (bool) $settings['cache_logged_in_users'] : false,
-			'cache_ssl'                  => isset( $settings['cache_ssl'] ) ? (bool) $settings['cache_ssl'] : true,
-			'cache_404'                  => isset( $settings['cache_404'] ) ? (bool) $settings['cache_404'] : false,
-			'cache_query_strings'        => isset( $settings['cache_query_strings'] ) ? (bool) $settings['cache_query_strings'] : false,
-			'allowed_query_strings'      => isset( $settings['allowed_query_strings'] ) ? explode( "\n", $settings['allowed_query_strings'] ) : array(
+			'cache_mobile'              => isset( $settings['cache_mobile'] ) ? (bool) $settings['cache_mobile'] : true,
+			'cache_tablet'              => isset( $settings['cache_tablet'] ) ? (bool) $settings['cache_tablet'] : true,
+			'separate_mobile_cache'     => isset( $settings['separate_mobile_cache'] ) ? (bool) $settings['separate_mobile_cache'] : true,
+			'cache_logged_in_users'     => isset( $settings['cache_logged_in_users'] ) ? (bool) $settings['cache_logged_in_users'] : false,
+			'cache_ssl'                 => isset( $settings['cache_ssl'] ) ? (bool) $settings['cache_ssl'] : true,
+			'cache_404'                 => isset( $settings['cache_404'] ) ? (bool) $settings['cache_404'] : false,
+			'cache_query_strings'       => isset( $settings['cache_query_strings'] ) ? (bool) $settings['cache_query_strings'] : false,
+			'allowed_query_strings'     => isset( $settings['allowed_query_strings'] ) ? explode( "\n", $settings['allowed_query_strings'] ) : array(
 				's',
 				'p',
 				'lang',
 			),
-			'cache_rest_api'             => isset( $settings['cache_rest_api'] ) ? (bool) $settings['cache_rest_api'] : false,
-			'cache_ajax'                 => isset( $settings['cache_ajax'] ) ? (bool) $settings['cache_ajax'] : false,
-			'cache_feed'                 => isset( $settings['cache_feed'] ) ? (bool) $settings['cache_feed'] : false,
-			'purge_on_post_edit'         => isset( $settings['purge_on_post_edit'] ) ? (bool) $settings['purge_on_post_edit'] : true,
-			'purge_on_comment'           => isset( $settings['purge_on_comment'] ) ? (bool) $settings['purge_on_comment'] : true,
-			'purge_schedule'             => isset( $settings['purge_schedule'] ) ? $settings['purge_schedule'] : 'daily',
-			'enable_in_dev_mode'         => isset( $settings['enable_in_dev_mode'] ) ? (bool) $settings['enable_in_dev_mode'] : false,
-			'enable_logging'             => isset( $settings['enable_logging'] ) ? (bool) $settings['enable_logging'] : true,
-			'debug_mode'                 => isset( $settings['debug_mode'] ) ? (bool) $settings['debug_mode'] : false,
-			'minify_html'                => isset( $settings['minify_html'] ) ? (bool) $settings['minify_html'] : true,
-			'minify_css'                 => isset( $settings['minify_css'] ) ? (bool) $settings['minify_css'] : true,
-			'minify_js'                  => isset( $settings['minify_js'] ) ? (bool) $settings['minify_js'] : true,
-			'combine_css'                => isset( $settings['combine_css'] ) ? (bool) $settings['combine_css'] : true,
-			'combine_js'                 => isset( $settings['combine_js'] ) ? (bool) $settings['combine_js'] : true,
-			'lazy_load'                  => isset( $settings['lazy_load'] ) ? (bool) $settings['lazy_load'] : true,
-			'cdn_enabled'                => isset( $settings['cdn_enabled'] ) ? (bool) $settings['cdn_enabled'] : false,
-			'cdn_url'                    => isset( $settings['cdn_url'] ) ? $settings['cdn_url'] : '{{CDN_URL}}',
-			'cdn_includes'               => isset( $settings['cdn_includes'] ) ? explode( "\n", $settings['cdn_includes'] ) : array(
+			'cache_rest_api'            => isset( $settings['cache_rest_api'] ) ? (bool) $settings['cache_rest_api'] : false,
+			'cache_ajax'                => isset( $settings['cache_ajax'] ) ? (bool) $settings['cache_ajax'] : false,
+			'cache_feed'                => isset( $settings['cache_feed'] ) ? (bool) $settings['cache_feed'] : false,
+			'purge_on_post_edit'        => isset( $settings['purge_on_post_edit'] ) ? (bool) $settings['purge_on_post_edit'] : true,
+			'purge_on_comment'          => isset( $settings['purge_on_comment'] ) ? (bool) $settings['purge_on_comment'] : true,
+			'purge_schedule'            => isset( $settings['purge_schedule'] ) ? $settings['purge_schedule'] : 'daily',
+			'enable_in_dev_mode'        => isset( $settings['enable_in_dev_mode'] ) ? (bool) $settings['enable_in_dev_mode'] : false,
+			'enable_logging'            => isset( $settings['enable_logging'] ) ? (bool) $settings['enable_logging'] : true,
+			'debug_mode'                => isset( $settings['debug_mode'] ) ? (bool) $settings['debug_mode'] : false,
+			'minify_html'               => isset( $settings['minify_html'] ) ? (bool) $settings['minify_html'] : true,
+			'minify_css'                => isset( $settings['minify_css'] ) ? (bool) $settings['minify_css'] : true,
+			'minify_js'                 => isset( $settings['minify_js'] ) ? (bool) $settings['minify_js'] : true,
+			'combine_css'               => isset( $settings['combine_css'] ) ? (bool) $settings['combine_css'] : true,
+			'combine_js'                => isset( $settings['combine_js'] ) ? (bool) $settings['combine_js'] : true,
+			'lazy_load'                 => isset( $settings['lazy_load'] ) ? (bool) $settings['lazy_load'] : true,
+			'cdn_enabled'               => isset( $settings['cdn_enabled'] ) ? (bool) $settings['cdn_enabled'] : false,
+			'cdn_url'                   => isset( $settings['cdn_url'] ) ? $settings['cdn_url'] : '{{CDN_URL}}',
+			'cdn_includes'              => isset( $settings['cdn_includes'] ) ? explode( "\n", $settings['cdn_includes'] ) : array(
 				'.jpg',
 				'.jpeg',
 				'.png',
@@ -227,18 +227,18 @@ class Sync_Advanced_Cache {
 				'.css',
 				'.js',
 			),
-			'warmup_method'              => isset( $settings['warmup_method'] ) ? $settings['warmup_method'] : 'auto',
-			'iops_protection'            => isset( $settings['iops_protection'] ) ? (bool) $settings['iops_protection'] : true,
-			'max_files_per_second'       => isset( $settings['max_files_per_second'] ) ? (int) $settings['max_files_per_second'] : 100,
-			'admin_roles_manage_cache'   => isset( $settings['admin_roles_manage_cache'] ) ? $settings['admin_roles_manage_cache'] : array(
+			'warmup_method'             => isset( $settings['warmup_method'] ) ? $settings['warmup_method'] : 'auto',
+			'iops_protection'           => isset( $settings['iops_protection'] ) ? (bool) $settings['iops_protection'] : true,
+			'max_files_per_second'      => isset( $settings['max_files_per_second'] ) ? (int) $settings['max_files_per_second'] : 100,
+			'admin_roles_manage_cache'  => isset( $settings['admin_roles_manage_cache'] ) ? $settings['admin_roles_manage_cache'] : array(
 				'administrator',
 				'editor',
 			),
-			'cache_analytics'            => isset( $settings['cache_analytics'] ) ? (bool) $settings['cache_analytics'] : true,
-			'analytics_sampling_rate'    => isset( $settings['analytics_sampling_rate'] ) ? (int) $settings['analytics_sampling_rate'] : 10,
-			'preload_homepage'           => isset( $settings['preload_homepage'] ) ? (bool) $settings['preload_homepage'] : true,
-			'preload_public_posts'       => isset( $settings['preload_public_posts'] ) ? (bool) $settings['preload_public_posts'] : true,
-			'preload_public_taxonomies'  => isset( $settings['preload_public_taxonomies'] ) ? (bool) $settings['preload_public_taxonomies'] : true,
+			'cache_analytics'           => isset( $settings['cache_analytics'] ) ? (bool) $settings['cache_analytics'] : true,
+			'analytics_sampling_rate'   => isset( $settings['analytics_sampling_rate'] ) ? (int) $settings['analytics_sampling_rate'] : 10,
+			'preload_homepage'          => isset( $settings['preload_homepage'] ) ? (bool) $settings['preload_homepage'] : true,
+			'preload_public_posts'      => isset( $settings['preload_public_posts'] ) ? (bool) $settings['preload_public_posts'] : true,
+			'preload_public_taxonomies' => isset( $settings['preload_public_taxonomies'] ) ? (bool) $settings['preload_public_taxonomies'] : true,
 		);
 		
 		// Clean up arrays (remove empty entries).
@@ -826,28 +826,34 @@ class Sync_Advanced_Cache {
 		}
 		
 		// Add the main menu item.
-		$wp_admin_bar->add_node( array(
-			'id'    => 'sync-cache',
-			'title' => __( 'SyncCache', 'sync-cache' ),
-			'href'  => admin_url( 'options-general.php?page=sync_cache_settings' ),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'id'    => 'sync-cache',
+				'title' => __( 'SyncCache', 'sync-cache' ),
+				'href'  => admin_url( 'options-general.php?page=sync_cache_settings' ),
+			) 
+		);
 		
 		// Add purge all cache.
-		$wp_admin_bar->add_node( array(
-			'parent' => 'sync-cache',
-			'id'     => 'sync-cache-purge-all',
-			'title'  => __( 'Purge All Cache', 'sync-cache' ),
-			'href'   => wp_nonce_url( admin_url( 'admin-post.php?action=sync_cache_purge' ), 'sync_cache_purge' ),
-		) );
+		$wp_admin_bar->add_node(
+			array(
+				'parent' => 'sync-cache',
+				'id'     => 'sync-cache-purge-all',
+				'title'  => __( 'Purge All Cache', 'sync-cache' ),
+				'href'   => wp_nonce_url( admin_url( 'admin-post.php?action=sync_cache_purge' ), 'sync_cache_purge' ),
+			) 
+		);
 		
 		// If viewing a singular post, add purge this page.
 		if ( is_singular() ) {
-			$wp_admin_bar->add_node( array(
-				'parent' => 'sync-cache',
-				'id'     => 'sync-cache-purge-page',
-				'title'  => __( 'Purge This Page', 'sync-cache' ),
-				'href'   => wp_nonce_url( admin_url( 'admin-post.php?action=sync_cache_purge&post_id=' . get_the_ID() ), 'sync_cache_purge' ),
-			) );
+			$wp_admin_bar->add_node(
+				array(
+					'parent' => 'sync-cache',
+					'id'     => 'sync-cache-purge-page',
+					'title'  => __( 'Purge This Page', 'sync-cache' ),
+					'href'   => wp_nonce_url( admin_url( 'admin-post.php?action=sync_cache_purge&post_id=' . get_the_ID() ), 'sync_cache_purge' ),
+				) 
+			);
 		}
 	}
 
@@ -895,12 +901,16 @@ class Sync_Advanced_Cache {
 		wp_enqueue_script( 'sync-cache-admin', plugin_dir_url( __FILE__ ) . 'assets/js/sync-admin.js', array( 'jquery' ), '1.0.0', true );
 		
 		// Add localization data.
-		wp_localize_script( 'sync-cache-admin', 'sync_cache', array(
-			'ajax_url'   => admin_url( 'admin-ajax.php' ),
-			'nonce'      => wp_create_nonce( 'sync_cache_ajax' ),
-			'purge_text' => __( 'Purging Cache...', 'sync-cache' ),
-			'done_text'  => __( 'Cache Purged!', 'sync-cache' ),
-		) );
+		wp_localize_script(
+			'sync-cache-admin',
+			'sync_cache',
+			array(
+				'ajax_url'   => admin_url( 'admin-ajax.php' ),
+				'nonce'      => wp_create_nonce( 'sync_cache_ajax' ),
+				'purge_text' => __( 'Purging Cache...', 'sync-cache' ),
+				'done_text'  => __( 'Cache Purged!', 'sync-cache' ),
+			) 
+		);
 	}
 
 	/**
@@ -1186,7 +1196,7 @@ class Sync_Advanced_Cache {
 		
 		// Also purge any language specific caches.
 		$lang_pattern = $cache_dir . '/lang-*/';
-		$lang_dirs = glob( $lang_pattern );
+		$lang_dirs    = glob( $lang_pattern );
 		if ( $lang_dirs ) {
 			foreach ( $lang_dirs as $lang_dir ) {
 				$lang_path = $lang_dir . '/' . $path;
@@ -1394,7 +1404,7 @@ class Sync_Advanced_Cache {
 			// Delete if expired.
 			if ( ( $now - $mtime ) > $lifetime ) {
 				if ( @unlink( $file ) ) {
-					$deleted_count++;
+					++$deleted_count;
 				}
 			}
 		}
@@ -1465,22 +1475,26 @@ class Sync_Advanced_Cache {
 		// Add public posts.
 		if ( ! empty( $this->options['preload_public_posts'] ) ) {
 			// Get latest public posts.
-			$posts = get_posts( array(
-				'post_type'      => 'post',
-				'post_status'    => 'publish',
-				'posts_per_page' => 10,
-			) );
+			$posts = get_posts(
+				array(
+					'post_type'      => 'post',
+					'post_status'    => 'publish',
+					'posts_per_page' => 10,
+				) 
+			);
 			
 			foreach ( $posts as $post ) {
 				$urls[] = get_permalink( $post->ID );
 			}
 			
 			// Get latest public pages.
-			$pages = get_posts( array(
-				'post_type'      => 'page',
-				'post_status'    => 'publish',
-				'posts_per_page' => 10,
-			) );
+			$pages = get_posts(
+				array(
+					'post_type'      => 'page',
+					'post_status'    => 'publish',
+					'posts_per_page' => 10,
+				) 
+			);
 			
 			foreach ( $pages as $page ) {
 				$urls[] = get_permalink( $page->ID );
@@ -1537,12 +1551,15 @@ class Sync_Advanced_Cache {
 			$count = 0;
 			foreach ( $urls as $url ) {
 				// Make a request to the URL.
-				$response = wp_remote_get( $url, array(
-					'timeout'     => 10,
-					'redirection' => 5,
-					'sslverify'   => false,
-					'user-agent'  => 'SyncCache Preloader',
-				) );
+				$response = wp_remote_get(
+					$url,
+					array(
+						'timeout'     => 10,
+						'redirection' => 5,
+						'sslverify'   => false,
+						'user-agent'  => 'SyncCache Preloader',
+					) 
+				);
 				
 				// Skip if error.
 				if ( is_wp_error( $response ) ) {
@@ -1554,7 +1571,7 @@ class Sync_Advanced_Cache {
 					continue;
 				}
 				
-				$count++;
+				++$count;
 			}
 			
 			// Log preload.

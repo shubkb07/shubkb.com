@@ -339,7 +339,7 @@ class Sync_Optimization {
 			}
 			
 			// Add separator.
-			$combined .= "/* " . $style->handle . " */\n";
+			$combined .= '/* ' . $style->handle . " */\n";
 			
 			// Add content.
 			$combined .= $content . "\n";
@@ -610,7 +610,7 @@ class Sync_Optimization {
 			}
 			
 			// Add separator.
-			$combined .= "/* " . $script->handle . " */\n";
+			$combined .= '/* ' . $script->handle . " */\n";
 			
 			// Add content.
 			$combined .= $content . ";\n";
@@ -808,33 +808,47 @@ class Sync_Optimization {
 		
 		// Get included extensions.
 		$extensions = isset( $this->options['cdn_includes'] ) ? $this->options['cdn_includes'] : array(
-			'.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg',
-			'.css', '.js', '.woff', '.woff2', '.ttf', '.eot',
+			'.jpg',
+			'.jpeg',
+			'.png',
+			'.gif',
+			'.webp',
+			'.svg',
+			'.css',
+			'.js',
+			'.woff',
+			'.woff2',
+			'.ttf',
+			'.eot',
 		);
 		
 		// Build the pattern.
 		$pattern = '/(https?:\/\/[^\/]+)?(\/[^"\']*?(' . implode( '|', array_map( 'preg_quote', $extensions ) ) . ')(\?[^"\']*)?)/i';
 		
 		// Replace URLs.
-		$content = preg_replace_callback( $pattern, function( $matches ) use ( $site_url, $cdn_url ) {
-			// Skip if it's already a CDN URL.
-			if ( strpos( $matches[0], $cdn_url ) !== false ) {
-				return $matches[0];
-			}
+		$content = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $site_url, $cdn_url ) {
+				// Skip if it's already a CDN URL.
+				if ( strpos( $matches[0], $cdn_url ) !== false ) {
+					return $matches[0];
+				}
 			
-			// If the URL is absolute without domain.
-			if ( isset( $matches[2] ) && strpos( $matches[2], '/' ) === 0 ) {
-				return $cdn_url . $matches[2];
-			}
+				// If the URL is absolute without domain.
+				if ( isset( $matches[2] ) && strpos( $matches[2], '/' ) === 0 ) {
+					return $cdn_url . $matches[2];
+				}
 			
-			// If the URL is relative.
-			if ( isset( $matches[0] ) && strpos( $matches[0], 'http' ) !== 0 ) {
-				return $cdn_url . '/' . ltrim( $matches[0], '/' );
-			}
+				// If the URL is relative.
+				if ( isset( $matches[0] ) && strpos( $matches[0], 'http' ) !== 0 ) {
+					return $cdn_url . '/' . ltrim( $matches[0], '/' );
+				}
 			
-			// If the URL is absolute with domain.
-			return str_replace( $site_url, $cdn_url, $matches[0] );
-		}, $content );
+				// If the URL is absolute with domain.
+				return str_replace( $site_url, $cdn_url, $matches[0] );
+			},
+			$content 
+		);
 		
 		return $content;
 	}

@@ -238,14 +238,33 @@ class Sync_Filesystem {
 	 * @param string $contents  File contents.
 	 * @return bool True on success, false on failure.
 	 */
-	public function put_contents( $file_path, $contents ) {
+	public function put_contents( $file_path, $contents, $bypass = false ) {
 		try {
 			$this->ensure_initialized();
-			
+
+			$special_files = array(
+				'sync_obj_cache_access' => WP_CONTENT_DIR . '/object-cache.php',
+				'sync_adv_cache_access' => WP_CONTENT_DIR . '/advanced-cache.php',
+				'sync_sunrise_access'   => WP_CONTENT_DIR . '/sunrise.php',
+				'sync_wp_config_access' => ABSPATH . 'wp-config.php',
+				'sync_htaccess_access'  => ABSPATH . '.htaccess',
+			);
+
+			if ( $bypass ) {
+				// Check if bypass path match it's path in special files.
+				$bypass_path = $special_files[ $bypass ];
+				if ( $bypass_path !== $file_path ) {
+					return false;
+				}
+				// else add the path to allowed paths by removing file name.
+				$this->allowed_paths[] = dirname( $bypass_path );
+			}
+
 			// Check if file path is allowed.
 			if ( ! $this->is_path_allowed( $file_path ) ) {
 				return false;
 			}
+
 			
 			// Create directory if it doesn't exist.
 			$dir_path = dirname( $file_path );
