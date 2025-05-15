@@ -113,7 +113,7 @@ class Sync_Settings {
 			return;
 		}
 
-		if ( ! $sync_filesystem->exists( WSYNC_PLUGIN_DIR . 'assets/template/load-settings-template.php' ) ) {
+		if ( ! $sync_filesystem->exists( WSYNC_PLUGIN_DIR . 'assets/template/load-settings.sync.template' ) ) {
 			// Throw Template Not Present Error, with Suggesting to Install Plugin Again.
 			throw new \Exception( 'Template file not found. Please install the plugin again.' );
 		}
@@ -127,10 +127,7 @@ class Sync_Settings {
 		$current_file_to_generate['CONSTANT'] = 'WSYNC_' . strtoupper( $current_file_to_generate['ACCEPT'] );
 
 		// Now Creating an Template File Data.
-		$template_file = $sync_filesystem->get_contents( WSYNC_PLUGIN_DIR . 'assets/template/load-settings-template.php' );
-
-		// Remove 'phpcs:disable' line and normalize empty comment lines and Remove consecutive empty comment lines, leaving just one.
-		$template_file = preg_replace( '/(\s*\n\s*\*\s*\n)\s*\*\s*\n/', '$1', preg_replace( '/\s*\n\s*\*\s*phpcs\:disable\s*\n/', "\n", $template_file ) );
+		$template_file = $sync_filesystem->get_contents( WSYNC_PLUGIN_DIR . 'assets/template/load-settings.sync.template' );
 
 		// Load Plugin Header.
 		$implementation_array = array_merge( get_plugin_data( WSYNC_LOAD_DIR . $current_file_to_generate['FILE'] ), $current_file_to_generate );
