@@ -132,12 +132,15 @@ class Sync_Settings {
 		// Now Creating an Template File Data.
 		$template_file = $sync_filesystem->get_contents( WSYNC_PLUGIN_DIR . 'assets/template/load-settings.sync.template' );
 
+		// Check if get_plugin_data() is available.
+		if ( ! function_exists( 'get_plugin_data' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
+
 		// Load Plugin Header.
 		$implementation_array = array_merge( get_plugin_data( WSYNC_LOAD_DIR . $current_file_to_generate['FILE'] ), $current_file_to_generate );
 
 		$implementation_array['Description'] = preg_replace( '/<cite>.*?<\/cite>/s', '', $implementation_array['Description'] );
-
-		error_log( 'Implementation Array: ' . print_r( $implementation_array, true ) );
 
 		// Interpolate the template file with the data.
 		$interpolated_content = $this->interpolate_array_to_text( $implementation_array, $template_file );
