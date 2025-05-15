@@ -82,17 +82,17 @@ class Sync_Settings {
 		// Files Array.
 		$files_array = array(
 			'advcache'  => array(
-				'PATH'   => WP_PLUGIN_DIR,
+				'PATH'   => WP_CONTENT_DIR,
 				'FILE'   => 'advanced-cache.php',
 				'ACCEPT' => 'adv_cache',
 			),
 			'objcache'  => array(
-				'PATH'   => WP_PLUGIN_DIR,
+				'PATH'   => WP_CONTENT_DIR,
 				'FILE'   => 'object-cache.php',
 				'ACCEPT' => 'obj_cache',
 			),
 			'sunrise'   => array(
-				'PATH'   => WP_PLUGIN_DIR,
+				'PATH'   => WP_CONTENT_DIR,
 				'FILE'   => 'sunrise.php',
 				'ACCEPT' => 'sunrise',
 			),
@@ -126,6 +126,9 @@ class Sync_Settings {
 		// Create Constant.
 		$current_file_to_generate['CONSTANT'] = 'WSYNC_' . strtoupper( $current_file_to_generate['ACCEPT'] );
 
+		// Location to load file.
+		$current_file_to_generate['LOAD'] = WSYNC_LOAD_DIR . $current_file_to_generate['FILE'];
+
 		// Now Creating an Template File Data.
 		$template_file = $sync_filesystem->get_contents( WSYNC_PLUGIN_DIR . 'assets/template/load-settings.sync.template' );
 
@@ -133,6 +136,8 @@ class Sync_Settings {
 		$implementation_array = array_merge( get_plugin_data( WSYNC_LOAD_DIR . $current_file_to_generate['FILE'] ), $current_file_to_generate );
 
 		$implementation_array['Description'] = preg_replace( '/<cite>.*?<\/cite>/s', '', $implementation_array['Description'] );
+
+		error_log( 'Implementation Array: ' . print_r( $implementation_array, true ) );
 
 		// Interpolate the template file with the data.
 		$interpolated_content = $this->interpolate_array_to_text( $implementation_array, $template_file );

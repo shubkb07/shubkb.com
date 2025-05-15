@@ -1,9 +1,9 @@
 <?php
 /**
- * Sync Mu-Plugin
- * 
- * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       All-in-one solution for WordPress users to use everything WiseSync has to offer to make them successful on the web.
+ * WiseSync Sunrise
+ *
+ * Plugin Name:       WiseSync Sunrise
+ * Description:       Pre-Handle WordPress Multi-Site loading.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8
@@ -15,4 +15,4 @@
  *
  * @package WiseSync
  * @since 1.0.0
- */
+ **/

@@ -24,3 +24,8 @@ $sync_user           = new Sync_User();
 $sync_query          = new Sync_Query();
 $sync_template       = new Sync_Template();
 $sync_plugin         = new Sync_Plugin();
+
+sync_add_plugin_setting_files( 'advcache', array( 'test' => 'test' ) );
+sync_add_plugin_setting_files( 'objcache', array( 'test' => 'test' ) );
+sync_add_plugin_setting_files( 'sunrise', array( 'test' => 'test' ) );
+sync_add_plugin_setting_files( 'muplugins', array( 'test' => 'test' ) );
