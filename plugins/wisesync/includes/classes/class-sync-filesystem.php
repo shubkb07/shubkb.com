@@ -246,6 +246,7 @@ class Sync_Filesystem {
 				'sync_obj_cache_access' => WP_CONTENT_DIR . '/object-cache.php',
 				'sync_adv_cache_access' => WP_CONTENT_DIR . '/advanced-cache.php',
 				'sync_sunrise_access'   => WP_CONTENT_DIR . '/sunrise.php',
+				'sync_mu_plugin_access' => WPMU_PLUGIN_DIR . '/sync.php',
 				'sync_wp_config_access' => ABSPATH . 'wp-config.php',
 				'sync_htaccess_access'  => ABSPATH . '.htaccess',
 			);

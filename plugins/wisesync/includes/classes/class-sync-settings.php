@@ -66,6 +66,120 @@ class Sync_Settings {
 	}
 
 	/**
+	 * Generate MU-Plugins and Drop-ins.
+	 *
+	 * @param string $file_to_generate The file to generate.
+	 * @param array  $data             The data to interpolate into the file.
+	 *
+	 * @return void
+	 * 
+	 * @throws \Exception If the template file is not found.
+	 */
+	public function add_plugin_setting_files( $file_to_generate, $data = array() ) {
+
+		global $sync_filesystem;
+
+		// Files Array.
+		$files_array = array(
+			'advcache'  => array(
+				'PATH'   => WP_PLUGIN_DIR,
+				'FILE'   => 'advanced-cache.php',
+				'ACCEPT' => 'adv_cache',
+			),
+			'objcache'  => array(
+				'PATH'   => WP_PLUGIN_DIR,
+				'FILE'   => 'object-cache.php',
+				'ACCEPT' => 'obj_cache',
+			),
+			'sunrise'   => array(
+				'PATH'   => WP_PLUGIN_DIR,
+				'FILE'   => 'sunrise.php',
+				'ACCEPT' => 'sunrise',
+			),
+			'muplugins' => array(
+				'PATH'   => WPMU_PLUGIN_DIR,
+				'FILE'   => 'sync.php',
+				'ACCEPT' => 'mu_plugin',
+			),
+		);
+
+		// $file_to_generate is not string, empty or not exists in $files_array, then return.
+		if ( ! is_string( $file_to_generate ) || empty( $file_to_generate ) || ! array_key_exists( $file_to_generate, $files_array ) ) {
+			return;
+		}
+
+		// If data is not array, then return.
+		if ( ! is_array( $data ) ) {
+			return;
+		}
+
+		if ( ! $sync_filesystem->exists( WSYNC_PLUGIN_DIR . 'assets/template/load-settings-template.php' ) ) {
+			// Throw Template Not Present Error, with Suggesting to Install Plugin Again.
+			throw new \Exception( 'Template file not found. Please install the plugin again.' );
+		}
+
+		$current_file_to_generate = $files_array[ $file_to_generate ];
+
+		// Convert data to JSON.
+		$current_file_to_generate['FILE_DATA'] = $data;
+
+		// Create Constant.
+		$current_file_to_generate['CONSTANT'] = 'WSYNC_' . strtoupper( $current_file_to_generate['ACCEPT'] );
+
+		// Now Creating an Template File Data.
+		$template_file = $sync_filesystem->get_contents( WSYNC_PLUGIN_DIR . 'assets/template/load-settings-template.php' );
+
+		// Remove 'phpcs:disable' line and normalize empty comment lines and Remove consecutive empty comment lines, leaving just one.
+		$template_file = preg_replace( '/(\s*\n\s*\*\s*\n)\s*\*\s*\n/', '$1', preg_replace( '/\s*\n\s*\*\s*phpcs\:disable\s*\n/', "\n", $template_file ) );
+
+		// Load Plugin Header.
+		$implementation_array = array_merge( get_plugin_data( WSYNC_LOAD_DIR . $current_file_to_generate['FILE'] ), $current_file_to_generate );
+
+		$implementation_array['Description'] = preg_replace( '/<cite>.*?<\/cite>/s', '', $implementation_array['Description'] );
+
+		// Interpolate the template file with the data.
+		$interpolated_content = $this->interpolate_array_to_text( $implementation_array, $template_file );
+
+		$sync_filesystem->put_contents( $current_file_to_generate['PATH'] . '/' . $current_file_to_generate['FILE'], $interpolated_content, 'sync_' . $current_file_to_generate['ACCEPT'] . '_access' );
+	}
+
+	/**
+	 * Replaces all occurrences of {{ARRAY_KEY}} in the text with corresponding values from the array.
+	 *
+	 * @param array  $interpolation_array The array containing keys and values for interpolation.
+	 * @param string $text_to_interpolate The text containing placeholders in {{KEY}} format.
+	 *
+	 * @return string The interpolated text with all placeholders replaced
+	 */
+	private function interpolate_array_to_text( $interpolation_array, $text_to_interpolate ) {
+		// Validate inputs.
+		if ( ! is_array( $interpolation_array ) || ! is_string( $text_to_interpolate ) ) {
+			return $text_to_interpolate;
+		}
+	
+		// Process each key in the interpolation array.
+		foreach ( $interpolation_array as $key => $value ) {
+			// Convert any non-string values to strings.
+			if ( ! is_string( $value ) ) {
+				// Handle arrays and objects by converting to JSON.
+				if ( is_array( $value ) || is_object( $value ) ) {
+					$value = wp_json_encode( $value );
+				} else {
+					$value = (string) $value;
+				}
+			}
+		
+			// Create the placeholder pattern with the current key.
+			$placeholder = '{{' . $key . '}}';
+		
+			// Replace all occurrences of the placeholder with its value.
+			$text_to_interpolate = str_replace( $placeholder, $value, $text_to_interpolate );
+		}
+	
+		return $text_to_interpolate;
+	}
+
+	/**
 	 * Core file editing functionality for both wp-config.php and .htaccess
 	 *
 	 * @param string $file_path     Path to the file to edit.
@@ -463,7 +577,7 @@ class Sync_Settings {
 	 */
 	public function init_admin_notices() {
 		$admin_notice_callbacks = array();
-		$admin_notice_callbacks = apply_filters( 'sync_add_dmin_notice', $admin_notice_callbacks );
+		$admin_notice_callbacks = apply_filters( 'sync_add_admin_notice', $admin_notice_callbacks );
 		foreach ( $admin_notice_callbacks as $admin_notice_callback ) {
 			call_user_func( $admin_notice_callback );
 		}

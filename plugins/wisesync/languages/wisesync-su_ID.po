@@ -108,19 +108,19 @@ msgid "Mu-Plugin Load Error"
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:879
+#: includes/classes/class-sync-settings.php:993
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:893
+#: includes/classes/class-sync-settings.php:1007
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:1307
-#: includes/classes/class-sync-settings.php:1364
+#: includes/classes/class-sync-settings.php:1421
+#: includes/classes/class-sync-settings.php:1478
 msgid "Invalid settings array."
 msgstr ""
 
