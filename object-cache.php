@@ -1,14 +1,14 @@
 <?php
 /**
- * Plugin Name: WiseSync Advanced Object Cache
+ * Plugin Name: WiseSync Object Cache
  * Description: Provides a persistent object cache using Memcached or Redis, with safe fallbacks to the built-in WP_Object_Cache. Dynamically selects backend.
- * Version: 1.1.0
- * Plugin URI: https://shubkb.com.
+ * Version: 1.0.0
+ * Plugin URI: https://shubkb.com
  * Author: Shubham Kumar Bansal <shub@shubkb.com>
- * Author URI: https://shubkb.com.
+ * Author URI: https://shubkb.com
  * License: Apache License 2.0
- * License URI: https://www.apache.org/licenses/LICENSE-2.0.
- * 
+ * License URI: https://www.apache.org/licenses/LICENSE-2.0
+ *
  * phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
  * phpcs:disable Universal.Files.SeparateFunctionsFromOO.Mixed
  * phpcs:disable WordPress.WP.I18n.MissingArgDomain

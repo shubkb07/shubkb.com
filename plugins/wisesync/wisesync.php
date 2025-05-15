@@ -31,6 +31,7 @@ define( 'WSYNC_PLUGIN_NAME', 'WiseSync' );
 define( 'WSYNC_PLUGIN_SLUG', 'wisesync' );
 define( 'WSYNC_PLUGIN_TEXTDOMAIN', 'wisesync' );
 define( 'WSYNC_PLUGIN_PREFIX', 'wisesync_' );
+define( 'WSYNC_LOAD_DIR', WSYNC_PLUGIN_DIR . 'includes/load/' );
 define( 'WSYNC_PLUGIN_ASSETS_URL', WSYNC_PLUGIN_URL . 'assets/' );
 define( 'WSYNC_PLUGIN_ASSETS_DIR', WSYNC_PLUGIN_DIR . 'assets/' );
 define( 'WSYNC_PLUGIN_JS_URL', WSYNC_PLUGIN_ASSETS_URL . 'js/' );

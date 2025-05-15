@@ -1,14 +1,17 @@
 <?php
 /**
- * SyncCache - Advanced WordPress Caching System
+ * Plugin Name: WiseSync Advanced Cache
+ * Description: A smart caching plugin for WordPress, designed to optimize performance and enhance user experience. It intelligently caches pages, handles cache purging, and provides advanced features for efficient content delivery.
+ * Version: 1.0.0
+ * Plugin URI: https://shubkb.com
+ * Author: Shubham Kumar Bansal <shub@shubkb.com>
+ * Author URI: https://shubkb.com
+ * License: Apache License 2.0
+ * License URI: https://www.apache.org/licenses/LICENSE-2.0
  *
- * This file serves as the entry point for the SyncCache caching system.
- * It's designed to be placed in wp-content/advanced-cache.php and will handle
- * full page caching with support for device detection, user roles, and more.
- *
- * @package SyncCache
- * @version 1.0.0
- */
+ * @package WiseSync
+ * @since 1.0.0
+ **/
 
 // Prevent direct access.
 if ( ! defined( 'ABSPATH' ) ) {

@@ -15,6 +15,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Generate MU-Plugins and Drop-ins.
+ *
+ * @param string $file_to_generate The file to generate.
+ * @param array  $data             The data to interpolate into the file.
+ *
+ * @return void
+ * 
+ * @throws \Exception If the template file is not found.
+ */
+function sync_add_plugin_setting_files( $file_to_generate, $data = array() ) {
+	global $sync_settings;
+
+	$sync_settings->add_plugin_setting_files( $file_to_generate, $data );
+}
+
+/**
  * Edit wp-config.php file to add or remove code blocks between sync markers
  *
  * @param string $code   The code block to add or remove.
