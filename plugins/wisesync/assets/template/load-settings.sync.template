@@ -30,7 +30,7 @@ define( '{{CONSTANT}}_PRESENT', true );
 $sync_{{ACCEPT}}_data = '{{FILE_DATA}}';
 
 // Path to Load File.
-$sync_{{ACCEPT}}_path = '{{PATH}}/{{FILE}}';
+$sync_{{ACCEPT}}_path = '{{LOAD}}';
 
 // Load Main Mu-Plugin File.
 if ( file_exists( $sync_{{ACCEPT}}_path ) ) {

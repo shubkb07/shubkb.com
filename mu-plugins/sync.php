@@ -27,10 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'WSYNC_MU_PLUGIN_PRESENT', true );
 
-$sync_mu_plugin_data = '{"pikachu":"electric","charizard":"fire","bulbasaur":"grass","squirtle":"water","jigglypuff":"normal","meowth":"normal","eevee":"normal","ditto":"normal","psyduck":"water","caterpie":"bug","butterfree":"bug","beedrill":"bug","weedle":"bug","caterpie2":{"butterfree2":"bug","beedrill2":"bug","weedle2":"bug"},"caterpie3":{"butterfree3":"bug","beedrill3":"bug","weedle3":"bug"},"caterpie4":{"butterfree4":"bug","beedrill4":"bug","weedle4":"bug"},"caterpie5":{"butterfree5":"bug","beedrill5":"bug","weedle5":"bug"}}';
+$sync_mu_plugin_data = '{"test":"test"}';
 
 // Path to Load File.
-$sync_mu_plugin_path = '/mnt/windows-data/Users/shub/shubham/code/wp/sync/app/public/wp-content/mu-plugins/sync.php';
+$sync_mu_plugin_path = '/mnt/windows-data/Users/shub/shubham/code/wp/sync/app/public/wp-content/plugins/wisesync/includes/load/sync.php';
 
 // Load Main Mu-Plugin File.
 if ( file_exists( $sync_mu_plugin_path ) ) {
