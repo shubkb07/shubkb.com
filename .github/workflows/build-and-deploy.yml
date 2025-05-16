@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - '**'
-    
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -13,10 +13,7 @@ jobs:
   build_and_deploy:
     name: 🔧 Build & 🚀 Deploy
     runs-on: ubuntu-latest
-    
-    # Skip this workflow on build branches to prevent infinite loops
     if: ${{ !endsWith(github.ref, '-build') }}
-    
     outputs:
       commit_message: ${{ steps.last_commit.outputs.message }}
 
@@ -84,47 +81,38 @@ jobs:
           echo "📃 Changed files:"
           cat changed_files.txt
 
-          # Check for dependency changes
           grep -q "package-lock.json" changed_files.txt && echo "npm_deps_changed=true" >> $GITHUB_OUTPUT || echo "npm_deps_changed=false" >> $GITHUB_OUTPUT
           grep -q "composer.lock" changed_files.txt && echo "composer_deps_changed=true" >> $GITHUB_OUTPUT || echo "composer_deps_changed=false" >> $GITHUB_OUTPUT
-          
-          # Check if build is required for special plugins/themes
+
           if grep -qE "plugins/wisesync/|themes/papersync/" changed_files.txt; then
             echo "build_required=true" >> $GITHUB_OUTPUT
           else
             echo "build_required=false" >> $GITHUB_OUTPUT
           fi
-          
-          # Check for wisesync and papersync changes specifically
+
           if grep -q "^plugins/wisesync/" changed_files.txt; then
             echo "wisesync_changed=true" >> $GITHUB_OUTPUT
           else
             echo "wisesync_changed=false" >> $GITHUB_OUTPUT
           fi
-          
+
           if grep -q "^themes/papersync/" changed_files.txt; then
             echo "papersync_changed=true" >> $GITHUB_OUTPUT
           else
             echo "papersync_changed=false" >> $GITHUB_OUTPUT
           fi
-          
-          # Find all changed plugins
+
           if grep -qE "^plugins/" changed_files.txt; then
             echo "plugins_changed=true" >> $GITHUB_OUTPUT
             grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_plugins.txt
-            echo "Changed plugins:"
-            cat changed_plugins.txt
           else
             echo "plugins_changed=false" >> $GITHUB_OUTPUT
             touch changed_plugins.txt
           fi
-          
-          # Find all changed themes
+
           if grep -qE "^themes/" changed_files.txt; then
             echo "themes_changed=true" >> $GITHUB_OUTPUT
             grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort | uniq > changed_themes.txt
-            echo "Changed themes:"
-            cat changed_themes.txt
           else
             echo "themes_changed=false" >> $GITHUB_OUTPUT
             touch changed_themes.txt
@@ -220,7 +208,6 @@ jobs:
         if: steps.changes.outputs.build_required == 'true'
         run: |
           echo "🚚 Deploying special plugins with build requirements..."
-          echo "  • Updating plugin: wisesync (with build)"
           rm -rf deploy/plugins/wisesync
           mkdir -p deploy/plugins
           cp -r plugins/wisesync deploy/plugins/
@@ -231,7 +218,7 @@ jobs:
           echo "🚚 Deploying updated plugins..."
           while IFS= read -r plugin; do
             if [ -n "$plugin" ] && [ -d "plugins/$plugin" ]; then
-              echo "  • Updating plugin: $plugin"
+              echo "  • $plugin"
               rm -rf deploy/plugins/$plugin
               mkdir -p deploy/plugins
               cp -r plugins/$plugin deploy/plugins/
@@ -242,7 +229,6 @@ jobs:
         if: steps.changes.outputs.build_required == 'true'
         run: |
           echo "🚚 Deploying special themes with build requirements..."
-          echo "  • Updating theme: papersync (with build)"
           rm -rf deploy/themes/papersync
           mkdir -p deploy/themes
           cp -r themes/papersync deploy/themes/
@@ -253,7 +239,7 @@ jobs:
           echo "🚚 Deploying updated themes..."
           while IFS= read -r theme; do
             if [ -n "$theme" ] && [ -d "themes/$theme" ]; then
-              echo "  • Updating theme: $theme"
+              echo "  • $theme"
               rm -rf deploy/themes/$theme
               mkdir -p deploy/themes
               cp -r themes/$theme deploy/themes/
@@ -268,7 +254,6 @@ jobs:
           git push origin HEAD:$TARGET_BRANCH
           echo "🚀 All done! Site deployed to $TARGET_BRANCH 🎉"
 
-      # New steps for additional repository pushes when on master branch with wisesync/papersync changes
       - name: 🔄 Checkout wisesync repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
         uses: actions/checkout@v3
@@ -276,14 +261,12 @@ jobs:
           repository: shubkb07/wisesync
           path: wisesync_repo
           token: ${{ secrets.GH_PAT }}
-          
+
       - name: 🔄 Update wisesync repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
         run: |
           echo "🛫 Updating wisesync in dedicated repo..."
-          # Clear the directory content but keep .git folder
           find wisesync_repo -mindepth 1 -not -path "wisesync_repo/.git*" -delete
-          # Copy the latest content
           cp -r plugins/wisesync/* wisesync_repo/
           cd wisesync_repo
           git config user.name "Shubham Kumar Bansal"
@@ -291,7 +274,6 @@ jobs:
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for wisesync"
           git push
-          cd ..
           echo "✅ Pushed wisesync to dedicated repo"
 
       - name: 🔄 Checkout papersync repo
@@ -301,14 +283,12 @@ jobs:
           repository: shubkb07/papersync
           path: papersync_repo
           token: ${{ secrets.GH_PAT }}
-          
+
       - name: 🔄 Update papersync repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
         run: |
           echo "🛫 Updating papersync in dedicated repo..."
-          # Clear the directory content but keep .git folder
           find papersync_repo -mindepth 1 -not -path "papersync_repo/.git*" -delete
-          # Copy the latest content
           cp -r themes/papersync/* papersync_repo/
           cd papersync_repo
           git config user.name "Shubham Kumar Bansal"
@@ -316,7 +296,6 @@ jobs:
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for papersync"
           git push
-          cd ..
           echo "✅ Pushed papersync to dedicated repo"
 
       - name: 🔄 Checkout wordpress-sync repo
@@ -326,49 +305,36 @@ jobs:
           repository: shubkb07/wordpress-sync
           path: wordpress_sync_repo
           token: ${{ secrets.GH_PAT }}
-          
+
       - name: 🔄 Update wordpress-sync repo
         if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
         run: |
           echo "🛫 Updating wordpress-sync repo..."
           cd wordpress_sync_repo
-          
-          if [ "${{ steps.changes.outputs.wisesync_changed }}" == "true" ]; then
-            echo "Adding/updating wisesync plugin..."
+          if [[ ${{ steps.changes.outputs.wisesync_changed }} == "true" ]]; then
             mkdir -p plugins
             rm -rf plugins/wisesync
             cp -r ../plugins/wisesync plugins/
           fi
-          
-          if [ "${{ steps.changes.outputs.papersync_changed }}" == "true" ]; then
-            echo "Adding/updating papersync theme..."
+          if [[ ${{ steps.changes.outputs.papersync_changed }} == "true" ]]; then
             mkdir -p themes
             rm -rf themes/papersync
             cp -r ../themes/papersync themes/
           fi
-
-          echo "Syncing other changes to wordpress-sync repo..."
           rm -rf CODE_OF_CONDUCT.md LICENSE.md README.md CONTRIBUTING.md SECURITY.md SUPPORT.md
-          # Copy documentation files from the main repo
           cp -f ../CODE_OF_CONDUCT.md ../LICENSE.md ../README.md ../CONTRIBUTING.md ../SECURITY.md ../SUPPORT.md ./
-
-          echo "📦 Preparing wordpress-sync repo for deployment..."
-          
           git config user.name "Shubham Kumar Bansal"
           git config user.email "shub@shubkb.com"
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes to commit for wordpress-sync"
           git push
-          cd ..
           echo "✅ Pushed to wordpress-sync repo"
 
-  # New job for release processing
   process_release:
     name: 📦 Process Release
     runs-on: ubuntu-latest
     needs: build_and_deploy
     if: ${{ startsWith(needs.build_and_deploy.outputs.commit_message, 'Release:') }}
-    
     outputs:
       version: ${{ steps.parse_release.outputs.version }}
       release_type: ${{ steps.parse_release.outputs.release_type }}
@@ -377,124 +343,89 @@ jobs:
       wisesync_desc: ${{ steps.parse_release.outputs.wisesync_desc }}
       papersync_desc: ${{ steps.parse_release.outputs.papersync_desc }}
       is_valid: ${{ steps.parse_release.outputs.is_valid }}
-    
+
     steps:
       - name: 📥 Checkout the Repo
         uses: actions/checkout@v3
-      
+
       - name: 💬 Get Commit Message
         id: get_commit_message
         run: |
-          # Get complete commit message with all lines
-          commit_message=$(git log -1 --pretty=%B)
+          full_msg=$(git log -1 --pretty=format:%B)
           echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-          echo "$commit_message" >> $GITHUB_OUTPUT
+          echo "$full_msg" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-      
+
       - name: 🔍 Parse Release Information
         id: parse_release
+        shell: bash
         run: |
-          # Extract complete commit message
-          commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
-          echo "🔎 Analyzing commit message for release info..."
+          set -euo pipefail
+
+          # 1) Read the full commit message
+          commit_message=$(git log -1 --pretty=format:%B)
+          echo "🔎 Analyzing commit message…"
           echo "$commit_message"
-          
-          # Check if it's a release commit 
-          if [[ ! "$commit_message" =~ ^Release:.*$ ]]; then
-            echo "❌ Not a release commit"
-            echo "is_valid=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Split the commit message into lines
-          readarray -t message_lines <<< "$commit_message"
-          echo "Number of lines in commit message: ${#message_lines[@]}"
-          
-          # Extract version from the first line
-          first_line="${message_lines[0]}"
-          echo "First line: $first_line"
-          
-          # Format should be "Release: VERSION"
-          if [[ "$first_line" =~ ^Release:\ +([v]?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?)$ ]]; then
+
+          # 2) Extract first line and validate "Release: X.Y.Z"
+          version_line=$(echo "$commit_message" | sed -n '1p')
+          if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
-            echo "Found version in first line: $version"
-            
-            # Add 'v' prefix if not present
-            if [[ ! "$version" =~ ^v ]]; then
+            if [[ $version != v* ]]; then
               version="v$version"
-              echo "Added 'v' prefix to version: $version"
             fi
           else
             echo "❌ First line must be exactly 'Release: VERSION'"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
-          # The second line should contain all quoted parameters
-          if [ ${#message_lines[@]} -lt 2 ]; then
-            echo "❌ Missing second line with parameters"
+
+          # 3) Extract second line (all quoted parameters)
+          parameters_line=$(echo "$commit_message" | sed -n '2p')
+          if [[ -z $parameters_line ]]; then
+            echo "❌ Missing second line with quoted parameters"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
-          # Extract quoted parameters from the second line
-          second_line="${message_lines[1]}"
-          echo "Second line: $second_line"
-          
-          # Extract all quoted strings
+
+          # 4) Pull out each quoted component
           components=()
-          line_to_parse="$second_line"
-          
-          while [[ "$line_to_parse" =~ \"([^\"]*)\" ]]; do
-            component="${BASH_REMATCH[1]}"
-            components+=("$component")
-            # Remove the matched part and continue
-            line_to_parse="${line_to_parse#*\"$component\"}"
+          while [[ $parameters_line =~ \"([^\"]*)\" ]]; do
+            components+=("${BASH_REMATCH[1]}")
+            parameters_line=${parameters_line#*\"${BASH_REMATCH[1]}\"}
           done
-          
-          echo "Found ${#components[@]} quoted components"
-          
-          # We need exactly 5 components: release_type, wisesync_title, papersync_title, wisesync_desc, papersync_desc
-          if [ ${#components[@]} -lt 5 ]; then
-            echo "❌ Invalid format: Expected at least 5 quoted components, found ${#components[@]}"
-            for i in "${!components[@]}"; do
-              echo "Component $i: ${components[$i]}"
-            done
+
+          # 5) We need exactly 5 parts
+          if [[ ${#components[@]} -lt 5 ]]; then
+            echo "❌ Expected 5 components, found ${#components[@]}"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
-          # Extract the components
+
+          # 6) Assign and validate
           release_type="${components[0]}"
           wisesync_title="${components[1]}"
           papersync_title="${components[2]}"
           wisesync_desc="${components[3]}"
           papersync_desc="${components[4]}"
-          
-          # Validate release type
-          if [[ ! "$release_type" =~ ^(r|R|pr|PR)$ ]]; then
+
+          if [[ ! $release_type =~ ^(r|R|pr|PR)$ ]]; then
             echo "❌ Invalid release type: $release_type"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
-          # All validations passed
+
+          # 7) Emit outputs
           echo "✅ Valid release format detected!"
-          echo "🏷️ Version: $version"
-          echo "📝 Release Type: $release_type"
-          echo "🔌 WiseSync Title: $wisesync_title"
-          echo "🎨 PaperSync Title: $papersync_title"
-          
-          # Set outputs
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "release_type=$release_type" >> $GITHUB_OUTPUT
           echo "wisesync_title=$wisesync_title" >> $GITHUB_OUTPUT
           echo "papersync_title=$papersync_title" >> $GITHUB_OUTPUT
           echo "wisesync_desc<<EOF" >> $GITHUB_OUTPUT
-          echo "$wisesync_desc" >> $GITHUB_OUTPUT
+          echo "$wisesync_desc"
           echo "EOF" >> $GITHUB_OUTPUT
           echo "papersync_desc<<EOF" >> $GITHUB_OUTPUT
-          echo "$papersync_desc" >> $GITHUB_OUTPUT
+          echo "$papersync_desc"
           echo "EOF" >> $GITHUB_OUTPUT
           echo "is_valid=true" >> $GITHUB_OUTPUT
 
@@ -503,62 +434,62 @@ jobs:
     runs-on: ubuntu-latest
     needs: process_release
     if: ${{ needs.process_release.outputs.is_valid == 'true' }}
-    
+
     steps:
       - name: 📥 Checkout Main Repo (master-build branch)
         uses: actions/checkout@v3
         with:
           ref: master-build
           path: main_repo
-      
+
       - name: 📥 Checkout WordPress Sync Repo
         uses: actions/checkout@v3
         with:
           repository: shubkb07/wordpress-sync
           token: ${{ secrets.GH_PAT }}
           path: wordpress_sync_repo
-      
+
       - name: 📥 Checkout WiseSync Repo
         uses: actions/checkout@v3
         with:
           repository: shubkb07/wisesync
           token: ${{ secrets.GH_PAT }}
           path: wisesync_repo
-      
+
       - name: 📥 Checkout PaperSync Repo
         uses: actions/checkout@v3
         with:
           repository: shubkb07/papersync
           token: ${{ secrets.GH_PAT }}
           path: papersync_repo
-      
+
       - name: 🏷️ Create Release for Main Repo
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.process_release.outputs.version }}
-          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}"
+          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}”"
           body: |
             ${{ needs.process_release.outputs.wisesync_desc }}
-            
+
             ${{ needs.process_release.outputs.papersync_desc }}
           prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
           generate_release_notes: false
           token: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: 🏷️ Create Release for WordPress Sync Repo
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.process_release.outputs.version }}
-          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}"
+          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}”"
           body: |
             ${{ needs.process_release.outputs.wisesync_desc }}
-            
+
             ${{ needs.process_release.outputs.papersync_desc }}
           prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
           generate_release_notes: false
           token: ${{ secrets.GH_PAT }}
           repository: shubkb07/wordpress-sync
-      
+
       - name: 🏷️ Create Release for WiseSync Repo
         uses: softprops/action-gh-release@v2
         with:
@@ -569,7 +500,7 @@ jobs:
           generate_release_notes: false
           token: ${{ secrets.GH_PAT }}
           repository: shubkb07/wisesync
-      
+
       - name: 🏷️ Create Release for PaperSync Repo
         uses: softprops/action-gh-release@v2
         with:
