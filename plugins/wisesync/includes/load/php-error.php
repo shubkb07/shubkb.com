@@ -1,9 +1,9 @@
 <?php
 /**
- * Sync Mu-Plugin
+ * PHP Error Handler
  * 
- * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       WiseSync Mu Plugin Handler, for Updates, and checks.
+ * Plugin Name:       WiseSync PHP Error Handler
+ * Description:       Handles PHP errors in WiseSync plugin.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8

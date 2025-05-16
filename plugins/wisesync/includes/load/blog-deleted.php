@@ -1,9 +1,9 @@
 <?php
 /**
- * Sync Mu-Plugin
+ * Blog Deleted Handler
  * 
- * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       WiseSync Mu Plugin Handler, for Updates, and checks.
+ * Plugin Name:       WiseSync Blog Deleted Handler
+ * Description:       Handles deleted blog states in WiseSync plugin.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8

@@ -26,13 +26,15 @@ class Sync_Plugin {
 	 * @return void
 	 */
 	public function show_admin_notice_mu_plugin() {
+		global $sync_filesystem;
+
 		$items = array();
 
 		// 1. Check your wp-config.php path.
 		$items[] = __( 'Please verify that the path to the MU-Plugin load file is correct in your <code>wp-config.php</code>.', 'wisesync' );
 
 		// 2. Edit the sync.php file in the right folder.
-		if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+		if ( $sync_filesystem->is_vip_site() ) {
 			$items[] = sprintf(
 				/* translators: %1$s: filename, %2$s: folder name */
 				__( 'Edit %1$s inside your %2$s folder.', 'wisesync' ),

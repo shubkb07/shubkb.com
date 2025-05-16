@@ -1,9 +1,9 @@
 <?php
 /**
- * Sync Mu-Plugin
+ * Maintenance Mode Handler
  * 
- * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       WiseSync Mu Plugin Handler, for Updates, and checks.
+ * Plugin Name:       WiseSync Maintenance Mode
+ * Description:       Handles maintenance mode for WordPress sites using WiseSync.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8

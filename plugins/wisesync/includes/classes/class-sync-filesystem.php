@@ -59,6 +59,24 @@ class Sync_Filesystem {
 	}
 
 	/**
+	 * Is VIP.
+	 *
+	 * @return bool is WPVIP or not.
+	 */
+	public function is_vip_site() {
+		return defined( 'VIP_GO_APP_ENVIRONMENT' );
+	}
+
+	/**
+	 * Is VIP in Local.
+	 *
+	 * @return bool is WPVIP or not.
+	 */
+	public function is_vip_site_local() {
+		return $this->is_vip_site() && 'local' === VIP_GO_APP_ENVIRONMENT;
+	}
+
+	/**
 	 * Initialize the WordPress filesystem.
 	 *
 	 * @return bool True if filesystem is initialized successfully, false otherwise.
@@ -70,7 +88,7 @@ class Sync_Filesystem {
 		}
 
 		// Initialize the WordPress filesystem.
-		if ( ! WP_Filesystem() ) {
+		if ( ! \WP_Filesystem() ) {
 			return false;
 		}
 
@@ -164,7 +182,7 @@ class Sync_Filesystem {
 			}
 			
 			// In VIP environment, we can't create directories.
-			if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+			if ( $this->is_vip_site() ) {
 				return $this->wp_filesystem->is_dir( $dir_path );
 			}
 			
@@ -243,12 +261,24 @@ class Sync_Filesystem {
 			$this->ensure_initialized();
 
 			$special_files = array(
-				'sync_obj_cache_access' => WP_CONTENT_DIR . '/object-cache.php',
-				'sync_adv_cache_access' => WP_CONTENT_DIR . '/advanced-cache.php',
-				'sync_sunrise_access'   => WP_CONTENT_DIR . '/sunrise.php',
-				'sync_mu_plugin_access' => WPMU_PLUGIN_DIR . '/sync.php',
-				'sync_wp_config_access' => ABSPATH . 'wp-config.php',
-				'sync_htaccess_access'  => ABSPATH . '.htaccess',
+				// Special Plugin Locations.
+				'sync_adv_cache_access'           => WP_CONTENT_DIR . '/advanced-cache.php',
+				'sync_blog_deleted_access'        => WP_CONTENT_DIR . '/blog-deleted.php',
+				'sync_blog_inactive_access'       => WP_CONTENT_DIR . '/blog-inactive.php',
+				'sync_blog_suspended_access'      => WP_CONTENT_DIR . '/blog-suspended.php',
+				'sync_db_access'                  => WP_CONTENT_DIR . '/db.php',
+				'sync_db_error_access'            => WP_CONTENT_DIR . '/db-error.php',
+				'sync_fatal_error_handler_access' => WP_CONTENT_DIR . '/fatal-error-handler.php',
+				'sync_install_access'             => WP_CONTENT_DIR . '/install.php',
+				'sync_maintenance_access'         => WP_CONTENT_DIR . '/maintenance.php',
+				'sync_mu_plugin_access'           => WPMU_PLUGIN_DIR . '/sync.php',
+				'sync_obj_cache_access'           => WP_CONTENT_DIR . '/object-cache.php',
+				'sync_php_error_access'           => WP_CONTENT_DIR . '/php-error.php',
+				'sync_sunrise_access'             => WP_CONTENT_DIR . '/sunrise.php',
+
+				// Config Files Location.
+				'sync_htaccess_access'            => ABSPATH . '.htaccess',
+				'sync_wp_config_access'           => ABSPATH . 'wp-config.php',
 			);
 
 			if ( $bypass ) {
@@ -296,7 +326,7 @@ class Sync_Filesystem {
 			}
 			
 			// In VIP environment, we can't delete files.
-			if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+			if ( $this->is_vip_site() ) {
 				return false;
 			}
 			
@@ -327,7 +357,7 @@ class Sync_Filesystem {
 			}
 			
 			// In VIP environment, we have limitations.
-			if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+			if ( $this->is_vip_site() ) {
 				// We can only move within allowed directories.
 				$src_dir = dirname( $source );
 				$dst_dir = dirname( $destination );
@@ -411,7 +441,7 @@ class Sync_Filesystem {
 			$this->ensure_initialized();
 			
 			// In VIP environment, check if path is allowed.
-			if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) && ! $this->is_path_allowed( $file_path ) ) {
+			if ( $this->is_vip_site() && ! $this->is_path_allowed( $file_path ) ) {
 				return false;
 			}
 			
@@ -641,7 +671,7 @@ class Sync_Filesystem {
 			}
 			
 			// In VIP environment, we can't delete directories.
-			if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+			if ( $this->is_vip_site() ) {
 				return false;
 			}
 			

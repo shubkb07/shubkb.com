@@ -1,9 +1,9 @@
 <?php
 /**
- * Sync Mu-Plugin
+ * Installation Handler
  * 
- * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       WiseSync Mu Plugin Handler, for Updates, and checks.
+ * Plugin Name:       WiseSync Installer
+ * Description:       Handles installation and setup process for WiseSync plugin.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8
