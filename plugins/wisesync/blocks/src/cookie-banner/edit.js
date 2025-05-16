@@ -17,6 +17,13 @@ import {
 } from '@wordpress/components';
 import './editor.scss';
 
+/**
+ *
+ * @param root0
+ * @param root0.attributes
+ * @param root0.setAttributes
+ * @param root0.context
+ */
 export default function Edit( { attributes, setAttributes, context } ) {
 	const {
 		bannerTitle,
@@ -61,7 +68,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 
 	// Check if we're in site editor
 	const { postType } = context;
-	const isSiteEditor = postType === 'wp_template' || postType === 'wp_template_part';
+	const isSiteEditor = 'wp_template' === postType || 'wp_template_part' === postType;
 	const showBlockNotice = showOnlyInSiteEditor && ! isSiteEditor;
 
 	const bannerPositionOptions = [
@@ -132,7 +139,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 					] }
 				>
 					{ ( tab ) => {
-						if ( tab.name === 'visibility' ) {
+						if ( 'visibility' === tab.name ) {
 							return (
 								<PanelBody title={ __( 'Banner Visibility', 'wisesync' ) } initialOpen={ true }>
 									<ToggleControl
@@ -148,7 +155,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'general' ) {
+						if ( 'general' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Banner Content', 'wisesync' ) } initialOpen={ true }>
@@ -230,7 +237,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'cookieCategories' ) {
+						if ( 'cookieCategories' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Cookie Types Configuration', 'wisesync' ) } initialOpen={ true }>
@@ -341,7 +348,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'appearance' ) {
+						if ( 'appearance' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Layout Settings', 'wisesync' ) } initialOpen={ true }>
@@ -388,7 +395,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'advanced' ) {
+						if ( 'advanced' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Cookie Settings', 'wisesync' ) } initialOpen={ true }>
@@ -414,7 +421,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'restrictions' ) {
+						if ( 'restrictions' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Block Usage Restrictions', 'wisesync' ) } initialOpen={ true }>
@@ -429,7 +436,7 @@ export default function Edit( { attributes, setAttributes, context } ) {
 							);
 						}
 
-						if ( tab.name === 'compliance' ) {
+						if ( 'compliance' === tab.name ) {
 							return (
 								<>
 									<PanelBody title={ __( 'Regional Compliance', 'wisesync' ) } initialOpen={ true }>

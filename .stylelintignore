@@ -27,3 +27,6 @@ Footer
 *.tgz
 *.tar.xz
 *.tar.bz2
+*.mo
+*.po
+*.pot

@@ -19,10 +19,10 @@ const CookieUtils = {
 		const ca = document.cookie.split( ';' );
 		for ( let i = 0; i < ca.length; i++ ) {
 			let c = ca[ i ];
-			while ( c.charAt( 0 ) === ' ' ) {
+			while ( ' ' === c.charAt( 0 ) ) {
 				c = c.substring( 1, c.length );
 			}
-			if ( c.indexOf( nameEQ ) === 0 ) {
+			if ( 0 === c.indexOf( nameEQ ) ) {
 				return c.substring( nameEQ.length, c.length );
 			}
 		}
@@ -58,7 +58,7 @@ window.WiseSyncCookies = {
  */
 window.is_sync_cookie_permission_to = function( permission ) {
 	// Necessary cookies always return true
-	if ( permission === 'necessary' ) {
+	if ( 'necessary' === permission ) {
 		return true;
 	}
 
@@ -77,7 +77,7 @@ window.is_sync_cookie_permission_to = function( permission ) {
 
 	try {
 		const consentData = JSON.parse( consentCookie );
-		return consentData[ permission ] === true;
+		return true === consentData[ permission ];
 	} catch ( e ) {
 		console.error( 'Error parsing cookie consent data:', e );
 		return false;
@@ -121,7 +121,7 @@ window.register_cookie_service = function( service, name, type ) {
 function triggerServiceTypeCallbacks( type ) {
 	if ( Array.isArray( window.WiseSyncCookies.callbacks[ type ] ) ) {
 		window.WiseSyncCookies.callbacks[ type ].forEach( ( callback ) => {
-			if ( typeof callback === 'function' ) {
+			if ( 'function' === typeof callback ) {
 				callback();
 			}
 		} );
@@ -217,7 +217,7 @@ class CookieConsent {
 
 		// Handle escape key
 		document.addEventListener( 'keydown', ( event ) => {
-			if ( event.key === 'Escape' && this.isCustomizing ) {
+			if ( 'Escape' === event.key && this.isCustomizing ) {
 				this.closeCustomizeModal();
 			}
 		} );
@@ -225,7 +225,7 @@ class CookieConsent {
 
 	hasConsent() {
 		const consent = CookieUtils.getCookie( this.cookieName );
-		return consent !== null;
+		return null !== consent;
 	}
 
 	getConsentStatus() {
@@ -436,10 +436,10 @@ class CookieConsent {
 	executeCallbacks( consentData ) {
 		// Trigger callbacks based on consent settings
 		Object.keys( consentData ).forEach( ( category ) => {
-			if ( consentData[ category ] === true &&
+			if ( true === consentData[ category ] &&
                 Array.isArray( window.WiseSyncCookies.callbacks[ category ] ) ) {
 				window.WiseSyncCookies.callbacks[ category ].forEach( ( callback ) => {
-					if ( typeof callback === 'function' ) {
+					if ( 'function' === typeof callback ) {
 						callback();
 					}
 				} );
@@ -449,7 +449,7 @@ class CookieConsent {
 		// Check for registered services that can be activated
 		Object.keys( window.WiseSyncCookies.registeredServices ).forEach( ( serviceKey ) => {
 			const service = window.WiseSyncCookies.registeredServices[ serviceKey ];
-			if ( consentData[ service.type ] === true ) {
+			if ( true === consentData[ service.type ] ) {
 				// This service's type has consent
 				const serviceEvent = new CustomEvent( 'cookieServiceActivated', {
 					detail: {
@@ -484,8 +484,8 @@ document.addEventListener( 'DOMContentLoaded', () => {
 
 	// Create helper function for scripts to register callbacks
 	window.registerCookieCallback = function( category, callback ) {
-		if ( typeof window.WiseSyncCookies.callbacks[ category ] !== 'undefined' &&
-            typeof callback === 'function' ) {
+		if ( 'undefined' !== typeof window.WiseSyncCookies.callbacks[ category ] &&
+            'function' === typeof callback ) {
 			window.WiseSyncCookies.callbacks[ category ].push( callback );
 
 			// Check if consent already given and execute immediately if so
@@ -516,7 +516,7 @@ function initCookieBanner() {
 
 	banners.forEach( ( banner ) => {
 		const cookieData = JSON.parse( banner.getAttribute( 'data-cookie-settings' ) || '{}' );
-		const showBanner = cookieData.showBanner !== false; // Default to true if not specified
+		const showBanner = false !== cookieData.showBanner; // Default to true if not specified
 
 		if ( ! showBanner ) {
 			banner.classList.add( 'minimized-banner' );
@@ -787,7 +787,7 @@ function getCookie( name ) {
 
 	for ( let i = 0; i < cookies.length; i++ ) {
 		const cookie = cookies[ i ].trim();
-		if ( cookie.indexOf( nameEQ ) === 0 ) {
+		if ( 0 === cookie.indexOf( nameEQ ) ) {
 			return decodeURIComponent( cookie.substring( nameEQ.length ) );
 		}
 	}
@@ -812,12 +812,12 @@ function dispatchConsentEvent( consent ) {
  */
 function getVisitorCountryCode() {
 	// Access country code set via PHP in a global variable
-	if ( typeof window.visitorGeoData !== 'undefined' && window.visitorGeoData.countryCode ) {
+	if ( 'undefined' !== typeof window.visitorGeoData && window.visitorGeoData.countryCode ) {
 		return window.visitorGeoData.countryCode;
 	}
 
 	// Fallback to server variable if available
-	if ( typeof window.geoipCountryCode !== 'undefined' ) {
+	if ( 'undefined' !== typeof window.geoipCountryCode ) {
 		return window.geoipCountryCode;
 	}
 

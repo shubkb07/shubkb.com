@@ -9,7 +9,7 @@ There are many ways to contribute to WiseSync:
 ### Reporting Bugs
 
 Before submitting a bug report:
-1. Check the [existing issues](https://github.com/shubkb07/shubkb.com/issues) to avoid duplicates
+1. Check the [existing issues](https://github.com/shubkb07/sync-web/issues) to avoid duplicates
 2. Use our issue template when creating a new issue
 3. Include detailed steps to reproduce the bug
 4. Add screenshots or screen recordings if possible

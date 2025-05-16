@@ -2,13 +2,13 @@
   "name": "shubkb",
   "version": "1.0.0",
   "description": "",
-  "homepage": "https://github.com/shubkb07/shubkb.com#readme",
+  "homepage": "https://github.com/shubkb07/sync-web#readme",
   "bugs": {
-    "url": "https://github.com/shubkb07/shubkb.com/issues"
+    "url": "https://github.com/shubkb07/sync-web/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shubkb07/shubkb.com.git"
+    "url": "git+https://github.com/shubkb07/sync-web.git"
   },
   "license": "ISC",
   "author": "Shubham Kumar Bansal <shub@shubkb.com>",

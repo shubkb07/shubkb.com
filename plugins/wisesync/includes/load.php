@@ -8,11 +8,12 @@
  * @since   1.0.0
  */
 
-use Sync\Sync_Settings;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
+
+// Load Global WiseSync Plugin Classes.
+require_once WSYNC_PLUGIN_DIR . 'includes/load/classes.php';
 
 // Register Blocks Category.
 add_filter( 'block_categories_all', 'register_sync_blocks_category' );
@@ -24,6 +25,3 @@ add_action(
 		register_sync_block_type( WSYNC_PLUGIN_DIR . 'blocks/build/' );
 	}
 );
-
-// Call settings class.
-$settings = new Sync_Settings();

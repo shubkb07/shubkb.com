@@ -12,7 +12,7 @@ First, delete all existing content inside your WordPress wp-content directory.
 ### Step 2: Clone the repository
 Run the following command inside your empty wp-content folder:
 ```bash
-git clone git@github.com:shubkb07/shubkb.com.git .
+git clone git@github.com:shubkb07/sync-web.git .
 ```
 
 ### Step 3: Install dependencies

@@ -59,7 +59,6 @@ add_action( 'wp_enqueue_scripts', 'sync_register_static_assets' );
  */
 function sync_load_admin_static_assets() {
 
-	// Add styles for admin area.
 	wp_enqueue_style( 'admin' );
 
 	// Add scripts for admin area.

@@ -16,7 +16,7 @@
         "wp-coding-standards/wpcs": "*",
         "phpcompatibility/php-compatibility": "*",
         "phpcompatibility/phpcompatibility-wp": "*",
-        "automattic/vipwpcs": "^3.0"
+        "automattic/vipwpcs": "*"
     },
     "config": {
         "allow-plugins": {

@@ -7,15 +7,15 @@ Thank you for using WiseSync! Here's how to get help when you need it.
 ### GitHub Issues and Discussions
 
 For general questions and community support:
-- Visit our [GitHub Issues](https://github.com/shubkb07/shubkb.com/issues) for bug reports
-- Use [GitHub Discussions](https://github.com/shubkb07/shubkb.com/discussions) for questions and feature ideas
+- Visit our [GitHub Issues](https://github.com/shubkb07/sync-web/issues) for bug reports
+- Use [GitHub Discussions](https://github.com/shubkb07/sync-web/discussions) for questions and feature ideas
 - Search for similar issues before creating a new topic
 - Be specific and include your WordPress version, theme, and any error messages
 
 ### Documentation
 
 Before reaching out for support:
-- Check our [GitHub discussions](https://github.com/shubkb07/shubkb.com/discussions) for comprehensive documentation
+- Check our [GitHub discussions](https://github.com/shubkb07/sync-web/discussions) for comprehensive documentation
 - Review the Frequently Asked Questions section in our repository
 - Check the documentation in the `/docs` folder of the repository
 
@@ -59,7 +59,7 @@ When requesting support, please include:
 ## Feature Requests
 
 Have an idea to improve WiseSync? We'd love to hear it!
-- Submit feature requests through our [GitHub repository](https://github.com/shubkb07/shubkb.com/issues/new?template=feature_request.md)
+- Submit feature requests through our [GitHub repository](https://github.com/shubkb07/sync-web/issues/new?template=feature_request.md)
 - Vote on existing feature requests to help us prioritize development
 
 ## Security Issues

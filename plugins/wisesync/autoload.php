@@ -17,12 +17,13 @@ if ( file_exists( WSYNC_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 	require_once WSYNC_PLUGIN_DIR . '/vendor/autoload.php';
 }
 
-// Load all function files exist in functions directory.
-$functions_dir = WSYNC_PLUGIN_DIR . '/includes/functions/';
-$functions     = glob( $functions_dir . '*.php' );
-foreach ( $functions as $function_file ) {
-	require_once $function_file;
-}
+// Load Text Domain.
+add_action(
+	'init',
+	function () {
+		load_plugin_textdomain( 'wisesync', false, WSYNC_PLUGIN_DIR . '/languages/' );
+	} 
+);
 
 /**
  * Autoloads classes for the WiseSync plugin.
@@ -58,3 +59,10 @@ function sync_autoload( $class_name ) {
 }
 
 spl_autoload_register( 'sync_autoload' );
+
+// Load all function files exist in functions directory.
+$functions_dir = WSYNC_PLUGIN_DIR . '/includes/functions/';
+$functions     = glob( $functions_dir . '*.php' );
+foreach ( $functions as $function_file ) {
+	require_once $function_file;
+}

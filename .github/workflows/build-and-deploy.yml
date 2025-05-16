@@ -3,9 +3,8 @@ name: 🚀 Epic Build & Deploy Workflow 🎉
 on:
   push:
     branches:
-      - master
-      - dev
-
+      - '**'
+    
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
@@ -14,11 +13,17 @@ jobs:
   build_and_deploy:
     name: 🔧 Build & 🚀 Deploy
     runs-on: ubuntu-latest
+    
+    # Skip this workflow on build branches to prevent infinite loops
+    if: ${{ !endsWith(github.ref, '-build') }}
+    
+    outputs:
+      commit_message: ${{ steps.last_commit.outputs.message }}
 
     steps:
-      - name: 🏁 Start Build & Deploy v1.1
+      - name: 🏁 Start Build & Deploy v1.2
         run: |
-          echo "🏁 Starting Build & Deploy v1.1!"
+          echo "🏁 Starting Build & Deploy v1.2!"
           echo "🖥️ Running on ${{ runner.os }}"
           echo "📦 Trigger: ${{ github.event_name }} in ${{ github.repository }}"
 
@@ -45,9 +50,10 @@ jobs:
             echo "TARGET_BRANCH=dev-build" >> $GITHUB_ENV
             echo "IS_MASTER=false" >> $GITHUB_ENV
           else
-            echo "❌ Unrecognized branch: $current_branch. Exiting!"
-            exit 1
+            echo "TARGET_BRANCH=develop-build" >> $GITHUB_ENV
+            echo "IS_MASTER=false" >> $GITHUB_ENV
           fi
+          echo "CURRENT_BRANCH=$current_branch" >> $GITHUB_ENV
 
       - name: 🔍 Scan for Changes Since Last Deploy
         id: changes
@@ -355,3 +361,227 @@ jobs:
           git push
           cd ..
           echo "✅ Pushed to wordpress-sync repo"
+
+  # New job for release processing
+  process_release:
+    name: 📦 Process Release
+    runs-on: ubuntu-latest
+    needs: build_and_deploy
+    if: ${{ startsWith(needs.build_and_deploy.outputs.commit_message, 'Release:') }}
+    
+    outputs:
+      version: ${{ steps.parse_release.outputs.version }}
+      release_type: ${{ steps.parse_release.outputs.release_type }}
+      wisesync_title: ${{ steps.parse_release.outputs.wisesync_title }}
+      papersync_title: ${{ steps.parse_release.outputs.papersync_title }}
+      wisesync_desc: ${{ steps.parse_release.outputs.wisesync_desc }}
+      papersync_desc: ${{ steps.parse_release.outputs.papersync_desc }}
+      is_valid: ${{ steps.parse_release.outputs.is_valid }}
+    
+    steps:
+      - name: 📥 Checkout the Repo
+        uses: actions/checkout@v3
+      
+      - name: 💬 Get Commit Message
+        id: get_commit_message
+        run: |
+          commit_message=$(git log -1 --pretty=%B)
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          echo "$commit_message" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      
+      - name: 🔍 Parse Release Information
+        id: parse_release
+        run: |
+          commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
+          echo "🔎 Analyzing commit message for release info..."
+          echo "$commit_message"
+          
+          # Check if it's a release commit
+          if [[ ! "$commit_message" =~ ^Release:\ .*$ ]]; then
+            echo "❌ Not a release commit"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Remove the "Release: " prefix
+          release_info="${commit_message#Release: }"
+          echo "Release info: $release_info"
+          
+          # Determine the delimiter (either single or double quote)
+          if [[ "$release_info" =~ ^\".*$ ]]; then
+            delimiter="\""
+            echo "Using double quote delimiter"
+          elif [[ "$release_info" =~ ^\'.*$ ]]; then
+            delimiter="'"
+            echo "Using single quote delimiter"
+          else
+            echo "❌ Invalid format: Missing opening quote"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Create array of components
+          components=()
+          remainder="$release_info"
+          
+          # Extract components between delimiters
+          while [[ "$remainder" =~ $delimiter ]]; do
+            # Get everything before the delimiter
+            before="${remainder%%$delimiter*}"
+            remainder="${remainder#*$delimiter}"
+            
+            # Get everything before the next delimiter
+            if [[ "$remainder" =~ $delimiter ]]; then
+              component="${remainder%%$delimiter*}"
+              components+=("$component")
+              remainder="${remainder#*$delimiter}"
+            else
+              echo "❌ Unmatched delimiter"
+              echo "is_valid=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+          
+          echo "Found ${#components[@]} components"
+          
+          # We need exactly 6 components
+          if [ ${#components[@]} -ne 6 ]; then
+            echo "❌ Invalid format: Expected 6 components, found ${#components[@]}"
+            for i in "${!components[@]}"; do
+              echo "Component $i: ${components[$i]}"
+            done
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Extract the components
+          version="${components[0]}"
+          release_type="${components[1]}"
+          wisesync_title="${components[2]}"
+          papersync_title="${components[3]}"
+          wisesync_desc="${components[4]}"
+          papersync_desc="${components[5]}"
+          
+          # Validate version format (starts with 'v' followed by numbers and dots, or just numbers and dots)
+          if [[ ! "$version" =~ ^(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?)$ ]]; then
+            echo "❌ Invalid version format: $version"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Add 'v' prefix if not present
+          if [[ ! "$version" =~ ^v ]]; then
+            version="v$version"
+            echo "Added 'v' prefix to version: $version"
+          fi
+          
+          # Validate release type
+          if [[ ! "$release_type" =~ ^(r|R|pr|PR)$ ]]; then
+            echo "❌ Invalid release type: $release_type"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # All validations passed
+          echo "✅ Valid release format detected!"
+          echo "🏷️ Version: $version"
+          echo "📝 Release Type: $release_type"
+          echo "🔌 WiseSync Title: $wisesync_title"
+          echo "🎨 PaperSync Title: $papersync_title"
+          
+          # Set outputs
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "release_type=$release_type" >> $GITHUB_OUTPUT
+          echo "wisesync_title=$wisesync_title" >> $GITHUB_OUTPUT
+          echo "papersync_title=$papersync_title" >> $GITHUB_OUTPUT
+          echo "wisesync_desc<<EOF" >> $GITHUB_OUTPUT
+          echo "$wisesync_desc" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "papersync_desc<<EOF" >> $GITHUB_OUTPUT
+          echo "$papersync_desc" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "is_valid=true" >> $GITHUB_OUTPUT
+
+  create_releases:
+    name: 🚀 Create Releases
+    runs-on: ubuntu-latest
+    needs: process_release
+    if: ${{ needs.process_release.outputs.is_valid == 'true' }}
+    
+    steps:
+      - name: 📥 Checkout Main Repo (master-build branch)
+        uses: actions/checkout@v3
+        with:
+          ref: master-build
+          path: main_repo
+      
+      - name: 📥 Checkout WordPress Sync Repo
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/wordpress-sync
+          token: ${{ secrets.GH_PAT }}
+          path: wordpress_sync_repo
+      
+      - name: 📥 Checkout WiseSync Repo
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/wisesync
+          token: ${{ secrets.GH_PAT }}
+          path: wisesync_repo
+      
+      - name: 📥 Checkout PaperSync Repo
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/papersync
+          token: ${{ secrets.GH_PAT }}
+          path: papersync_repo
+      
+      - name: 🏷️ Create Release for Main Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.process_release.outputs.version }}
+          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}"
+          body: |
+            ${{ needs.process_release.outputs.wisesync_desc }}
+            
+            ${{ needs.process_release.outputs.papersync_desc }}
+          prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
+          generate_release_notes: false
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: 🏷️ Create Release for WordPress Sync Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.process_release.outputs.version }}
+          name: "${{ needs.process_release.outputs.wisesync_title }} & ${{ needs.process_release.outputs.papersync_title }}"
+          body: |
+            ${{ needs.process_release.outputs.wisesync_desc }}
+            
+            ${{ needs.process_release.outputs.papersync_desc }}
+          prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
+          generate_release_notes: false
+          token: ${{ secrets.GH_PAT }}
+          repository: shubkb07/wordpress-sync
+      
+      - name: 🏷️ Create Release for WiseSync Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.process_release.outputs.version }}
+          name: "${{ needs.process_release.outputs.wisesync_title }}"
+          body: ${{ needs.process_release.outputs.wisesync_desc }}
+          prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
+          generate_release_notes: false
+          token: ${{ secrets.GH_PAT }}
+          repository: shubkb07/wisesync
+      
+      - name: 🏷️ Create Release for PaperSync Repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.process_release.outputs.version }}
+          name: "${{ needs.process_release.outputs.papersync_title }}"
+          body: ${{ needs.process_release.outputs.papersync_desc }}
+          prerelease: ${{ contains(needs.process_release.outputs.release_type, 'p') }}
+          generate_release_notes: false
+          token: ${{ secrets.GH_PAT }}
+          repository: shubkb07/papersync
