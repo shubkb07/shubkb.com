@@ -254,6 +254,7 @@ class Sync_Filesystem {
 	 *
 	 * @param string $file_path Path to the file.
 	 * @param string $contents  File contents.
+	 * @param string $bypass    Give access to edit files outside uploads directry of specific files.
 	 * @return bool True on success, false on failure.
 	 */
 	public function put_contents( $file_path, $contents, $bypass = false ) {

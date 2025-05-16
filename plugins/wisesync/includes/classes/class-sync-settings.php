@@ -151,11 +151,18 @@ class Sync_Settings {
 		// Avoiding WPVIP issues.
 		if ( $sync_filesystem->is_vip_site() ) {
 			if ( $sync_filesystem->is_vip_site_local() ) {
-				if () {
-				} 
+				if ( 'sunrise' === $file_to_generate ) {
+					$files_array['sunrise']['FILE'] = 'client-sunrise.php';
+				} elseif ( in_array( $file_to_generate, array( 'db', 'objcache' ) ) ) {
+					return;
+				}
 			} else {
-				return false;
+				return;
 			}
+		}
+
+		if ( ! is_multisite() && in_array( $file_to_generate, array( 'blogdel', 'bloginact', 'blogsus', 'sunrise' ) ) ) {
+			return;
 		}
 
 		// $file_to_generate is not string, empty or not exists in $files_array, then return.
