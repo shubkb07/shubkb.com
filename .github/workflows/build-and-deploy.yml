@@ -407,7 +407,7 @@ jobs:
           fi
           
           # Split the commit message into lines
-          IFS=$'\n' read -r -a message_lines <<< "$commit_message"
+          readarray -t message_lines <<< "$commit_message"
           echo "Number of lines in commit message: ${#message_lines[@]}"
           
           # Extract version from the first line
