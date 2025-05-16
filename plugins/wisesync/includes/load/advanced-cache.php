@@ -265,13 +265,14 @@ class SyncCache {
 	 * @return bool Whether caching should be enabled.
 	 */
 	private function should_enable_cache() {
+		global $sync_filesystem;
 		// Check if caching is enabled in config.
 		if ( empty( $this->config['cache_enabled'] ) ) {
 			return false;
 		}
 
 		// Check for VIP Go environment.
-		if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+		if ( $sync_filesystem->is_vip_site() ) {
 			// Always cache on VIP Go.
 			return true;
 		}

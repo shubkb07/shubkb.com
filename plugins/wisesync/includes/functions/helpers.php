@@ -21,7 +21,9 @@
  * @return WP_Role|void WP_Role object, if the role is added.
  */
 function sync_add_role( $role, $display_name, $capabilities = array() ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		wpcom_vip_add_role( $role, $display_name, $capabilities );
 	} else {
 		return add_role( $role, $display_name, $capabilities ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.custom_role_add_role
@@ -39,7 +41,8 @@ function sync_add_role( $role, $display_name, $capabilities = array() ) {
  * @return int The found post ID, or 0 on failure.
  */
 function sync_attachment_url_to_postid( $url ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_attachment_url_to_postid( $url );
 	} else {
 		return attachment_url_to_postid( $url ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.attachment_url_to_postid_attachment_url_to_postid
@@ -60,7 +63,8 @@ function sync_attachment_url_to_postid( $url ) {
  * @return int|string The number of posts by the user.
  */
 function sync_count_user_posts( $user_id, $post_type = 'post', $public_only = true ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return (int) wpcom_vip_count_user_posts( $user_id, $post_type, $public_only );
 	} else {
 		return count_user_posts( $user_id, $post_type, $public_only ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.count_user_posts_count_user_posts
@@ -81,7 +85,8 @@ function sync_count_user_posts( $user_id, $post_type = 'post', $public_only = tr
  * @return WP_Post|null Post object if successful, null otherwise.
  */
 function sync_get_adjacent_post( $in_same_term = false, $excluded_terms = '', $previous = true, $taxonomy = 'category' ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_get_adjacent_post( $in_same_term, $excluded_terms, $previous, $taxonomy );
 	} else {
 		return get_adjacent_post( $in_same_term, $excluded_terms, $previous, $taxonomy ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.get_adjacent_post_get_adjacent_post
@@ -101,7 +106,8 @@ function sync_get_adjacent_post( $in_same_term = false, $excluded_terms = '', $p
  * @return WP_Post|null Post object if successful, null otherwise.
  */
 function sync_get_previous_post( $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_get_adjacent_post( $in_same_term, $excluded_terms, true, $taxonomy );
 	} else {
 		return get_previous_post( $in_same_term, $excluded_terms, $taxonomy ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.get_adjacent_post_get_previous_post
@@ -121,7 +127,8 @@ function sync_get_previous_post( $in_same_term = false, $excluded_terms = '', $t
  * @return WP_Post|null Post object if successful, null otherwise.
  */
 function sync_get_next_post( $in_same_term = false, $excluded_terms = '', $taxonomy = 'category' ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_get_adjacent_post( $in_same_term, $excluded_terms, false, $taxonomy );
 	} else {
 		return get_next_post( $in_same_term, $excluded_terms, $taxonomy ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.get_adjacent_post_get_next_post
@@ -140,7 +147,8 @@ function sync_get_next_post( $in_same_term = false, $excluded_terms = '', $taxon
  * @return string|false The embed HTML on success, false otherwise.
  */
 function sync_wp_oembed_get( $url, $args = array() ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_wp_oembed_get( $url, $args );
 	} else {
 		return wp_oembed_get( $url, $args ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_oembed_get_wp_oembed_get
@@ -158,7 +166,8 @@ function sync_wp_oembed_get( $url, $args = array() ) {
  * @return int The post ID on success, 0 on failure.
  */
 function sync_url_to_postid( $url ) {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_url_to_postid( $url );
 	} else {
 		return url_to_postid( $url ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.url_to_postid_url_to_postid
@@ -174,7 +183,8 @@ function sync_url_to_postid( $url ) {
  * @return bool|void False if no redirect was triggered, void on redirect.
  */
 function sync_old_slug_redirect() {
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+	if ( $sync_filesystem->is_vip_site() ) {
 		wpcom_vip_wp_old_slug_redirect();
 		return false; // Only reached if no redirect happened.
 	} else {
@@ -196,12 +206,11 @@ function sync_old_slug_redirect() {
  * @return WP_Post|array|null WP_Post on success or null on failure.
  */
 function sync_get_page_by_title( $page_title, $output = OBJECT, $post_type = 'page' ) {
-	global $wp_version;
-	
-	if ( defined( 'VIP_GO_APP_ENVIRONMENT' ) ) {
+	global $sync_filesystem;
+
+	if ( $sync_filesystem->is_vip_site() ) {
 		return wpcom_vip_get_page_by_title( $page_title, $output, $post_type );
-	} elseif ( version_compare( $wp_version, '6.2', '>=' ) ) {
-		// For WP 6.2+, use WP_Query as get_page_by_title is deprecated.
+	} else {
 		$query = new WP_Query(
 			array(
 				'title'          => $page_title,
@@ -221,5 +230,4 @@ function sync_get_page_by_title( $page_title, $output = OBJECT, $post_type = 'pa
 		}
 		return null;
 	}
-	return null;
 }

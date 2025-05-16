@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-15T20:57:50+00:00\n"
+"POT-Creation-Date: 2025-05-16T07:12:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wisesync\n"
@@ -67,41 +67,41 @@ msgstr ""
 msgid "Invalid nonce"
 msgstr ""
 
-#: includes/classes/class-sync-plugin.php:32
+#: includes/classes/class-sync-plugin.php:34
 msgid "Please verify that the path to the MU-Plugin load file is correct in your <code>wp-config.php</code>."
 msgstr ""
 
 #. translators: %1$s: filename, %2$s: folder name
-#: includes/classes/class-sync-plugin.php:38
-#: includes/classes/class-sync-plugin.php:45
+#: includes/classes/class-sync-plugin.php:40
+#: includes/classes/class-sync-plugin.php:47
 #, php-format
 msgid "Edit %1$s inside your %2$s folder."
 msgstr ""
 
 #. translators: %1$s: variable name, %2$s: path
-#: includes/classes/class-sync-plugin.php:54
+#: includes/classes/class-sync-plugin.php:56
 #, php-format
 msgid "Ensure %1$s is pointing to %2$s."
 msgstr ""
 
-#: includes/classes/class-sync-plugin.php:64
+#: includes/classes/class-sync-plugin.php:66
 msgid "Mu-Plugin Load Error"
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:998
+#: includes/classes/class-sync-settings.php:1060
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:1012
+#: includes/classes/class-sync-settings.php:1074
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:1426
-#: includes/classes/class-sync-settings.php:1483
+#: includes/classes/class-sync-settings.php:1488
+#: includes/classes/class-sync-settings.php:1545
 msgid "Invalid settings array."
 msgstr ""
 

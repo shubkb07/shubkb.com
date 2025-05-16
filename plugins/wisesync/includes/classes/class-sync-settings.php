@@ -86,22 +86,84 @@ class Sync_Settings {
 				'FILE'   => 'advanced-cache.php',
 				'ACCEPT' => 'adv_cache',
 			),
-			'objcache'  => array(
+			'blogdel'   => array(
 				'PATH'   => WP_CONTENT_DIR,
-				'FILE'   => 'object-cache.php',
-				'ACCEPT' => 'obj_cache',
+				'FILE'   => 'blog-deleted.php',
+				'ACCEPT' => 'blog_deleted',
 			),
-			'sunrise'   => array(
+			'bloginact' => array(
 				'PATH'   => WP_CONTENT_DIR,
-				'FILE'   => 'sunrise.php',
-				'ACCEPT' => 'sunrise',
+				'FILE'   => 'blog-inactive.php',
+				'ACCEPT' => 'blog_inactive',
+			),
+			'blogsus'   => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'blog-suspended.php',
+				'ACCEPT' => 'blog_suspended',
+			),
+			'db'        => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'db.php',
+				'ACCEPT' => 'db',
+			),
+			'dberr'     => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'db-error.php',
+				'ACCEPT' => 'db_error',
+			),
+			'fatalerr'  => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'fatal-error-handler.php',
+				'ACCEPT' => 'fatal_error_handler',
+			),
+			'install'   => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'install.php',
+				'ACCEPT' => 'install',
+			),
+			'mnt'       => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'maintenance.php',
+				'ACCEPT' => 'maintenance',
 			),
 			'muplugins' => array(
 				'PATH'   => WPMU_PLUGIN_DIR,
 				'FILE'   => 'sync.php',
 				'ACCEPT' => 'mu_plugin',
 			),
+			'objcache'  => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'object-cache.php',
+				'ACCEPT' => 'obj_cache',
+			),
+			'phperr'    => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'php-error.php',
+				'ACCEPT' => 'php_error',
+			),
+			'sunrise'   => array(
+				'PATH'   => WP_CONTENT_DIR,
+				'FILE'   => 'sunrise.php',
+				'ACCEPT' => 'sunrise',
+			),
 		);
+
+		// Avoiding WPVIP issues.
+		if ( $sync_filesystem->is_vip_site() ) {
+			if ( $sync_filesystem->is_vip_site_local() ) {
+				if ( 'sunrise' === $file_to_generate ) {
+					$files_array['sunrise']['FILE'] = 'client-sunrise.php';
+				} elseif ( in_array( $file_to_generate, array( 'db', 'objcache' ) ) ) {
+					return;
+				}
+			} else {
+				return;
+			}
+		}
+
+		if ( ! is_multisite() && in_array( $file_to_generate, array( 'blogdel', 'bloginact', 'blogsus', 'sunrise' ) ) ) {
+			return;
+		}
 
 		// $file_to_generate is not string, empty or not exists in $files_array, then return.
 		if ( ! is_string( $file_to_generate ) || empty( $file_to_generate ) || ! array_key_exists( $file_to_generate, $files_array ) ) {

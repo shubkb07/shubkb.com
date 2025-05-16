@@ -3,7 +3,7 @@
  * Sync Mu-Plugin
  * 
  * Plugin Name:       WiseSync Plugin Mu Plugin
- * Description:       All-in-one solution for WordPress users to use everything WiseSync has to offer to make them successful on the web.
+ * Description:       WiseSync Mu Plugin Handler, for Updates, and checks.
  * Plugin URI:        https://shubkb.com
  * Version:           1.0.0
  * Requires at least: 6.8
