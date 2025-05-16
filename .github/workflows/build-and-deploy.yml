@@ -385,6 +385,7 @@ jobs:
       - name: 💬 Get Commit Message
         id: get_commit_message
         run: |
+          # Get complete commit message with all lines
           commit_message=$(git log -1 --pretty=%B)
           echo "commit_message<<EOF" >> $GITHUB_OUTPUT
           echo "$commit_message" >> $GITHUB_OUTPUT
@@ -393,61 +394,69 @@ jobs:
       - name: 🔍 Parse Release Information
         id: parse_release
         run: |
+          # Extract complete commit message
           commit_message="${{ steps.get_commit_message.outputs.commit_message }}"
           echo "🔎 Analyzing commit message for release info..."
           echo "$commit_message"
           
-          # Check if it's a release commit
-          if [[ ! "$commit_message" =~ ^Release:\ .*$ ]]; then
+          # Check if it's a release commit 
+          if [[ ! "$commit_message" =~ ^Release:.*$ ]]; then
             echo "❌ Not a release commit"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # Remove the "Release: " prefix
-          release_info="${commit_message#Release: }"
-          echo "Release info: $release_info"
+          # Split the commit message into lines
+          IFS=$'\n' read -r -a message_lines <<< "$commit_message"
+          echo "Number of lines in commit message: ${#message_lines[@]}"
           
-          # Determine the delimiter (either single or double quote)
-          if [[ "$release_info" =~ ^\".*$ ]]; then
-            delimiter="\""
-            echo "Using double quote delimiter"
-          elif [[ "$release_info" =~ ^\'.*$ ]]; then
-            delimiter="'"
-            echo "Using single quote delimiter"
+          # Extract version from the first line
+          first_line="${message_lines[0]}"
+          echo "First line: $first_line"
+          
+          # Format should be "Release: VERSION"
+          if [[ "$first_line" =~ ^Release:\ +([v]?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?)$ ]]; then
+            version="${BASH_REMATCH[1]}"
+            echo "Found version in first line: $version"
+            
+            # Add 'v' prefix if not present
+            if [[ ! "$version" =~ ^v ]]; then
+              version="v$version"
+              echo "Added 'v' prefix to version: $version"
+            fi
           else
-            echo "❌ Invalid format: Missing opening quote"
+            echo "❌ First line must be exactly 'Release: VERSION'"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           
-          # Create array of components
-          components=()
-          remainder="$release_info"
+          # The second line should contain all quoted parameters
+          if [ ${#message_lines[@]} -lt 2 ]; then
+            echo "❌ Missing second line with parameters"
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
           
-          # Extract components between delimiters
-          while [[ "$remainder" =~ $delimiter ]]; do
-            # Get everything before the delimiter
-            before="${remainder%%$delimiter*}"
-            remainder="${remainder#*$delimiter}"
-            
-            # Get everything before the next delimiter
-            if [[ "$remainder" =~ $delimiter ]]; then
-              component="${remainder%%$delimiter*}"
-              components+=("$component")
-              remainder="${remainder#*$delimiter}"
-            else
-              echo "❌ Unmatched delimiter"
-              echo "is_valid=false" >> $GITHUB_OUTPUT
-              exit 0
-            fi
+          # Extract quoted parameters from the second line
+          second_line="${message_lines[1]}"
+          echo "Second line: $second_line"
+          
+          # Extract all quoted strings
+          components=()
+          line_to_parse="$second_line"
+          
+          while [[ "$line_to_parse" =~ \"([^\"]*)\" ]]; do
+            component="${BASH_REMATCH[1]}"
+            components+=("$component")
+            # Remove the matched part and continue
+            line_to_parse="${line_to_parse#*\"$component\"}"
           done
           
-          echo "Found ${#components[@]} components"
+          echo "Found ${#components[@]} quoted components"
           
-          # We need exactly 6 components
-          if [ ${#components[@]} -ne 6 ]; then
-            echo "❌ Invalid format: Expected 6 components, found ${#components[@]}"
+          # We need exactly 5 components: release_type, wisesync_title, papersync_title, wisesync_desc, papersync_desc
+          if [ ${#components[@]} -lt 5 ]; then
+            echo "❌ Invalid format: Expected at least 5 quoted components, found ${#components[@]}"
             for i in "${!components[@]}"; do
               echo "Component $i: ${components[$i]}"
             done
@@ -456,25 +465,11 @@ jobs:
           fi
           
           # Extract the components
-          version="${components[0]}"
-          release_type="${components[1]}"
-          wisesync_title="${components[2]}"
-          papersync_title="${components[3]}"
-          wisesync_desc="${components[4]}"
-          papersync_desc="${components[5]}"
-          
-          # Validate version format (starts with 'v' followed by numbers and dots, or just numbers and dots)
-          if [[ ! "$version" =~ ^(v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?)$ ]]; then
-            echo "❌ Invalid version format: $version"
-            echo "is_valid=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Add 'v' prefix if not present
-          if [[ ! "$version" =~ ^v ]]; then
-            version="v$version"
-            echo "Added 'v' prefix to version: $version"
-          fi
+          release_type="${components[0]}"
+          wisesync_title="${components[1]}"
+          papersync_title="${components[2]}"
+          wisesync_desc="${components[3]}"
+          papersync_desc="${components[4]}"
           
           # Validate release type
           if [[ ! "$release_type" =~ ^(r|R|pr|PR)$ ]]; then
