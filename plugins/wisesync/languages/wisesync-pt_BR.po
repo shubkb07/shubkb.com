@@ -34,6 +34,16 @@ msgstr ""
 msgid "Shubham Kumar Bansal <shub@shubkb.com>"
 msgstr ""
 
+#: includes/blocks/class-cookie-banner-block.php:209
+#: blocks/build/cookie-banner/index.js:1
+#: blocks/src/cookie-banner/edit.js:394
+msgid "Cookie Settings"
+msgstr ""
+
+#: includes/blocks/class-cookie-banner-block.php:210
+msgid "Close"
+msgstr ""
+
 #: includes/functions/block.php:26
 msgid "Sync Blocks"
 msgstr ""
@@ -52,104 +62,4 @@ msgstr ""
 #: blocks/src/cookie-banner/block.json
 msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:83
-msgid "Bad Request"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:96
-msgid "Unauthorized"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:109
-msgid "Forbidden"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:122
-msgid "Not Found"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:135
-msgid "Internal Server Error"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:148
-msgid "Unexpected Error"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:208
-msgid "Unauthorized access"
-msgstr ""
-
-#: includes/classes/class-sync-ajax.php:212
-msgid "Invalid nonce"
-msgstr ""
-
-#: includes/classes/class-sync-plugin.php:34
-msgid "Please verify that the path to the MU-Plugin load file is correct in your <code>wp-config.php</code>."
-msgstr ""
-
-#. translators: %1$s: filename, %2$s: folder name
-#: includes/classes/class-sync-plugin.php:40
-#: includes/classes/class-sync-plugin.php:47
-#, php-format
-msgid "Edit %1$s inside your %2$s folder."
-msgstr ""
-
-#. translators: %1$s: variable name, %2$s: path
-#: includes/classes/class-sync-plugin.php:56
-#, php-format
-msgid "Ensure %1$s is pointing to %2$s."
-msgstr ""
-
-#: includes/classes/class-sync-plugin.php:66
-msgid "Mu-Plugin Load Error"
-msgstr ""
-
-#. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:1060
-#, php-format
-msgid "Field \"%s\" is required."
-msgstr ""
-
-#. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:1074
-#, php-format
-msgid "Field \"%s\" is invalid."
-msgstr ""
-
-#: includes/classes/class-sync-settings.php:1488
-#: includes/classes/class-sync-settings.php:1545
-msgid "Invalid settings array."
-msgstr ""
-
-#. translators: Tab heading for Site Health navigation.
-#: includes/classes/class-sync-site-health.php:48
-msgctxt "Site Health"
-msgid "Sync"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:92
-msgid "Good"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:96
-msgid "Recommended"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:100
-msgid "Critical"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:104
-msgid "Should be improved"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:163
-msgid "Sync Info"
-msgstr ""
-
-#: includes/classes/class-sync-site-health.php:239
-msgid "Copy Logs"
 msgstr ""
