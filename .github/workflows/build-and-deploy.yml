@@ -60,11 +60,14 @@ jobs:
           CURRENT_COMMIT=$(git rev-parse HEAD)
           echo "🆔 Current commit: $CURRENT_COMMIT"
 
+          # Try to fetch the remote target branch; ignore errors if it doesn't exist
           git fetch origin $TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH || true
 
           if git rev-parse --verify origin/$TARGET_BRANCH >/dev/null 2>&1; then
+            echo "🔄 Diffing against origin/$TARGET_BRANCH"
             git diff --name-only origin/$TARGET_BRANCH $CURRENT_COMMIT > changed_files.txt
           else
+            echo "⚠️ origin/$TARGET_BRANCH not found; diffing against HEAD^"
             git diff --name-only HEAD^ $CURRENT_COMMIT > changed_files.txt
           fi
 
@@ -76,20 +79,20 @@ jobs:
           grep -q "^plugins/wisesync/"  changed_files.txt && echo "wisesync_changed=true"  >> $GITHUB_OUTPUT || echo "wisesync_changed=false"  >> $GITHUB_OUTPUT
           grep -q "^themes/papersync/"  changed_files.txt && echo "papersync_changed=true"  >> $GITHUB_OUTPUT || echo "papersync_changed=false"  >> $GITHUB_OUTPUT
 
+          # Changed plugins list
           if grep -qE "^plugins/" changed_files.txt; then
             echo "plugins_changed=true" >> $GITHUB_OUTPUT
             grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_plugins.txt
           else
-            echo "plugins_changed=false" >> $GITHUB_OUTPUT
-            touch changed_plugins.txt
+            echo "plugins_changed=false" >> $GITHUB_OUTPUT && touch changed_plugins.txt
           fi
 
+          # Changed themes list
           if grep -qE "^themes/" changed_files.txt; then
             echo "themes_changed=true" >> $GITHUB_OUTPUT
             grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_themes.txt
           else
-            echo "themes_changed=false" >> $GITHUB_OUTPUT
-            touch changed_themes.txt
+            echo "themes_changed=false" >> $GITHUB_OUTPUT && touch changed_themes.txt
           fi
 
       - name: 🐘 Boot PHP
@@ -158,7 +161,8 @@ jobs:
 
       - name: 🧹 Clean Up Build Artifacts
         if: steps.changes.outputs.build_required == 'true'
-        run: rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
+        run: |
+          rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
 
       - name: 📦 Prep $TARGET_BRANCH for Deployment
         run: |
@@ -166,9 +170,9 @@ jobs:
           git config --global user.email "shub@shubkb.com"
           mkdir -p deploy && cd deploy
           git init
-          git.remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git.fetch --depth=1 origin $TARGET_BRANCH
-          git.checkout $TARGET_BRANCH || git.checkout --orphan $TARGET_BRANCH
+          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git fetch --depth=1 origin $TARGET_BRANCH
+          git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
 
       - name: 🚚 Sync Plugin Updates - Special & Changed
         run: |
@@ -263,6 +267,7 @@ jobs:
           git config user.email "shub@shubkb.com"
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wordpress-sync"
+          git push
 
   release:
     name: 📦 Parse & Create Releases
