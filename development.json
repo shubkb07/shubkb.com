@@ -1,6 +1,6 @@
 {
   "environment": "staging",
-  "last_commit_message": "feat: Add cache IDs for Composer and Node.js steps to improve caching efficiency  ",
+  "last_commit_message": "fix: Update cache keys for Composer and Node.js to remove date dependency for improved consistency  ",
   "data": [
     {
       "pr_title": "Adding Template Class and Its Wrapper Funtions",
@@ -19,7 +19,8 @@
         "refactor: Rename build_and_deploy job to build_deploy_and_release and streamline release condition checks",
         "feat: Add developer settings functionality for staging and development environments",
         "feat: Refactor PR data generation to use Python script for improved error handling and flexibility",
-        "feat: Add cache IDs for Composer and Node.js steps to improve caching efficiency"
+        "feat: Add cache IDs for Composer and Node.js steps to improve caching efficiency",
+        "fix: Update cache keys for Composer and Node.js to remove date dependency for improved consistency"
       ]
     }
   ]
