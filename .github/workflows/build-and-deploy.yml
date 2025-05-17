@@ -286,11 +286,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Get the full commit message with original newlines preserved
-          full_msg=$(git log -1 --pretty=%B)
+          
+          # Store the full commit message with original format
+          git log -1 --pretty=%B > full_commit_message.txt
           
           # Extract version from first line
-          version_line=$(echo "$full_msg" | head -n 1)
+          version_line=$(head -n 1 full_commit_message.txt)
           if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
             [[ $version != v* ]] && version="v$version"
@@ -300,19 +301,34 @@ jobs:
             exit 0
           fi
           
-          # Get everything after the first line, preserving all newlines
-          rest=$(echo "$full_msg" | tail -n +2)
+          # Remove the first line (version line)
+          sed -i '1d' full_commit_message.txt
           
-          # First, let's extract all strings in quotes from the rest
-          # This regex captures content between double quotes, handling multiple lines
-          # We use grep with PCRE (-P) to extract quoted strings with newlines
-          quoted_parts=$(echo "$rest" | grep -oP '"[^"]*"' || echo "")
+          # Now extract the quoted parts with a different approach
+          # First, join all lines for processing
+          joined_message=$(tr '\n' '\001' < full_commit_message.txt)
           
-          # Convert quoted parts to an array
-          readarray -t components < <(echo "$quoted_parts" | sed 's/^"//;s/"$//')
+          # Extract each quoted section
+          quoted_sections=()
+          remaining="$joined_message"
           
-          # Count how many components we found
-          component_count=${#components[@]}
+          # Match quoted content even across line breaks (now represented by \001)
+          while [[ "$remaining" =~ \"([^\"]*)\" ]]; do
+            # Extract the match and replace \001 with newlines
+            match="${BASH_REMATCH[1]}"
+            match="${match//\001/$'\n'}"
+            quoted_sections+=("$match")
+            
+            # Remove the matched part from the remaining text
+            before="${remaining%%\"${BASH_REMATCH[1]}\"*}"
+            after="${remaining#*\"${BASH_REMATCH[1]}\"}"
+            remaining="${before}${after}"
+          done
+          
+          # Count how many sections we found
+          component_count=${#quoted_sections[@]}
+          
+          echo "Found $component_count quoted sections"
           
           # Verify we have at least 3 components
           if [[ $component_count -lt 3 ]]; then
@@ -322,38 +338,33 @@ jobs:
           fi
           
           # Always take the first 2 as titles
-          wisesync_title="${components[0]}"
-          papersync_title="${components[1]}"
+          wisesync_title="${quoted_sections[0]}"
+          papersync_title="${quoted_sections[1]}"
           
           # If we have exactly 3 components, use the 3rd as description for both
           if [[ $component_count -eq 3 ]]; then
-            combined_desc="${components[2]}"
+            combined_desc="${quoted_sections[2]}"
             wisesync_desc="$combined_desc"
             papersync_desc="$combined_desc"
           else
             # We have 4+ components, use 3rd for wisesync and 4th for papersync
-            wisesync_desc="${components[2]}"
-            papersync_desc="${components[3]}"
+            wisesync_desc="${quoted_sections[2]}"
+            papersync_desc="${quoted_sections[3]}"
           fi
           
-          echo "version=$version" >> $GITHUB_OUTPUT
-          echo "wisesync_title=$wisesync_title" >> $GITHUB_OUTPUT
-          echo "papersync_title=$papersync_title" >> $GITHUB_OUTPUT
-          
-          # Write multiline values properly, preserving all newlines and formatting
+          # Output the variables using heredocs to preserve formatting
           {
+            echo "version=$version"
+            echo "wisesync_title=$wisesync_title"
+            echo "papersync_title=$papersync_title"
             echo "wisesync_desc<<EOF"
             echo "$wisesync_desc"
             echo "EOF"
-          } >> $GITHUB_OUTPUT
-          
-          {
             echo "papersync_desc<<EOF"
             echo "$papersync_desc"
             echo "EOF"
+            echo "is_valid=true"
           } >> $GITHUB_OUTPUT
-          
-          echo "is_valid=true" >> $GITHUB_OUTPUT
           
           # Debug output to help verify parsing
           echo "::group::Debug Release Information"
