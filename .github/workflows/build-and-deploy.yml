@@ -328,7 +328,7 @@ jobs:
 
             ${{ steps.parse_release.outputs.papersync_desc }}
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: 🏷️ Create Release for WiseSync
         uses: softprops/action-gh-release@v2
@@ -338,7 +338,7 @@ jobs:
           name: ${{ needs.build_and_deploy.outputs.commit_message }}
           body: ${{ steps.parse_release.outputs.wisesync_desc }}
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
 
       - name: 🏷️ Create Release for PaperSync
         uses: softprops/action-gh-release@v2
@@ -348,4 +348,4 @@ jobs:
           name: ${{ needs.build_and_deploy.outputs.commit_message }}
           body: ${{ steps.parse_release.outputs.papersync_desc }}
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_PAT }}
