@@ -286,10 +286,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # Get the full commit message with original newlines preserved
           full_msg=$(git log -1 --pretty=%B)
           
           # Extract version from first line
-          version_line="${full_msg%%$'\n'*}"
+          version_line=$(echo "$full_msg" | head -n 1)
           if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
             [[ $version != v* ]] && version="v$version"
@@ -299,22 +300,23 @@ jobs:
             exit 0
           fi
           
-          # Get everything after the first line
-          rest="${full_msg#*$'\n'}"
+          # Get everything after the first line, preserving all newlines
+          rest=$(echo "$full_msg" | tail -n +2)
           
-          # Extract up to 4 quoted strings - we need minimum 2 titles and at least 1 description
-          components=()
-          while IFS= read -r line; do
-            # Extract all quoted strings in this line
-            while [[ $line =~ \"([^\"]+)\" ]]; do
-              components+=("${BASH_REMATCH[1]}")
-              line=${line#*\"${BASH_REMATCH[1]}\"}
-            done
-          done < <(echo "$rest")
+          # First, let's extract all strings in quotes from the rest
+          # This regex captures content between double quotes, handling multiple lines
+          # We use grep with PCRE (-P) to extract quoted strings with newlines
+          quoted_parts=$(echo "$rest" | grep -oP '"[^"]*"' || echo "")
+          
+          # Convert quoted parts to an array
+          readarray -t components < <(echo "$quoted_parts" | sed 's/^"//;s/"$//')
+          
+          # Count how many components we found
+          component_count=${#components[@]}
           
           # Verify we have at least 3 components
-          if [[ ${#components[@]} -lt 3 ]]; then
-            echo "::error ::Invalid release format: found ${#components[@]} quoted parts, expected at least 3"
+          if [[ $component_count -lt 3 ]]; then
+            echo "::error ::Invalid release format: found $component_count quoted parts, expected at least 3"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -324,7 +326,7 @@ jobs:
           papersync_title="${components[1]}"
           
           # If we have exactly 3 components, use the 3rd as description for both
-          if [[ ${#components[@]} -eq 3 ]]; then
+          if [[ $component_count -eq 3 ]]; then
             combined_desc="${components[2]}"
             wisesync_desc="$combined_desc"
             papersync_desc="$combined_desc"
@@ -338,7 +340,7 @@ jobs:
           echo "wisesync_title=$wisesync_title" >> $GITHUB_OUTPUT
           echo "papersync_title=$papersync_title" >> $GITHUB_OUTPUT
           
-          # Write multiline values properly
+          # Write multiline values properly, preserving all newlines and formatting
           {
             echo "wisesync_desc<<EOF"
             echo "$wisesync_desc"
@@ -352,12 +354,38 @@ jobs:
           } >> $GITHUB_OUTPUT
           
           echo "is_valid=true" >> $GITHUB_OUTPUT
+          
+          # Debug output to help verify parsing
+          echo "::group::Debug Release Information"
+          echo "Version: $version"
+          echo "WiseSync Title: $wisesync_title"
+          echo "PaperSync Title: $papersync_title"
+          echo "Component Count: $component_count"
+          echo "WiseSync Description:"
+          echo "$wisesync_desc"
+          echo "PaperSync Description:"
+          echo "$papersync_desc"
+          echo "::endgroup::"
 
-      - name: 🏷️ Create Release for Main & WP-Sync
+      - name: 🏷️ Create Release for Current Repo (sync-web)
         if: steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ steps.parse_release.outputs.version }}
+          name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
+          body: |
+            ${{ steps.parse_release.outputs.wisesync_desc }}
+
+            ${{ steps.parse_release.outputs.papersync_desc }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
+      
+      - name: 🏷️ Create Release for WordPress Sync
+        if: steps.parse_release.outputs.is_valid == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GH_PAT }}
+          repository: shubkb07/wordpress-sync
           tag_name: ${{ steps.parse_release.outputs.version }}
           name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
           body: |
