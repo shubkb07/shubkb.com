@@ -10,153 +10,37 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Fetch all history to determine branch info
 
       - name: Setup PHP Environment
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.0'
 
-      - name: ♻️ Cache Composer
-        id: composer-cache-dir
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.composer-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: ${{ runner.os }}-composer-
-
       - name: Install Composer Dependencies
         run: |
           # Installing PHP packages using Composer
           composer install --prefer-dist --no-progress --no-suggest
-
-      - name: Get PR push count
-        id: pr_count
-        run: |
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          # Check if gh CLI is available
-          if ! command -v gh &> /dev/null; then
-            echo "GitHub CLI not found, using curl instead"
-            PUSH_COUNT=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER/commits" | jq 'length')
-          else
-            PUSH_COUNT=$(gh api repos/${{ github.repository }}/pulls/$PR_NUMBER/commits --jq 'length')
-          fi
-          echo "push_count=$PUSH_COUNT" >> $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Delete previous bot comments after 5 pushes
-        if: steps.pr_count.outputs.push_count != ''
-        run: |
-          PUSH_COUNT="${{ steps.pr_count.outputs.push_count }}"
-          
-          # Check if this is a 5th push using bash arithmetic
-          if (( PUSH_COUNT % 5 != 0 )); then
-            echo "Not a 5th push (got $PUSH_COUNT), skipping comment cleanup"
-            exit 0
-          fi
-          
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          BOT_LOGIN="github-actions[bot]"
-          
-          # Check if gh CLI is available
-          if ! command -v gh &> /dev/null; then
-            echo "GitHub CLI not found, using curl instead"
-            # Get comment IDs with curl (simplified example)
-            COMMENTS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments" | \
-              jq '.[] | select(.user.login == "github-actions[bot]") | .id')
-            
-            # Delete each comment with curl
-            for COMMENT_ID in $COMMENTS; do
-              curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
-                "https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID"
-            done
-          else
-            # Get all comments by the bot on this PR
-            COMMENTS=$(gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments --jq '.[] | select(.user.login == "github-actions[bot]") | .id')
-            
-            # Delete each comment
-            for COMMENT_ID in $COMMENTS; do
-              gh api repos/${{ github.repository }}/issues/comments/$COMMENT_ID -X DELETE
-            done
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run PHPCS
         id: run_phpcs
         run: |
           set -e
           echo "Running PHPCS to check code style issues..."
-          # Run PHPCS with increased memory limit and sniff info
-          ./vendor/bin/phpcs . -d memory_limit=1024M --report=json > phpcs_results.json || true
-          
-          # Count errors and warnings
-          ERRORS_COUNT=$(jq '.totals.errors' phpcs_results.json)
-          WARNINGS_COUNT=$(jq '.totals.warnings' phpcs_results.json)
-          TOTAL_ISSUES=$((ERRORS_COUNT + WARNINGS_COUNT))
-          
-          echo "total_issues=$TOTAL_ISSUES" >> $GITHUB_OUTPUT
-          
-          # Set a default summary if needed
-          SUMMARY="Found $ERRORS_COUNT errors and $WARNINGS_COUNT warnings in code style."
-          echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
-          
-          echo "PHPCS completed. $SUMMARY"
+          # Run PHPCS with increased memory limit. Any output (errors/warnings) is captured.
+          PHPCS_OUTPUT=$(./vendor/bin/phpcs . -d memory_limit=1024M 2>&1) || true
+          echo "$PHPCS_OUTPUT" > phpcs_output.txt
+          echo "::set-output name=output::$PHPCS_OUTPUT"
+          echo "PHPCS completed. Check phpcs_output.txt for details."
 
-      - name: Determine PR base branch and set environment URL
-        id: set_env_url
-        run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
-          
-          if [[ "$BASE_BRANCH" == "master" ]]; then
-            echo "env_url=https://shubkb.com" >> $GITHUB_OUTPUT
-          elif [[ "$BASE_BRANCH" == "dev" ]]; then
-            echo "env_url=https://dev.shubkb.com" >> $GITHUB_OUTPUT
-          else
-            echo "env_url=https://develop.shubkb.com" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check for PHPCS configuration
-        id: check_phpcs_config
-        run: |
-          if [ -f "phpcs.xml" ]; then
-            echo "standard=phpcs.xml" >> $GITHUB_OUTPUT
-          elif [ -f "phpcs.xml.dist" ]; then
-            echo "standard=phpcs.xml.dist" >> $GITHUB_OUTPUT
-          else
-            echo "standard=PSR2" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post PHPCS review comments
-        if: steps.run_phpcs.outputs.total_issues != '' && steps.run_phpcs.outputs.total_issues <= 100
-        uses: reviewdog/action-phpcs@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          level: warning
-          fail_on_error: false
-          filter_mode: file
-          standard: ${{ steps.check_phpcs_config.outputs.standard }}
-          flags: '-s'
-
-      - name: Create summary comment with link
+      - name: Create PR Comment with PHPCS Report
+        if: steps.run_phpcs.outputs.output != ''
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.pull_request.number }}
           body: |
-            ## PHPCS Report Summary
-            
-            ${{ steps.run_phpcs.outputs.summary }}
-            
-            ### Check your changes
-            👉 [Preview your changes](${{ steps.set_env_url.outputs.env_url }})
-            
-            _This comment was automatically generated by the PHPCS GitHub Action workflow._
+            ## PHPCS Report
+            The following code style issues were detected by PHPCS:
+            ```
+            ${{ steps.run_phpcs.outputs.output }}
+            ```
