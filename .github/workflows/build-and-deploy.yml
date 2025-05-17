@@ -11,12 +11,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build_and_deploy:
-    name: 🔧 Build & 🚀 Deploy
+  build_deploy_and_release:
+    name: 🔧 Build, 🚀 Deploy & 📦 Release
     runs-on: ubuntu-latest
     if: ${{ !endsWith(github.ref, '-build') }}
-    outputs:
-      commit_message: ${{ steps.last_commit.outputs.message }}
 
     steps:
       - name: 🏁 Start Build & Deploy v1.2
@@ -269,20 +267,10 @@ jobs:
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wordpress-sync"
           git push
 
-  release:
-    name: 📦 Parse & Create Releases
-    runs-on: ubuntu-latest
-    needs: build_and_deploy
-    if: ${{ startsWith(needs.build_and_deploy.outputs.commit_message, 'Release:') }}
-
-    steps:
-      - name: 📥 Checkout Main Repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
+      # Release steps (previously in the release job)
       - name: 🔍 Parse Release Information
         id: parse_release
+        if: startsWith(steps.last_commit.outputs.message, 'Release:')
         shell: bash
         run: |
           set -euo pipefail
@@ -385,7 +373,7 @@ jobs:
           echo "::endgroup::"
 
       - name: 🏷️ Create Release for Current Repo (sync-web)
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -400,7 +388,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
       
       - name: 🏷️ Create Release for WordPress Sync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
@@ -416,7 +404,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for WiseSync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
@@ -427,7 +415,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for PaperSync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
