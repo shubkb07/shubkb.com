@@ -193,114 +193,159 @@ jobs:
           done < changed_themes.txt
 
       - name: 📊 Generate PR Data JSON for Development/Staging
-        if: env.TARGET_BRANCH == 'dev-build' || env.TARGET_BRANCH == 'develop-build'
+        if: env.TARGET_BRANCH == 'dev-build' || env.TARGET_BRANCH == 'develop-build' 
         run: |
           # Install jq for JSON processing
-          sudo apt-get update && sudo apt-get install -y jq
+          sudo apt-get update
+          sudo apt-get install -y jq
 
           # Set environment based on TARGET_BRANCH
           if [ "$TARGET_BRANCH" = "dev-build" ]; then
             ENVIRONMENT="development"
+            FILTER_BRANCH="dev"
+            # For dev-build, we'll only include PRs with head branch as dev
+            FILTER_TYPE="include"
           else
             ENVIRONMENT="staging"
+            # For develop-build, exclude PRs with head branch as master or dev
+            FILTER_TYPE="exclude"
+            FILTER_BRANCH="master,dev"
           fi
 
-          # Create a JavaScript script to generate the JSON file
-          cat > generate-pr-data.js << 'EOL'
-          const { execSync } = require('child_process');
+          # Create a Python script to generate the development.json file
+          cat > generate-pr-data.py << 'EOF'
+          import json
+          import os
+          import subprocess
+          import sys
 
-          // Configuration
-          const environment = process.env.ENVIRONMENT;
-          const targetBranch = process.env.TARGET_BRANCH;
-          const lastCommitMessage = process.env.LAST_COMMIT_MESSAGE;
-          const repoOwner = process.env.GITHUB_REPOSITORY.split('/')[0];
-          const repoName = process.env.GITHUB_REPOSITORY.split('/')[1];
-          const token = process.env.GITHUB_TOKEN;
+          # Configuration from environment variables
+          environment = os.environ.get('ENVIRONMENT', 'unknown')
+          filter_type = os.environ.get('FILTER_TYPE', 'exclude')
+          filter_branches = os.environ.get('FILTER_BRANCH', '').split(',')
+          last_commit_message = os.environ.get('LAST_COMMIT_MESSAGE', '')
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          token = os.environ.get('GITHUB_TOKEN', '')
 
-          // Fetch open PRs using GitHub CLI
-          const getPRData = () => {
-            try {
-              // Get open PRs
-              const prListCmd = `curl -s -H "Authorization: token ${token}" "https://api.github.com/repos/${repoOwner}/${repoName}/pulls?state=open"`;
-              const prList = JSON.parse(execSync(prListCmd).toString());
-              
-              // Filter PRs based on target branch
-              const filteredPRs = prList.filter(pr => {
-                if (targetBranch === 'dev-build') {
-                  // For dev-build, only include PRs with head branch as dev
-                  return pr.head.ref === 'dev';
-                } else if (targetBranch === 'develop-build') {
-                  // For develop-build, include all PRs except those with head branch as master or dev
-                  return pr.head.ref !== 'master' && pr.head.ref !== 'dev';
-                }
-                return false;
-              });
-              
-              // For each PR, get commits
-              const prData = filteredPRs.map(pr => {
-                try {
-                  const commitsCmd = `curl -s -H "Authorization: token ${token}" "${pr.commits_url}"`;
-                  const commits = JSON.parse(execSync(commitsCmd).toString());
+          def run_command(cmd):
+              try:
+                  result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+                  return result.stdout.strip()
+              except subprocess.CalledProcessError as e:
+                  print(f"Error executing command: {cmd}")
+                  print(f"Error details: {e.stderr}")
+                  return None
+
+          def get_pr_data():
+              try:
+                  # Get open PRs
+                  pr_cmd = f'curl -s -H "Authorization: token {token}" "https://api.github.com/repos/{repo}/pulls?state=open"'
+                  pr_output = run_command(pr_cmd)
                   
-                  // Extract commit messages
-                  const commitMessages = commits.map(commit => commit.commit.message);
+                  if not pr_output:
+                      print("No output from GitHub API when fetching PRs")
+                      return []
                   
-                  return {
-                    pr_title: pr.title,
-                    pr_desc: pr.body || '',
-                    pr_head: pr.head.ref,
-                    pr_base: pr.base.ref,
-                    pr_url: pr.html_url,
-                    commits: commitMessages
-                  };
-                } catch (error) {
-                  console.error(`Error processing PR ${pr.number}:`, error);
-                  return {
-                    pr_title: pr.title,
-                    pr_desc: pr.body || '',
-                    pr_head: pr.head.ref,
-                    pr_base: pr.base.ref,
-                    pr_url: pr.html_url,
-                    commits: ['Error fetching commits']
-                  };
-                }
-              });
+                  try:
+                      pr_list = json.loads(pr_output)
+                      if not isinstance(pr_list, list):
+                          print(f"Expected list but got: {type(pr_list)}")
+                          print(f"API Response: {pr_output[:200]}...")  # Print first 200 chars for debugging
+                          return []
+                  except json.JSONDecodeError as e:
+                      print(f"Failed to parse PR list JSON: {e}")
+                      print(f"API Response: {pr_output[:200]}...")
+                      return []
+                  
+                  # Filter PRs based on branch criteria
+                  filtered_prs = []
+                  for pr in pr_list:
+                      head_ref = pr.get('head', {}).get('ref', '')
+                      
+                      # Apply filter logic
+                      if filter_type == 'include':
+                          # Include only PRs with specific head branch
+                          if head_ref in filter_branches:
+                              filtered_prs.append(pr)
+                      else:  # exclude
+                          # Include all PRs except those with specified head branches
+                          if head_ref not in filter_branches:
+                              filtered_prs.append(pr)
+                  
+                  # Process each PR to get commits
+                  results = []
+                  for pr in filtered_prs:
+                      pr_number = pr.get('number', '')
+                      commits_url = pr.get('commits_url', '')
+                      
+                      # Get commits for this PR
+                      commits_cmd = f'curl -s -H "Authorization: token {token}" "{commits_url}"'
+                      commits_output = run_command(commits_cmd)
+                      
+                      if not commits_output:
+                          print(f"No output when fetching commits for PR #{pr_number}")
+                          commit_messages = ['Error fetching commits']
+                      else:
+                          try:
+                              commits_data = json.loads(commits_output)
+                              if isinstance(commits_data, list):
+                                  commit_messages = [commit.get('commit', {}).get('message', '') for commit in commits_data]
+                              else:
+                                  print(f"Expected list of commits but got: {type(commits_data)}")
+                                  commit_messages = ['Error: Invalid commits format']
+                          except json.JSONDecodeError:
+                              print(f"Failed to parse commits JSON for PR #{pr_number}")
+                              commit_messages = ['Error: Failed to parse commits']
+                      
+                      # Create PR entry
+                      pr_entry = {
+                          'pr_title': pr.get('title', ''),
+                          'pr_desc': pr.get('body', '') or '',
+                          'pr_head': pr.get('head', {}).get('ref', ''),
+                          'pr_base': pr.get('base', {}).get('ref', ''),
+                          'pr_url': pr.get('html_url', ''),
+                          'commits': commit_messages
+                      }
+                      
+                      results.append(pr_entry)
+                  
+                  return results
               
-              return prData;
-            } catch (error) {
-              console.error('Error fetching PRs:', error);
-              return [];
-            }
-          };
+              except Exception as e:
+                  print(f"Error fetching PRs: {e}")
+                  return []
 
-          // Generate the JSON structure
-          const generateJson = () => {
-            const prData = getPRData();
-            
-            return {
-              environment: environment,
-              last_commit_message: lastCommitMessage,
-              data: prData
-            };
-          };
+          # Generate JSON data
+          pr_data = get_pr_data()
+          json_data = {
+              'environment': environment,
+              'last_commit_message': last_commit_message,
+              'data': pr_data
+          }
 
-          // Write the JSON to file
-          const fs = require('fs');
-          const jsonData = generateJson();
-          fs.writeFileSync('development.json', JSON.stringify(jsonData, null, 2));
-          
-          console.log('Generated development.json with PR data.');
-          EOL
+          # Write to file
+          with open('development.json', 'w') as f:
+              json.dump(json_data, f, indent=2)
 
-          # Run the script to generate the JSON file
+          print(f"Generated development.json with {len(pr_data)} PRs.")
+          EOF
+
+          # Make script executable
+          chmod +x generate-pr-data.py
+
+          # Run the script
           cd deploy
           export ENVIRONMENT="$ENVIRONMENT"
+          export FILTER_TYPE="$FILTER_TYPE"
+          export FILTER_BRANCH="$FILTER_BRANCH"
           export LAST_COMMIT_MESSAGE="${{ steps.last_commit.outputs.message }}"
-          node ../generate-pr-data.js
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          python3 ../generate-pr-data.py
           
-          # Debug: Check if file was created
-          ls -la development.json || echo "Failed to create development.json"
-          cat development.json || echo "Failed to read development.json"
+          # Debug: Show the generated file
+          echo "Generated development.json file:"
+          ls -la development.json
+          cat development.json
 
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
