@@ -121,8 +121,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache-dir.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-$(date +%B)-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-$(date +%B)-
+          key: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-
 
       - name: ♻️ Cache NPM
         id: node-modules-cache
@@ -130,8 +130,8 @@ jobs:
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-$(date +%B)-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-$(date +%B)-
+          key: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-
 
       - name: 📥 Composer Install
         if: (steps.changes.outputs.composer_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.composer-cache.outputs.cache-hit != 'true')
