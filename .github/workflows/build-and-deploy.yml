@@ -287,53 +287,74 @@ jobs:
         run: |
           set -euo pipefail
           full_msg=$(git log -1 --pretty=%B)
-
+          
           # Extract version from first line
           version_line="${full_msg%%$'\n'*}"
           if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
             [[ $version != v* ]] && version="v$version"
           else
+            echo "::error ::Invalid release version format. Expected 'Release: v1.2.3'"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-
-          # Drop first line, keep rest
+          
+          # Get everything after the first line
           rest="${full_msg#*$'\n'}"
-
-          # Extract exactly 4 quoted components
+          
+          # Extract up to 4 quoted strings - we need minimum 2 titles and at least 1 description
           components=()
-          while [[ ${#components[@]} -lt 4 && $rest =~ \"([^\"]*)\" ]]; do
-            components+=("${BASH_REMATCH[1]}")
-            rest=${rest#*\"${components[-1]}\"}
-          done
-
-          if [[ ${#components[@]} -lt 4 ]]; then
-            echo "Invalid release format: found ${#components[@]} quoted parts, expected 4" >&2
+          while IFS= read -r line; do
+            # Extract all quoted strings in this line
+            while [[ $line =~ \"([^\"]+)\" ]]; do
+              components+=("${BASH_REMATCH[1]}")
+              line=${line#*\"${BASH_REMATCH[1]}\"}
+            done
+          done < <(echo "$rest")
+          
+          # Verify we have at least 3 components
+          if [[ ${#components[@]} -lt 3 ]]; then
+            echo "::error ::Invalid release format: found ${#components[@]} quoted parts, expected at least 3"
             echo "is_valid=false" >> $GITHUB_OUTPUT
             exit 0
           fi
-
+          
+          # Always take the first 2 as titles
           wisesync_title="${components[0]}"
           papersync_title="${components[1]}"
-          wisesync_desc="${components[2]}"
-          papersync_desc="${components[3]}"
-
-          echo "version=$version"                  >> $GITHUB_OUTPUT
-          echo "wisesync_title=$wisesync_title"    >> $GITHUB_OUTPUT
-          echo "papersync_title=$papersync_title"  >> $GITHUB_OUTPUT
-
-          echo "wisesync_desc<<EOF"                >> $GITHUB_OUTPUT
-          echo "$wisesync_desc"
-          echo "EOF"                              >> $GITHUB_OUTPUT
-
-          echo "papersync_desc<<EOF"               >> $GITHUB_OUTPUT
-          echo "$papersync_desc"
-          echo "EOF"                              >> $GITHUB_OUTPUT
-
-          echo "is_valid=true"                    >> $GITHUB_OUTPUT
+          
+          # If we have exactly 3 components, use the 3rd as description for both
+          if [[ ${#components[@]} -eq 3 ]]; then
+            combined_desc="${components[2]}"
+            wisesync_desc="$combined_desc"
+            papersync_desc="$combined_desc"
+          else
+            # We have 4+ components, use 3rd for wisesync and 4th for papersync
+            wisesync_desc="${components[2]}"
+            papersync_desc="${components[3]}"
+          fi
+          
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "wisesync_title=$wisesync_title" >> $GITHUB_OUTPUT
+          echo "papersync_title=$papersync_title" >> $GITHUB_OUTPUT
+          
+          # Write multiline values properly
+          {
+            echo "wisesync_desc<<EOF"
+            echo "$wisesync_desc"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          
+          {
+            echo "papersync_desc<<EOF"
+            echo "$papersync_desc"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          
+          echo "is_valid=true" >> $GITHUB_OUTPUT
 
       - name: 🏷️ Create Release for Main & WP-Sync
+        if: steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -346,6 +367,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for WiseSync
+        if: steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
@@ -356,6 +378,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for PaperSync
+        if: steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
