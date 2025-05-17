@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-05-17T16:54:43+00:00\n"
+"POT-Creation-Date: 2025-05-17T18:23:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: wisesync\n"
@@ -89,19 +89,19 @@ msgid "Mu-Plugin Load Error"
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:1060
+#: includes/classes/class-sync-settings.php:1071
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:1074
+#: includes/classes/class-sync-settings.php:1085
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:1488
-#: includes/classes/class-sync-settings.php:1545
+#: includes/classes/class-sync-settings.php:1499
+#: includes/classes/class-sync-settings.php:1556
 msgid "Invalid settings array."
 msgstr ""
 

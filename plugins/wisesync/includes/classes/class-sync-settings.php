@@ -777,6 +777,12 @@ class Sync_Settings {
 		);
 	}
 
+	/**
+	 * Add Developer Settings.
+	 *
+	 * @param string $env Environment.
+	 */
+	public function add_development_settings( $env ) {}
 
 	/**
 	 * Add WP menu.
@@ -953,7 +959,12 @@ class Sync_Settings {
 		/**
 		 * Sync Settings Page Filter
 		 */
-		apply_filters( 'sync_settings_page', $this->menus );
+		do_action( 'sync_settings_page', $this->menus );
+
+		if ( in_array( wp_get_environment_type(), array( 'staging', 'development' ) ) ) {
+			// Add Development Page.
+			$this->add_development_settings( wp_get_environment_type() );
+		}
 
 		if ( $sync_ajax->is_ajax ) {
 			$this->init_ajax_response();
