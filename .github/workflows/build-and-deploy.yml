@@ -192,6 +192,116 @@ jobs:
             cp -r themes/$theme deploy/themes/ || true
           done < changed_themes.txt
 
+      - name: 📊 Generate PR Data JSON for Development/Staging
+        if: env.TARGET_BRANCH == 'dev-build' || env.TARGET_BRANCH == 'develop-build'
+        run: |
+          # Install jq for JSON processing
+          sudo apt-get update && sudo apt-get install -y jq
+
+          # Set environment based on TARGET_BRANCH
+          if [ "$TARGET_BRANCH" = "dev-build" ]; then
+            ENVIRONMENT="development"
+          else
+            ENVIRONMENT="staging"
+          fi
+
+          # Create a JavaScript script to generate the JSON file
+          cat > generate-pr-data.js << 'EOL'
+          const { execSync } = require('child_process');
+
+          // Configuration
+          const environment = process.env.ENVIRONMENT;
+          const targetBranch = process.env.TARGET_BRANCH;
+          const lastCommitMessage = process.env.LAST_COMMIT_MESSAGE;
+          const repoOwner = process.env.GITHUB_REPOSITORY.split('/')[0];
+          const repoName = process.env.GITHUB_REPOSITORY.split('/')[1];
+          const token = process.env.GITHUB_TOKEN;
+
+          // Fetch open PRs using GitHub CLI
+          const getPRData = () => {
+            try {
+              // Get open PRs
+              const prListCmd = `curl -s -H "Authorization: token ${token}" "https://api.github.com/repos/${repoOwner}/${repoName}/pulls?state=open"`;
+              const prList = JSON.parse(execSync(prListCmd).toString());
+              
+              // Filter PRs based on target branch
+              const filteredPRs = prList.filter(pr => {
+                if (targetBranch === 'dev-build') {
+                  // For dev-build, only include PRs with head branch as dev
+                  return pr.head.ref === 'dev';
+                } else if (targetBranch === 'develop-build') {
+                  // For develop-build, include all PRs except those with head branch as master or dev
+                  return pr.head.ref !== 'master' && pr.head.ref !== 'dev';
+                }
+                return false;
+              });
+              
+              // For each PR, get commits
+              const prData = filteredPRs.map(pr => {
+                try {
+                  const commitsCmd = `curl -s -H "Authorization: token ${token}" "${pr.commits_url}"`;
+                  const commits = JSON.parse(execSync(commitsCmd).toString());
+                  
+                  // Extract commit messages
+                  const commitMessages = commits.map(commit => commit.commit.message);
+                  
+                  return {
+                    pr_title: pr.title,
+                    pr_desc: pr.body || '',
+                    pr_head: pr.head.ref,
+                    pr_base: pr.base.ref,
+                    pr_url: pr.html_url,
+                    commits: commitMessages
+                  };
+                } catch (error) {
+                  console.error(`Error processing PR ${pr.number}:`, error);
+                  return {
+                    pr_title: pr.title,
+                    pr_desc: pr.body || '',
+                    pr_head: pr.head.ref,
+                    pr_base: pr.base.ref,
+                    pr_url: pr.html_url,
+                    commits: ['Error fetching commits']
+                  };
+                }
+              });
+              
+              return prData;
+            } catch (error) {
+              console.error('Error fetching PRs:', error);
+              return [];
+            }
+          };
+
+          // Generate the JSON structure
+          const generateJson = () => {
+            const prData = getPRData();
+            
+            return {
+              environment: environment,
+              last_commit_message: lastCommitMessage,
+              data: prData
+            };
+          };
+
+          // Write the JSON to file
+          const fs = require('fs');
+          const jsonData = generateJson();
+          fs.writeFileSync('development.json', JSON.stringify(jsonData, null, 2));
+          
+          console.log('Generated development.json with PR data.');
+          EOL
+
+          # Run the script to generate the JSON file
+          cd deploy
+          export ENVIRONMENT="$ENVIRONMENT"
+          export LAST_COMMIT_MESSAGE="${{ steps.last_commit.outputs.message }}"
+          node ../generate-pr-data.js
+          
+          # Debug: Check if file was created
+          ls -la development.json || echo "Failed to create development.json"
+          cat development.json || echo "Failed to read development.json"
+
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
           cd deploy
