@@ -71,11 +71,11 @@ jobs:
       - name: Determine PR base branch and set environment URL
         id: set_env_url
         run: |
-          BASE_BRANCH="${{ github.event.pull_request.base.ref }}"
+          HEAD_BRANCH="${{ github.event.pull_request.head.ref }}"
           
-          if [[ "$BASE_BRANCH" == "master" ]]; then
+          if [[ "$HEAD_BRANCH" == "master" ]]; then
             echo "env_url=https://shubkb.com" >> $GITHUB_OUTPUT
-          elif [[ "$BASE_BRANCH" == "dev" ]]; then
+          elif [[ "$HEAD_BRANCH" == "dev" ]]; then
             echo "env_url=https://dev.shubkb.com" >> $GITHUB_OUTPUT
           else
             echo "env_url=https://develop.shubkb.com" >> $GITHUB_OUTPUT
