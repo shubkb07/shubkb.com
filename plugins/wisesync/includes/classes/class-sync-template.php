@@ -22,9 +22,9 @@ class Sync_Template {
 	}
 
 	/**
-	 * Create an template post
+	 * Create a template post
 	 *
-	 * Can be develop for registering posts, taxonomy, theme and other things.
+	 * Can be developed for registering posts, taxonomy, theme and other things.
 	 *
 	 * @param string $template_type Post, Taxonomy, Theme Page, Pattern and much more.
 	 * @param array  $template_data For template its data.
