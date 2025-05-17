@@ -22,7 +22,7 @@ jobs:
       - name: 🏁 Start Build & Deploy v1.2
         run: |
           echo "🏁 Starting Build & Deploy v1.2!"
-          echo "🖥️ Running on ${{ runner.os }}"
+          echo "🖥️ Runner OS: ${{ runner.os }}"
           echo "📦 Trigger: ${{ github.event_name }} in ${{ github.repository }}"
 
       - name: 📥 Checkout the Repo
@@ -33,59 +33,61 @@ jobs:
       - name: 💬 Capture Last Commit Message
         id: last_commit
         run: |
-          sanitized_message=$(git log -1 --pretty=%B | tr '\n' ' ' | tr -d '\r')
-          echo "message=$sanitized_message" >> $GITHUB_OUTPUT
+          msg=$(git log -1 --pretty=%B | tr '\n' ' ' | tr -d '\r')
+          echo "message=$msg" >> $GITHUB_OUTPUT
 
       - name: 🎯 Determine Deployment Branch
         id: set_target_branch
         run: |
-          current_branch="${GITHUB_REF##*/}"
-          echo "🔍 Current branch: $current_branch"
-          if [ "$current_branch" == "master" ]; then
+          branch="${GITHUB_REF##*/}"
+          if [ "$branch" == "master" ]; then
             echo "TARGET_BRANCH=master-build" >> $GITHUB_ENV
-            echo "IS_MASTER=true" >> $GITHUB_ENV
-          elif [ "$current_branch" == "dev" ]; then
-            echo "TARGET_BRANCH=dev-build" >> $GITHUB_ENV
-            echo "IS_MASTER=false" >> $GITHUB_ENV
+            echo "IS_MASTER=true"     >> $GITHUB_ENV
+          elif [ "$branch" == "dev" ]; then
+            echo "TARGET_BRANCH=dev-build"    >> $GITHUB_ENV
+            echo "IS_MASTER=false"   >> $GITHUB_ENV
           else
             echo "TARGET_BRANCH=develop-build" >> $GITHUB_ENV
-            echo "IS_MASTER=false" >> $GITHUB_ENV
+            echo "IS_MASTER=false"   >> $GITHUB_ENV
           fi
-          echo "CURRENT_BRANCH=$current_branch" >> $GITHUB_ENV
+          echo "CURRENT_BRANCH=$branch" >> $GITHUB_ENV
 
       - name: 🔍 Scan for Changes Since Last Deploy
         id: changes
         run: |
+          set -euo pipefail
+
           CURRENT_COMMIT=$(git rev-parse HEAD)
-          mkdir -p temp_deploy && cd temp_deploy
-          git init
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git fetch --depth=1 origin $TARGET_BRANCH
-          if git checkout $TARGET_BRANCH 2>/dev/null; then
-            LAST_MSG=$(git log -1 --pretty=%B)
-            cd .. && rm -rf temp_deploy
-            if [[ $LAST_MSG =~ SHA:([0-9a-f]{40}) ]]; then
-              git diff --name-only ${BASH_REMATCH[1]} $CURRENT_COMMIT > changed_files.txt
-            else
-              git diff --name-only HEAD~10..HEAD > changed_files.txt
-            fi
+          echo "🆔 Current commit: $CURRENT_COMMIT"
+
+          # Try to fetch the remote target branch; ignore errors if it doesn't exist
+          git fetch origin $TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH || true
+
+          if git rev-parse --verify origin/$TARGET_BRANCH >/dev/null 2>&1; then
+            echo "🔄 Diffing against origin/$TARGET_BRANCH"
+            git diff --name-only origin/$TARGET_BRANCH $CURRENT_COMMIT > changed_files.txt
           else
-            cd .. && rm -rf temp_deploy
-            git diff --name-only HEAD~10..HEAD > changed_files.txt
+            echo "⚠️ origin/$TARGET_BRANCH not found; diffing against HEAD^"
+            git diff --name-only HEAD^ $CURRENT_COMMIT > changed_files.txt
           fi
 
-          grep -q "package-lock.json"   changed_files.txt && echo "npm_deps_changed=true"       >> $GITHUB_OUTPUT || echo "npm_deps_changed=false"       >> $GITHUB_OUTPUT
-          grep -q "composer.lock"       changed_files.txt && echo "composer_deps_changed=true"   >> $GITHUB_OUTPUT || echo "composer_deps_changed=false"   >> $GITHUB_OUTPUT
-          grep -qE "plugins/wisesync/|themes/papersync/" changed_files.txt && echo "build_required=true" >> $GITHUB_OUTPUT || echo "build_required=false" >> $GITHUB_OUTPUT
-          grep -q "^plugins/wisesync/"  changed_files.txt && echo "wisesync_changed=true"      >> $GITHUB_OUTPUT || echo "wisesync_changed=false"      >> $GITHUB_OUTPUT
-          grep -q "^themes/papersync/"  changed_files.txt && echo "papersync_changed=true"      >> $GITHUB_OUTPUT || echo "papersync_changed=false"      >> $GITHUB_OUTPUT
+          echo "📃 Changed files:"; cat changed_files.txt
 
+          grep -q "package-lock.json"   changed_files.txt && echo "npm_deps_changed=true"     >> $GITHUB_OUTPUT || echo "npm_deps_changed=false"     >> $GITHUB_OUTPUT
+          grep -q "composer.lock"       changed_files.txt && echo "composer_deps_changed=true">> $GITHUB_OUTPUT || echo "composer_deps_changed=false">> $GITHUB_OUTPUT
+          grep -qE "plugins/wisesync/|themes/papersync/" changed_files.txt && echo "build_required=true" >> $GITHUB_OUTPUT || echo "build_required=false" >> $GITHUB_OUTPUT
+          grep -q "^plugins/wisesync/"  changed_files.txt && echo "wisesync_changed=true"  >> $GITHUB_OUTPUT || echo "wisesync_changed=false"  >> $GITHUB_OUTPUT
+          grep -q "^themes/papersync/"  changed_files.txt && echo "papersync_changed=true"  >> $GITHUB_OUTPUT || echo "papersync_changed=false"  >> $GITHUB_OUTPUT
+
+          # Changed plugins list
           if grep -qE "^plugins/" changed_files.txt; then
             echo "plugins_changed=true" >> $GITHUB_OUTPUT
             grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_plugins.txt
           else
             echo "plugins_changed=false" >> $GITHUB_OUTPUT && touch changed_plugins.txt
           fi
+
+          # Changed themes list
           if grep -qE "^themes/" changed_files.txt; then
             echo "themes_changed=true" >> $GITHUB_OUTPUT
             grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_themes.txt
@@ -109,24 +111,21 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: ♻️ Composer Cache Recall
+      - name: ♻️ Cache Composer
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
-        id: composer-cache-dir
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      - name: ♻️ Cache Composer Dependencies
+      - name: ♻️ Cache Composer Deps
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: actions/cache@v3
-        id: composer-cache
         with:
           path: ${{ steps.composer-cache-dir.outputs.dir }}
           key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: composer-${{ runner.os }}-
 
-      - name: ♻️ NPM Cache Recall
+      - name: ♻️ Cache NPM
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/cache@v3
-        id: node-modules-cache
         with:
           path: node_modules
           key: node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
@@ -148,11 +147,9 @@ jobs:
       - name: ⚡ Install WP-CLI
         if: steps.changes.outputs.build_required == 'true'
         run: |
-          echo "⚡ Fetching WP-CLI..."
-          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          curl -sSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp-cli.phar
           chmod +x wp-cli.phar
           sudo mv wp-cli.phar /usr/local/bin/wp
-          wp --info
 
       - name: 🛠️ Build Frontend Assets
         if: steps.changes.outputs.build_required == 'true'
@@ -165,13 +162,11 @@ jobs:
       - name: 🧹 Clean Up Build Artifacts
         if: steps.changes.outputs.build_required == 'true'
         run: |
-          echo "🧹 Tidying up…"
           rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
 
       - name: 📦 Prep $TARGET_BRANCH for Deployment
         run: |
-          echo "📦 Preparing branch: $TARGET_BRANCH"
-          git config --global user.name "Shubham Kumar Bansal"
+          git config --global user.name  "Shubham Kumar Bansal"
           git config --global user.email "shub@shubkb.com"
           mkdir -p deploy && cd deploy
           git init
@@ -179,34 +174,100 @@ jobs:
           git fetch --depth=1 origin $TARGET_BRANCH
           git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
 
-      - name: 🚚 Sync Plugin & Theme Updates
+      - name: 🚚 Sync Plugin Updates - Special & Changed
         run: |
-          # special plugins
-          rm -rf deploy/plugins/wisesync
           mkdir -p deploy/plugins
-          cp -r plugins/wisesync deploy/plugins/
-          # changed plugins
+          if [ "${{ steps.changes.outputs.build_required }}" = "true" ]; then
+            cp -r plugins/wisesync deploy/plugins/
+          fi
           while IFS= read -r plugin; do
-            rm -rf deploy/plugins/$plugin
-            cp -r plugins/$plugin deploy/plugins/
+            cp -r plugins/$plugin deploy/plugins/ || true
           done < changed_plugins.txt
-          # special themes
-          rm -rf deploy/themes/papersync
+
+      - name: 🚚 Sync Theme Updates - Special & Changed
+        run: |
           mkdir -p deploy/themes
-          cp -r themes/papersync deploy/themes/
-          # changed themes
+          if [ "${{ steps.changes.outputs.build_required }}" = "true" ]; then
+            cp -r themes/papersync deploy/themes/
+          fi
           while IFS= read -r theme; do
-            rm -rf deploy/themes/$theme
-            cp -r themes/$theme deploy/themes/
+            cp -r themes/$theme deploy/themes/ || true
           done < changed_themes.txt
 
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
           cd deploy
           git add --all
-          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "✅ Nothing new to deploy!"
+          git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "Nothing to deploy"
           git push origin HEAD:$TARGET_BRANCH
-          echo "🚀 All done! Site deployed to $TARGET_BRANCH 🎉"
+
+      - name: 🔄 Checkout & Sync wisesync Repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/wisesync
+          path: wisesync_repo
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 🔄 Update wisesync Repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
+        run: |
+          find wisesync_repo -mindepth 1 -not -path "wisesync_repo/.git*" -delete
+          cp -r plugins/wisesync/* wisesync_repo/
+          cd wisesync_repo
+          git config user.name  "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add --all
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wisesync"
+          git push
+
+      - name: 🔄 Checkout & Sync papersync Repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/papersync
+          path: papersync_repo
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 🔄 Update papersync Repo
+        if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
+        run: |
+          find papersync_repo -mindepth 1 -not -path "papersync_repo/.git*" -delete
+          cp -r themes/papersync/* papersync_repo/
+          cd papersync_repo
+          git config user.name  "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add --all
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for papersync"
+          git push
+
+      - name: 🔄 Checkout & Sync wordpress-sync Repo
+        if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
+        uses: actions/checkout@v3
+        with:
+          repository: shubkb07/wordpress-sync
+          path: wordpress_sync_repo
+          token: ${{ secrets.GH_PAT }}
+
+      - name: 🔄 Update wordpress-sync Repo
+        if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
+        run: |
+          cd wordpress_sync_repo
+          if [ "${{ steps.changes.outputs.wisesync_changed }}" = "true" ]; then
+            mkdir -p plugins
+            cp -r ../plugins/wisesync plugins/
+          fi
+          if [ "${{ steps.changes.outputs.papersync_changed }}" = "true" ]; then
+            mkdir -p themes
+            cp -r ../themes/papersync themes/
+          fi
+          rm -f CODE_OF_CONDUCT.md LICENSE.md README.md CONTRIBUTING.md SECURITY.md SUPPORT.md
+          cp -f ../CODE_OF_CONDUCT.md ../LICENSE.md ../README.md ../CONTRIBUTING.md ../SECURITY.md ../SUPPORT.md ./
+          git config user.name  "Shubham Kumar Bansal"
+          git config user.email "shub@shubkb.com"
+          git add --all
+          git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wordpress-sync"
+          git push
 
   release:
     name: 📦 Parse & Create Releases
@@ -225,63 +286,48 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          commit_message=$(git log -1 --pretty=format:%B)
+          full_msg=$(git log -1 --pretty=%B)
 
-          # 1) Extract version
-          version_line=$(echo "$commit_message" | sed -n '1p')
-          if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
+          # Extract version
+          ver_line=$(echo "$full_msg" | sed -n '1p')
+          if [[ $ver_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
             [[ $version != v* ]] && version="v$version"
           else
-            echo "is_valid=false" >> $GITHUB_OUTPUT
-            exit 0
+            echo "is_valid=false" >> $GITHUB_OUTPUT && exit 0
           fi
 
-          # 2) Grab parameters line (skip blanks)
-          params=$(echo "$commit_message" | tail -n +2 | grep -v '^[[:space:]]*$' | head -n1)
-
-          # 3) Extract quoted components
-          components=()
+          # Extract params line
+          params=$(echo "$full_msg" | tail -n +2 | grep -v '^[[:space:]]*$' | head -n1)
+          comps=()
           while [[ $params =~ \"([^\"]*)\" ]]; do
-            components+=("${BASH_REMATCH[1]}")
-            params=${params#*\"${components[-1]}\"}
+            comps+=("${BASH_REMATCH[1]}")
+            params=${params#*\"${comps[-1]}\"}
           done
 
-          # 4) Must have 5 parts
-          if [[ ${#components[@]} -lt 5 ]]; then
-            echo "is_valid=false" >> $GITHUB_OUTPUT
-            exit 0
+          if [[ ${#comps[@]} -lt 5 ]]; then
+            echo "is_valid=false" >> $GITHUB_OUTPUT && exit 0
           fi
 
-          # 5) Assign
-          release_type="${components[0]}"
-          wisesync_title="${components[1]}"
-          papersync_title="${components[2]}"
-          wisesync_desc="${components[3]}"
-          papersync_desc="${components[4]}"
-
-          # 6) Pass back
           echo "version=$version"                  >> $GITHUB_OUTPUT
-          echo "wisesync_title=$wisesync_title"    >> $GITHUB_OUTPUT
-          echo "papersync_title=$papersync_title"  >> $GITHUB_OUTPUT
-          echo "wisesync_desc<<EOF"                >> $GITHUB_OUTPUT
-          echo "$wisesync_desc"
-          echo "EOF"                               >> $GITHUB_OUTPUT
-          echo "papersync_desc<<EOF"               >> $GITHUB_OUTPUT
-          echo "$papersync_desc"
-          echo "EOF"                               >> $GITHUB_OUTPUT
-          echo "is_valid=true"                    >> $GITHUB_OUTPUT
+          echo "wisesync_desc<<EOF"               >> $GITHUB_OUTPUT
+          echo "${comps[3]}"
+          echo "EOF"                              >> $GITHUB_OUTPUT
+          echo "papersync_desc<<EOF"              >> $GITHUB_OUTPUT
+          echo "${comps[4]}"
+          echo "EOF"                              >> $GITHUB_OUTPUT
+          echo "is_valid=true"                   >> $GITHUB_OUTPUT
 
       - name: 🏷️ Create Release for Main & WP-Sync
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
+          name: ${{ needs.build_and_deploy.outputs.commit_message }}
           body: |
             ${{ steps.parse_release.outputs.wisesync_desc }}
 
             ${{ steps.parse_release.outputs.papersync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.release_type, 'p') }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏷️ Create Release for WiseSync
@@ -289,9 +335,9 @@ jobs:
         with:
           repository: shubkb07/wisesync
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ steps.parse_release.outputs.wisesync_title }}
+          name: ${{ needs.build_and_deploy.outputs.commit_message }}
           body: ${{ steps.parse_release.outputs.wisesync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.release_type, 'p') }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏷️ Create Release for PaperSync
@@ -299,7 +345,7 @@ jobs:
         with:
           repository: shubkb07/papersync
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ steps.parse_release.outputs.papersync_title }}
+          name: ${{ needs.build_and_deploy.outputs.commit_message }}
           body: ${{ steps.parse_release.outputs.papersync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.release_type, 'p') }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
           token: ${{ secrets.GITHUB_TOKEN }}
