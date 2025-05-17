@@ -110,10 +110,13 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: ♻️ Cache Composer
+        id: composer-cache-dir
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: ♻️ Cache Composer Deps
+        id: composer-cache
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: actions/cache@v3
         with:
@@ -122,6 +125,7 @@ jobs:
           restore-keys: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-$(date +%B)-
 
       - name: ♻️ Cache NPM
+        id: node-modules-cache
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/cache@v3
         with:
