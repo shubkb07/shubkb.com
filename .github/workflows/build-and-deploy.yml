@@ -60,14 +60,11 @@ jobs:
           CURRENT_COMMIT=$(git rev-parse HEAD)
           echo "🆔 Current commit: $CURRENT_COMMIT"
 
-          # Try to fetch the remote target branch; ignore errors if it doesn't exist
           git fetch origin $TARGET_BRANCH:refs/remotes/origin/$TARGET_BRANCH || true
 
           if git rev-parse --verify origin/$TARGET_BRANCH >/dev/null 2>&1; then
-            echo "🔄 Diffing against origin/$TARGET_BRANCH"
             git diff --name-only origin/$TARGET_BRANCH $CURRENT_COMMIT > changed_files.txt
           else
-            echo "⚠️ origin/$TARGET_BRANCH not found; diffing against HEAD^"
             git diff --name-only HEAD^ $CURRENT_COMMIT > changed_files.txt
           fi
 
@@ -79,20 +76,20 @@ jobs:
           grep -q "^plugins/wisesync/"  changed_files.txt && echo "wisesync_changed=true"  >> $GITHUB_OUTPUT || echo "wisesync_changed=false"  >> $GITHUB_OUTPUT
           grep -q "^themes/papersync/"  changed_files.txt && echo "papersync_changed=true"  >> $GITHUB_OUTPUT || echo "papersync_changed=false"  >> $GITHUB_OUTPUT
 
-          # Changed plugins list
           if grep -qE "^plugins/" changed_files.txt; then
             echo "plugins_changed=true" >> $GITHUB_OUTPUT
             grep -E "^plugins/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_plugins.txt
           else
-            echo "plugins_changed=false" >> $GITHUB_OUTPUT && touch changed_plugins.txt
+            echo "plugins_changed=false" >> $GITHUB_OUTPUT
+            touch changed_plugins.txt
           fi
 
-          # Changed themes list
           if grep -qE "^themes/" changed_files.txt; then
             echo "themes_changed=true" >> $GITHUB_OUTPUT
             grep -E "^themes/" changed_files.txt | cut -d'/' -f2 | sort -u > changed_themes.txt
           else
-            echo "themes_changed=false" >> $GITHUB_OUTPUT && touch changed_themes.txt
+            echo "themes_changed=false" >> $GITHUB_OUTPUT
+            touch changed_themes.txt
           fi
 
       - name: 🐘 Boot PHP
@@ -161,8 +158,7 @@ jobs:
 
       - name: 🧹 Clean Up Build Artifacts
         if: steps.changes.outputs.build_required == 'true'
-        run: |
-          rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
+        run: rm -rf ./plugins/wisesync/blocks/src ./themes/papersync/blocks/src
 
       - name: 📦 Prep $TARGET_BRANCH for Deployment
         run: |
@@ -170,9 +166,9 @@ jobs:
           git config --global user.email "shub@shubkb.com"
           mkdir -p deploy && cd deploy
           git init
-          git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
-          git fetch --depth=1 origin $TARGET_BRANCH
-          git checkout $TARGET_BRANCH || git checkout --orphan $TARGET_BRANCH
+          git.remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          git.fetch --depth=1 origin $TARGET_BRANCH
+          git.checkout $TARGET_BRANCH || git.checkout --orphan $TARGET_BRANCH
 
       - name: 🚚 Sync Plugin Updates - Special & Changed
         run: |
@@ -267,7 +263,6 @@ jobs:
           git config user.email "shub@shubkb.com"
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wordpress-sync"
-          git push
 
   release:
     name: 📦 Parse & Create Releases
@@ -288,64 +283,79 @@ jobs:
           set -euo pipefail
           full_msg=$(git log -1 --pretty=%B)
 
-          # Extract version
-          ver_line=$(echo "$full_msg" | sed -n '1p')
-          if [[ $ver_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
+          # Extract version from first line
+          version_line="${full_msg%%$'\n'*}"
+          if [[ $version_line =~ ^Release:\ ([v]?[0-9]+\.[0-9]+\.[0-9]+(-[[:alnum:]]+)?)$ ]]; then
             version="${BASH_REMATCH[1]}"
             [[ $version != v* ]] && version="v$version"
           else
-            echo "is_valid=false" >> $GITHUB_OUTPUT && exit 0
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
-          # Extract params line
-          params=$(echo "$full_msg" | tail -n +2 | grep -v '^[[:space:]]*$' | head -n1)
-          comps=()
-          while [[ $params =~ \"([^\"]*)\" ]]; do
-            comps+=("${BASH_REMATCH[1]}")
-            params=${params#*\"${comps[-1]}\"}
+          # Drop first line, keep rest
+          rest="${full_msg#*$'\n'}"
+
+          # Extract exactly 4 quoted components
+          components=()
+          while [[ ${#components[@]} -lt 4 && $rest =~ \"([^\"]*)\" ]]; do
+            components+=("${BASH_REMATCH[1]}")
+            rest=${rest#*\"${components[-1]}\"}
           done
 
-          if [[ ${#comps[@]} -lt 5 ]]; then
-            echo "is_valid=false" >> $GITHUB_OUTPUT && exit 0
+          if [[ ${#components[@]} -lt 4 ]]; then
+            echo "Invalid release format: found ${#components[@]} quoted parts, expected 4" >&2
+            echo "is_valid=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
 
+          wisesync_title="${components[0]}"
+          papersync_title="${components[1]}"
+          wisesync_desc="${components[2]}"
+          papersync_desc="${components[3]}"
+
           echo "version=$version"                  >> $GITHUB_OUTPUT
-          echo "wisesync_desc<<EOF"               >> $GITHUB_OUTPUT
-          echo "${comps[3]}"
+          echo "wisesync_title=$wisesync_title"    >> $GITHUB_OUTPUT
+          echo "papersync_title=$papersync_title"  >> $GITHUB_OUTPUT
+
+          echo "wisesync_desc<<EOF"                >> $GITHUB_OUTPUT
+          echo "$wisesync_desc"
           echo "EOF"                              >> $GITHUB_OUTPUT
-          echo "papersync_desc<<EOF"              >> $GITHUB_OUTPUT
-          echo "${comps[4]}"
+
+          echo "papersync_desc<<EOF"               >> $GITHUB_OUTPUT
+          echo "$papersync_desc"
           echo "EOF"                              >> $GITHUB_OUTPUT
-          echo "is_valid=true"                   >> $GITHUB_OUTPUT
+
+          echo "is_valid=true"                    >> $GITHUB_OUTPUT
 
       - name: 🏷️ Create Release for Main & WP-Sync
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ needs.build_and_deploy.outputs.commit_message }}
+          name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
           body: |
             ${{ steps.parse_release.outputs.wisesync_desc }}
 
             ${{ steps.parse_release.outputs.papersync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GH_PAT }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for WiseSync
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GH_PAT }}
           repository: shubkb07/wisesync
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ needs.build_and_deploy.outputs.commit_message }}
+          name: ${{ steps.parse_release.outputs.wisesync_title }}
           body: ${{ steps.parse_release.outputs.wisesync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GH_PAT }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for PaperSync
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GH_PAT }}
           repository: shubkb07/papersync
           tag_name: ${{ steps.parse_release.outputs.version }}
-          name: ${{ needs.build_and_deploy.outputs.commit_message }}
+          name: ${{ steps.parse_release.outputs.papersync_title }}
           body: ${{ steps.parse_release.outputs.papersync_desc }}
-          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') }}
-          token: ${{ secrets.GH_PAT }}
+          prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
