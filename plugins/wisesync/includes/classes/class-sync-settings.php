@@ -25,6 +25,13 @@ class Sync_Settings {
 	private $menus = array();
 
 	/**
+	 * Single Settings array.
+	 *
+	 * @var array
+	 */
+	private $single_settings = array();
+
+	/**
 	 * Sync Menus Array.
 	 *
 	 * @var array
@@ -782,20 +789,62 @@ class Sync_Settings {
 	 *
 	 * @param string $env Environment.
 	 */
-	public function add_development_settings( $env ) {}
+	public function add_development_settings() {
+		$this->add_wp_menu(
+			'development-settings',
+			__( 'Sync Development Settings', 'wisesync' ),
+			array(
+				'menu'      => false,
+				'menu_name' => 'Developer Debug',
+				'callback'  => array( $this, 'developer_settings_view' ),
+			),
+			100,
+			'both' 
+		);
+	}
+
+	/**
+	 * Developer Settings View.
+	 */
+	public function developer_settings_view() {
+		// Add your developer settings view code here.
+		ob_start();
+		?>
+		<code>
+			<?php
+			// Check if development.json is present in WP_CONTENT_DIR.
+			global $sync_filesystem;
+			$development_file = WP_CONTENT_DIR . '/development.json';
+			if ( $sync_filesystem->exists( $development_file ) ) {
+				$development_data = $sync_filesystem->get_contents( $development_file );
+				$development_data = json_decode( $development_data, true );
+
+				if ( is_array( $development_data ) && ! empty( $development_data ) ) {
+					echo '<pre>' . esc_html( print_r( $development_data, true ) ) . '</pre>';
+				} else {
+					echo '<p>' . esc_html__( 'No development settings found.', 'wisesync' ) . '</p>';
+				}
+			} else {
+				echo '<p>' . esc_html__( 'Development settings file not found.', 'wisesync' ) . '</p>';
+			}
+			?>
+		</code>
+		<?php
+		return ob_get_clean();
+	}
 
 	/**
 	 * Add WP menu.
 	 *
-	 * @param string     $menu_slug Menu slug.
-	 * @param string     $menu_name Menu name.
-	 * @param int        $position Menu position.
-	 * @param bool|array $create_sync_menu Create sync menu.
-	 * @param string     $settings_level Settings level (site, network, both).
+	 * @param string $menu_slug Menu slug.
+	 * @param string $menu_name Menu name.
+	 * @param array  $create_sync_menu Create sync menu.
+	 * @param int    $position Menu position.
+	 * @param string $settings_level Settings level (site, network, both).
 	 *
 	 * @since 1.0.0
 	 */
-	public function add_wp_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = false, $settings_level = 'site' ) {
+	public function add_wp_menu( $menu_slug, $menu_name, $create_sync_menu, $position = 100, $settings_level = 'site' ) {
 
 		if ( empty( $menu_slug ) || ! is_string( $menu_slug ) || strpos( $menu_slug, 'sync' ) !== false || ! preg_match( '/^[a-z][a-z0-9_-]*$/', $menu_slug ) ) {
 			return;
@@ -804,6 +853,18 @@ class Sync_Settings {
 		if ( empty( $menu_name ) || ! is_string( $menu_name ) ) {
 			return;
 		}
+
+		// Check if create_sync_menu is not array and also if create_sync_menu[menu] not set or not bool, and create_sync_menu[menu_name] and create_sync_menu[callback] are not set or not string and not callable, return early.
+		if (
+			! is_array( $create_sync_menu ) || ! isset( $create_sync_menu['menu'] )
+			|| ! is_bool( $create_sync_menu['menu'] ) || ! isset( $create_sync_menu['menu_name'] )
+			|| ! is_string( $create_sync_menu['menu_name'] ) || ! isset( $create_sync_menu['callback'] )
+			|| ! is_callable( $create_sync_menu['callback'] )
+		) {
+			return;
+		}
+
+	
 
 		if ( ! is_numeric( $position ) || $position < 0 ) {
 			return;
@@ -816,12 +877,12 @@ class Sync_Settings {
 		$this->menus[ $menu_slug ] = array(
 			'menu_name'        => $menu_name,
 			'position'         => $position,
-			'create_sync_menu' => false === $create_sync_menu ? false : true,
+			'create_sync_menu' => false === $create_sync_menu['menu'] ? false : true,
 			'settings_level'   => $settings_level,
 		);
 
 		// Check if, $create_sync_menu is array and have keys menu_name (required) which is not empty and string, and icon_url (optional, default null, else string and null can be set in array), position will always be -1 and sub_menu will always be false.
-		if ( is_array( $create_sync_menu ) && isset( $create_sync_menu['menu_name'] ) && ! empty( $create_sync_menu['menu_name'] ) && is_string( $create_sync_menu['menu_name'] ) && isset( $create_sync_menu['callback'] ) && is_callable( $create_sync_menu['callback'] ) ) {
+		if ( is_array( $create_sync_menu ) && true === $create_sync_menu['menu'] && isset( $create_sync_menu['menu_name'] ) && ! empty( $create_sync_menu['menu_name'] ) && is_string( $create_sync_menu['menu_name'] ) && isset( $create_sync_menu['callback'] ) && is_callable( $create_sync_menu['callback'] ) ) {
 			$this->sync_menus[ $menu_slug ][ $menu_slug ] = array(
 				'menu_name' => $create_sync_menu['menu_name'],
 				'icon_url'  => isset( $create_sync_menu['icon_url'] ) ? $create_sync_menu['icon_url'] : null,
@@ -830,6 +891,9 @@ class Sync_Settings {
 			);
 
 			add_filter( 'sync_register_menu_' . $menu_slug, $create_sync_menu['callback'], 10, 2 );
+		} elseif ( false === $create_sync_menu['menu'] ) {
+			$this->single_settings[ $menu_slug ] = $menu_name;
+			add_filter( 'sync_register_single_settings_' . $menu_slug, $create_sync_menu['callback'], 10, 2 );
 		}
 	}
 
@@ -963,7 +1027,7 @@ class Sync_Settings {
 
 		if ( in_array( wp_get_environment_type(), array( 'staging', 'development' ) ) ) {
 			// Add Development Page.
-			$this->add_development_settings( wp_get_environment_type() );
+			$this->add_development_settings();
 		}
 
 		if ( $sync_ajax->is_ajax ) {
@@ -1012,7 +1076,7 @@ class Sync_Settings {
 		$page_data = array(
 			'name'    => $action_name,
 			'slug'    => $slug,
-			'puspose' => 'menu_submit',
+			'purpose' => 'menu_submit',
 		);
 
 		// Append the parent slug if it exists.
@@ -1130,7 +1194,7 @@ class Sync_Settings {
 
 		if ( $instance['return_html'] ) {
 			$load_pd            = $pd;
-			$load_pd['puspose'] = 'menu_load';
+			$load_pd['purpose'] = 'menu_load';
 			$html_filter_name   = 'sync_register_menu_' . $slug;
 			$response['html']   = apply_filters( $instance['filter_name'], '', $load_pd );
 		}
@@ -1211,6 +1275,28 @@ class Sync_Settings {
 		// Remove sync- from the plugin_page to get the actual menu slug.
 		$current_settings_page = str_replace( 'sync-', '', $plugin_page );
 
+		// check if its single setting page or multi menu settings page.
+		if ( isset( $this->single_settings[ $current_settings_page ] ) ) {
+			$single_settings_page = true;
+			$page_title           = $this->single_settings[ $current_settings_page ];
+			$page_content         = apply_filters(
+				'sync_register_single_settings_' . $current_settings_page,
+				'',
+				array(
+					'name'    => $current_settings_page,
+					'purpose' => 'menu_load',
+					'slug'    => $current_settings_page,
+				) 
+			);
+			error_log( 'Single Settings Page: ' . $current_settings_page );
+			error_log( 'Page Title: ' . $page_title );
+			error_log( 'Page Content: ' . $page_content );
+		} elseif ( $this->sync_menus[ $current_settings_page ] ) {
+			$single_settings_page = false;
+		} else {
+			return; // Invalid settings page.
+		}
+
 		// Get the first menu item dynamically.
 		$default_menu_slug = '';
 		if ( isset( $this->sync_menus[ $current_settings_page ] ) && is_array( $this->sync_menus[ $current_settings_page ] ) ) {
@@ -1281,7 +1367,9 @@ class Sync_Settings {
 					<h1 class="sync-page-title">
 						<?php
 						// Set the default page title based on the first menu.
-						if ( ! empty( $default_menu_slug ) && isset( $current_sync_menu[ $default_menu_slug ]['menu_name'] ) ) {
+						if ( ! empty( $page_title ) && isset( $page_title ) ) {
+							echo esc_html( $page_title );
+						} elseif ( ! empty( $default_menu_slug ) && isset( $current_sync_menu[ $default_menu_slug ]['menu_name'] ) ) {
 							echo esc_html( $current_sync_menu[ $default_menu_slug ]['menu_name'] );
 						} else {
 							echo 'Dashboard';
@@ -1291,7 +1379,14 @@ class Sync_Settings {
 				</div>
 
 				<!-- Dynamic content container - Now empty to be filled by JS -->
-				<div id="sync-dynamic-content" class="sync-dynamic-content"></div>
+				<div id="sync-dynamic-content" class="sync-dynamic-content">
+					<?php
+					if ( $page_content ) {
+						// Output the page content.
+						$this->sanitize_form_output( $page_content );
+					}
+					?>
+				</div>
 			</main>
 		</div>
 
@@ -1306,7 +1401,7 @@ class Sync_Settings {
 					$page_data = array(
 						'name'    => $current_menu['menu_name'],
 						'slug'    => $menu_slug,
-						'puspose' => 'menu_load',
+						'purpose' => 'menu_load',
 					);
 
 					// Apply filter for this menu page.
@@ -1331,7 +1426,7 @@ class Sync_Settings {
 								'name'        => $sub_menu['menu_name'],
 								'parent_slug' => $menu_slug,
 								'slug'        => $sub_menu_slug,
-								'puspose'     => 'menu_load',
+								'purpose'     => 'menu_load',
 							);
 
 							// Apply filter for this submenu page.
@@ -1455,7 +1550,7 @@ class Sync_Settings {
 		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
 		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 
-		if ( isset( $page_details['puspose'] ) && 'menu_load' === $page_details['puspose'] ) {
+		if ( isset( $page_details['purpose'] ) && 'menu_load' === $page_details['purpose'] ) {
 
 			// Create nonce key.
 			$nonce_action = 'sync_setting_' . $full_slug;
@@ -1490,7 +1585,7 @@ class Sync_Settings {
 			<?php
 
 			return ob_get_clean();
-		} elseif ( isset( $page_details['puspose'] ) && 'menu_submit' === $page_details['puspose'] ) {
+		} elseif ( isset( $page_details['purpose'] ) && 'menu_submit' === $page_details['purpose'] ) {
 
 			if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
 				sync_send_json(
@@ -1522,7 +1617,7 @@ class Sync_Settings {
 		$full_slug     = $parent_slug ? $parent_slug . '_' . $slug : $slug;
 		$full_slug_adv = $parent_slug ? $parent_slug . '_sub_' . $slug : $slug;
 
-		if ( isset( $page_details['puspose'] ) && 'menu_load' === $page_details['puspose'] ) {
+		if ( isset( $page_details['purpose'] ) && 'menu_load' === $page_details['purpose'] ) {
 			// Create nonce key.
 			$nonce_action = 'sync_setting_' . $full_slug;
 			$nonce        = wp_create_nonce( $nonce_action );
@@ -1547,7 +1642,7 @@ class Sync_Settings {
 
 			<?php
 			return ob_get_clean();
-		} elseif ( isset( $page_details['puspose'] ) && 'menu_submit' === $page_details['puspose'] ) {
+		} elseif ( isset( $page_details['purpose'] ) && 'menu_submit' === $page_details['purpose'] ) {
 
 			if ( empty( $settings_array ) || ! is_array( $settings_array ) || ! $this->validate_input_sync_options( $settings_array ) ) {
 				sync_send_json(

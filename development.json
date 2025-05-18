@@ -1,0 +1,27 @@
+{
+  "environment": "staging",
+  "last_commit_message": "fix: Update cache keys for Composer and Node.js to remove date dependency for improved consistency  ",
+  "data": [
+    {
+      "pr_title": "Adding Template Class and Its Wrapper Funtions",
+      "pr_desc": "# \ud83d\ude80 Pull Request Template\r\n\r\n## Description\r\n\r\nPlease include a summary of the change and what issue is fixed or feature is added.\r\n\r\nFixes: # (link issue number if applicable)\r\n\r\n## Type of change\r\n\r\n- [ ] Bug fix\r\n- [ ] New feature\r\n- [ ] Breaking change\r\n- [ ] Documentation update\r\n\r\n## Related Plugins or Themes\r\n\r\nList any themes/plugins affected.\r\n\r\n## Screenshots (if UI changes)\r\n\r\n_Please attach screenshots/gifs if relevant._\r\n\r\n## Checklist\r\n\r\n- [ ] I have tested the code on my local WordPress.\r\n- [ ] I have followed WordPress PHPCS rules.\r\n- [ ] I have added tests or explained why not applicable.\r\n- [ ] My code follows the plugin\u2019s coding style.\r\n\r\n---\r\n\r\nThanks for contributing to **WiseSync**! \u2764\ufe0f\r\n",
+      "pr_head": "feat/plugin-template",
+      "pr_base": "dev",
+      "pr_url": "https://github.com/shubkb07/sync-web/pull/38",
+      "commits": [
+        "feat: Add constructor and create_template method to Sync_Template class",
+        "feat: Update caching keys for Composer and NPM to include target branch and month",
+        "feat: Update build-and-deploy workflow to restrict linting to master branch and enhance PHPCS reporting in PR workflow",
+        "feat: Simplify PHPCS workflow by removing caching and push count logic, and enhance report output",
+        "fix: Update PR environment link workflow to use head branch for environment URL determination",
+        "feat: Enhance PR environment link workflow with detailed environment info and improved comment formatting",
+        "fix: Correct typos in Sync_Template class documentation",
+        "refactor: Rename build_and_deploy job to build_deploy_and_release and streamline release condition checks",
+        "feat: Add developer settings functionality for staging and development environments",
+        "feat: Refactor PR data generation to use Python script for improved error handling and flexibility",
+        "feat: Add cache IDs for Composer and Node.js steps to improve caching efficiency",
+        "fix: Update cache keys for Composer and Node.js to remove date dependency for improved consistency"
+      ]
+    }
+  ]
+}

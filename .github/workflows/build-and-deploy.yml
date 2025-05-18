@@ -222,6 +222,7 @@ jobs:
           import os
           import subprocess
           import sys
+          from datetime import datetime
 
           # Configuration from environment variables
           environment = os.environ.get('ENVIRONMENT', 'unknown')
@@ -230,6 +231,7 @@ jobs:
           last_commit_message = os.environ.get('LAST_COMMIT_MESSAGE', '')
           repo = os.environ.get('GITHUB_REPOSITORY', '')
           token = os.environ.get('GITHUB_TOKEN', '')
+          workflow_run_id = os.environ.get('GITHUB_RUN_ID', '')
 
           def run_command(cmd):
               try:
@@ -289,25 +291,44 @@ jobs:
                       if not commits_output:
                           print(f"No output when fetching commits for PR #{pr_number}")
                           commit_messages = ['Error fetching commits']
+                          commit_count = 0
                       else:
                           try:
                               commits_data = json.loads(commits_output)
                               if isinstance(commits_data, list):
                                   commit_messages = [commit.get('commit', {}).get('message', '') for commit in commits_data]
+                                  commit_count = len(commits_data)
                               else:
                                   print(f"Expected list of commits but got: {type(commits_data)}")
                                   commit_messages = ['Error: Invalid commits format']
+                                  commit_count = 0
                           except json.JSONDecodeError:
                               print(f"Failed to parse commits JSON for PR #{pr_number}")
                               commit_messages = ['Error: Failed to parse commits']
+                              commit_count = 0
                       
-                      # Create PR entry
+                      # Extract PR labels
+                      pr_labels = [label.get('name', '') for label in pr.get('labels', [])]
+                      
+                      # Create PR entry with all requested fields
                       pr_entry = {
                           'pr_title': pr.get('title', ''),
                           'pr_desc': pr.get('body', '') or '',
                           'pr_head': pr.get('head', {}).get('ref', ''),
                           'pr_base': pr.get('base', {}).get('ref', ''),
                           'pr_url': pr.get('html_url', ''),
+                          'pr_number': pr.get('number', ''),
+                          'pr_status': pr.get('state', 'unknown'),
+                          'pr_created_at': pr.get('created_at', ''),
+                          'pr_updated_at': pr.get('updated_at', ''),
+                          'pr_author': pr.get('user', {}).get('login', ''),
+                          'pr_labels': pr_labels,
+                          'pr_draft': pr.get('draft', False),
+                          'pr_mergeable': pr.get('mergeable', None),
+                          'commit_count': commit_count,
+                          'files_changed': pr.get('changed_files', 0),
+                          'additions': pr.get('additions', 0),
+                          'deletions': pr.get('deletions', 0),
                           'commits': commit_messages
                       }
                       
@@ -321,9 +342,15 @@ jobs:
 
           # Generate JSON data
           pr_data = get_pr_data()
+          current_time = datetime.utcnow().isoformat() + 'Z'
+          
           json_data = {
               'environment': environment,
               'last_commit_message': last_commit_message,
+              'generated_at': current_time,
+              'updated_at': current_time,
+              'workflow_run_id': workflow_run_id,
+              'total_prs': len(pr_data),
               'data': pr_data
           }
 
@@ -344,6 +371,7 @@ jobs:
           export FILTER_BRANCH="$FILTER_BRANCH"
           export LAST_COMMIT_MESSAGE="${{ steps.last_commit.outputs.message }}"
           export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export GITHUB_RUN_ID="${{ github.run_id }}"
           python3 ../generate-pr-data.py
           
           # Debug: Show the generated file
