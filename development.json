@@ -1,9 +1,9 @@
 {
   "environment": "staging",
-  "last_commit_message": "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes  ",
-  "generated_at": "2025-05-18T12:55:12.904943Z",
-  "updated_at": "2025-05-18T12:55:12.904943Z",
-  "workflow_run_id": "15096144527",
+  "last_commit_message": "feat: Add delay before creating environment link comment to improve user experience  ",
+  "generated_at": "2025-05-18T12:59:38.806574Z",
+  "updated_at": "2025-05-18T12:59:38.806574Z",
+  "workflow_run_id": "15096184349",
   "total_prs": 1,
   "data": [
     {
@@ -15,14 +15,14 @@
       "pr_number": 38,
       "pr_status": "open",
       "pr_created_at": "2025-05-17T10:19:38Z",
-      "pr_updated_at": "2025-05-18T12:54:30Z",
+      "pr_updated_at": "2025-05-18T12:59:23Z",
       "pr_author": "shubkb07",
       "pr_labels": [],
       "pr_draft": false,
       "pr_mergeable": true,
-      "commit_count": 18,
+      "commit_count": 19,
       "files_changed": 5,
-      "additions": 856,
+      "additions": 861,
       "deletions": 59,
       "commits": [
         "feat: Add constructor and create_template method to Sync_Template class",
@@ -42,7 +42,8 @@
         "feat: Add detailed PR information retrieval including file changes, additions, and deletions",
         "fix: Clean up whitespace in build-and-deploy workflow for improved readability",
         "Remove: Test Development Json for local view.",
-        "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes"
+        "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes",
+        "feat: Add delay before creating environment link comment to improve user experience"
       ]
     }
   ]
