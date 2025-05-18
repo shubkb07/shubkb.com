@@ -29,41 +29,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete previous bot comments after 5 pushes
-        if: steps.pr_count.outputs.push_count != ''
+      - name: Delete all previous environment comments
         run: |
-          PUSH_COUNT="${{ steps.pr_count.outputs.push_count }}"
-          
-          # Check if this is a 5th push using bash arithmetic
-          if (( PUSH_COUNT % 5 != 0 )); then
-            echo "Not a 5th push (got $PUSH_COUNT), skipping comment cleanup"
-            exit 0
-          fi
-          
           PR_NUMBER=${{ github.event.pull_request.number }}
           BOT_LOGIN="github-actions[bot]"
           
           # Check if gh CLI is available
           if ! command -v gh &> /dev/null; then
             echo "GitHub CLI not found, using curl instead"
-            # Get comment IDs with curl (simplified example)
-            COMMENTS=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments" | \
-              jq '.[] | select(.user.login == "github-actions[bot]") | .id')
+            # Get all comments by the bot on this PR
+            curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments" > /tmp/comments.json
             
-            # Delete each comment with curl
-            for COMMENT_ID in $COMMENTS; do
+            # Filter comments that contain "🚀 Preview Environment" in the body
+            COMMENT_IDS=$(jq -r '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("🚀 Preview Environment"))) | .id' /tmp/comments.json)
+            
+            # Delete each matching comment
+            for COMMENT_ID in $COMMENT_IDS; do
+              echo "Deleting comment ID: $COMMENT_ID"
               curl -s -X DELETE -H "Authorization: token $GITHUB_TOKEN" \
                 "https://api.github.com/repos/${{ github.repository }}/issues/comments/$COMMENT_ID"
             done
           else
-            # Get all comments by the bot on this PR
-            COMMENTS=$(gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments --jq '.[] | select(.user.login == "github-actions[bot]") | .id')
+            # Get all comments by the bot on this PR that contain "🚀 Preview Environment"
+            gh api repos/${{ github.repository }}/issues/$PR_NUMBER/comments --paginate \
+              --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("🚀 Preview Environment"))) | .id' > /tmp/comment_ids.txt
             
-            # Delete each comment
-            for COMMENT_ID in $COMMENTS; do
-              gh api repos/${{ github.repository }}/issues/comments/$COMMENT_ID -X DELETE
-            done
+            # Delete each matching comment
+            while IFS= read -r COMMENT_ID; do
+              if [ ! -z "$COMMENT_ID" ]; then
+                echo "Deleting comment ID: $COMMENT_ID"
+                gh api repos/${{ github.repository }}/issues/comments/$COMMENT_ID -X DELETE
+              fi
+            done < /tmp/comment_ids.txt
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
