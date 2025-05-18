@@ -107,32 +107,166 @@ msgstr ""
 msgid "Mu-Plugin Load Error"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:795
+#: includes/classes/class-sync-settings.php:793
 msgid "Sync Development Settings"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:825
-msgid "No development settings found."
+#: includes/classes/class-sync-settings.php:826
+msgid "Development Settings"
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:828
+#: includes/classes/class-sync-settings.php:830
+msgid "Environment Information"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:834
+msgid "Environment"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:835
+#: includes/classes/class-sync-settings.php:902
+#: includes/classes/class-sync-settings.php:904
+msgid "Not specified"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:838
+msgid "Last Commit Message"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:839
+#: includes/classes/class-sync-settings.php:843
+#: includes/classes/class-sync-settings.php:847
+#: includes/classes/class-sync-settings.php:851
+#: includes/classes/class-sync-settings.php:885
+#: includes/classes/class-sync-settings.php:909
+#: includes/classes/class-sync-settings.php:913
+msgid "Not available"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:842
+msgid "Generated At"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:846
+#: includes/classes/class-sync-settings.php:912
+msgid "Updated At"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:850
+msgid "Workflow Run ID"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:854
+msgid "Total PRs"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:864
+msgid "Pull Requests"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:879
+msgid "Untitled PR"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:884
+msgid "PR Number"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:888
+msgid "Status"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:891
+#: includes/classes/class-sync-settings.php:897
+#: includes/classes/class-sync-settings.php:933
+msgid "Unknown"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:896
+msgid "Author"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:900
+msgid "Branch"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:908
+msgid "Created At"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:916
+#: includes/classes/class-sync-settings.php:957
+msgid "Commits"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:920
+msgid "Files Changed"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:924
+msgid "Changes"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:932
+msgid "Draft"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:933
+msgid "Yes"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:933
+msgid "No"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:937
+msgid "PR URL"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:947
+#: blocks/build/cookie-banner/index.js:1
+#: blocks/src/cookie-banner/edit.js:276
+#: blocks/src/cookie-banner/edit.js:292
+#: blocks/src/cookie-banner/edit.js:308
+#: blocks/src/cookie-banner/edit.js:324
+#: blocks/src/cookie-banner/edit.js:340
+msgid "Description"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:971
+msgid "Labels"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:984
+msgid "No pull request data available."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:992
+msgid "Error: Invalid JSON format in development settings file."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:999
+msgid "Error: Unable to read development settings file."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:1006
 msgid "Development settings file not found."
 msgstr ""
 
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:1135
+#: includes/classes/class-sync-settings.php:1312
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:1149
+#: includes/classes/class-sync-settings.php:1326
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:1594
-#: includes/classes/class-sync-settings.php:1651
+#: includes/classes/class-sync-settings.php:1771
+#: includes/classes/class-sync-settings.php:1828
 msgid "Invalid settings array."
 msgstr ""
 
