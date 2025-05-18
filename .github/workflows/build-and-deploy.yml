@@ -242,6 +242,30 @@ jobs:
                   print(f"Error details: {e.stderr}")
                   return None
 
+          def get_pr_details(pr_number):
+              """Get detailed PR information including file changes, additions, deletions"""
+              try:
+                  pr_detail_cmd = f'curl -s -H "Authorization: token {token}" "https://api.github.com/repos/{repo}/pulls/{pr_number}"'
+                  pr_detail_output = run_command(pr_detail_cmd)
+                  
+                  if pr_detail_output:
+                      pr_details = json.loads(pr_detail_output)
+                      return {
+                          'changed_files': pr_details.get('changed_files', 0),
+                          'additions': pr_details.get('additions', 0),
+                          'deletions': pr_details.get('deletions', 0),
+                          'mergeable': pr_details.get('mergeable', None)
+                      }
+              except Exception as e:
+                  print(f"Error fetching PR details for #{pr_number}: {e}")
+              
+              return {
+                  'changed_files': 0,
+                  'additions': 0,
+                  'deletions': 0,
+                  'mergeable': None
+              }
+
           def get_pr_data():
               try:
                   # Get open PRs
@@ -278,11 +302,13 @@ jobs:
                           if head_ref not in filter_branches:
                               filtered_prs.append(pr)
                   
-                  # Process each PR to get commits
+                  # Process each PR to get commits and detailed information
                   results = []
                   for pr in filtered_prs:
                       pr_number = pr.get('number', '')
                       commits_url = pr.get('commits_url', '')
+                      
+                      print(f"Processing PR #{pr_number}: {pr.get('title', '')}")
                       
                       # Get commits for this PR
                       commits_cmd = f'curl -s -H "Authorization: token {token}" "{commits_url}"'
@@ -307,41 +333,44 @@ jobs:
                               commit_messages = ['Error: Failed to parse commits']
                               commit_count = 0
                       
+                      # Get detailed PR information (files changed, additions, deletions)
+                      pr_details = get_pr_details(pr_number)
+                      
                       # Extract PR labels
                       pr_labels = [label.get('name', '') for label in pr.get('labels', [])]
                       
                       # Create PR entry with all requested fields
                       pr_entry = {
-                          'pr_title': pr.get('title', ''),
-                          'pr_desc': pr.get('body', '') or '',
-                          'pr_head': pr.get('head', {}).get('ref', ''),
-                          'pr_base': pr.get('base', {}).get('ref', ''),
-                          'pr_url': pr.get('html_url', ''),
-                          'pr_number': pr.get('number', ''),
-                          'pr_status': pr.get('state', 'unknown'),
-                          'pr_created_at': pr.get('created_at', ''),
-                          'pr_updated_at': pr.get('updated_at', ''),
-                          'pr_author': pr.get('user', {}).get('login', ''),
-                          'pr_labels': pr_labels,
-                          'pr_draft': pr.get('draft', False),
-                          'pr_mergeable': pr.get('mergeable', None),
-                          'commit_count': commit_count,
-                          'files_changed': pr.get('changed_files', 0),
-                          'additions': pr.get('additions', 0),
-                          'deletions': pr.get('deletions', 0),
-                          'commits': commit_messages
-                      }
-                      
-                      results.append(pr_entry)
+                         'pr_title': pr.get('title', ''),
+                         'pr_desc': pr.get('body', '') or '',
+                         'pr_head': pr.get('head', {}).get('ref', ''),
+                         'pr_base': pr.get('base', {}).get('ref', ''),
+                         'pr_url': pr.get('html_url', ''),
+                         'pr_number': pr.get('number', ''),
+                         'pr_status': pr.get('state', 'unknown'),
+                         'pr_created_at': pr.get('created_at', ''),
+                         'pr_updated_at': pr.get('updated_at', ''),
+                         'pr_author': pr.get('user', {}).get('login', ''),
+                         'pr_labels': pr_labels,
+                         'pr_draft': pr.get('draft', False),
+                         'pr_mergeable': pr_details['mergeable'],
+                         'commit_count': commit_count,
+                         'files_changed': pr_details['changed_files'],
+                         'additions': pr_details['additions'],
+                         'deletions': pr_details['deletions'],
+                         'commits': commit_messages
+                     }
+                     
+                     results.append(pr_entry)
                   
                   return results
               
               except Exception as e:
                   print(f"Error fetching PRs: {e}")
                   return []
-
-          # Generate JSON data
-          pr_data = get_pr_data()
+ 
+           # Generate JSON data
+           pr_data = get_pr_data()
           current_time = datetime.utcnow().isoformat() + 'Z'
           
           json_data = {
@@ -353,17 +382,17 @@ jobs:
               'total_prs': len(pr_data),
               'data': pr_data
           }
-
+ 
           # Write to file
           with open('development.json', 'w') as f:
               json.dump(json_data, f, indent=2)
-
+ 
           print(f"Generated development.json with {len(pr_data)} PRs.")
           EOF
-
+ 
           # Make script executable
           chmod +x generate-pr-data.py
-
+ 
           # Run the script
           cd deploy
           export ENVIRONMENT="$ENVIRONMENT"
@@ -378,14 +407,14 @@ jobs:
           echo "Generated development.json file:"
           ls -la development.json
           cat development.json
-
+ 
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
           cd deploy
           git add --all
           git commit -m "Deploy build: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }} (SHA:${{ github.sha }})" || echo "Nothing to deploy"
           git push origin HEAD:$TARGET_BRANCH
-
+ 
       - name: 🔄 Checkout & Sync wisesync Repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
         uses: actions/checkout@v3
@@ -393,7 +422,7 @@ jobs:
           repository: shubkb07/wisesync
           path: wisesync_repo
           token: ${{ secrets.GH_PAT }}
-
+ 
       - name: 🔄 Update wisesync Repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.wisesync_changed == 'true'
         run: |
@@ -405,7 +434,7 @@ jobs:
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wisesync"
           git push
-
+ 
       - name: 🔄 Checkout & Sync papersync Repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
         uses: actions/checkout@v3
@@ -413,7 +442,7 @@ jobs:
           repository: shubkb07/papersync
           path: papersync_repo
           token: ${{ secrets.GH_PAT }}
-
+ 
       - name: 🔄 Update papersync Repo
         if: env.IS_MASTER == 'true' && steps.changes.outputs.papersync_changed == 'true'
         run: |
@@ -425,7 +454,7 @@ jobs:
           git add --all
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for papersync"
           git push
-
+ 
       - name: 🔄 Checkout & Sync wordpress-sync Repo
         if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
         uses: actions/checkout@v3
@@ -433,7 +462,7 @@ jobs:
           repository: shubkb07/wordpress-sync
           path: wordpress_sync_repo
           token: ${{ secrets.GH_PAT }}
-
+ 
       - name: 🔄 Update wordpress-sync Repo
         if: env.IS_MASTER == 'true' && (steps.changes.outputs.wisesync_changed == 'true' || steps.changes.outputs.papersync_changed == 'true')
         run: |
@@ -558,7 +587,7 @@ jobs:
           echo "PaperSync Description:"
           echo "$papersync_desc"
           echo "::endgroup::"
-
+ 
       - name: 🏷️ Create Release for Current Repo (sync-web)
         if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
@@ -568,9 +597,9 @@ jobs:
           name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
           body: |
             ${{ steps.parse_release.outputs.wisesync_desc }}
-
+ 
             ---
-
+ 
             ${{ steps.parse_release.outputs.papersync_desc }}
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
       
@@ -584,12 +613,12 @@ jobs:
           name: ${{ steps.parse_release.outputs.wisesync_title }} & ${{ steps.parse_release.outputs.papersync_title }}
           body: |
             ${{ steps.parse_release.outputs.wisesync_desc }}
-
+ 
             ---
-
+ 
             ${{ steps.parse_release.outputs.papersync_desc }}
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
-
+ 
       - name: 🏷️ Create Release for WiseSync
         if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
