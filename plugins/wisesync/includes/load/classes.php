@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $sync_helpers        = new Sync_Helpers();
+$sync_plugin         = new Sync_Plugin();
 $sync_ajax           = new Sync_Ajax();
 $sync_settings       = new Sync_Settings();
 $sync_cli            = new Sync_CLI();
@@ -23,4 +24,3 @@ $sync_post           = new Sync_Post();
 $sync_user           = new Sync_User();
 $sync_query          = new Sync_Query();
 $sync_template       = new Sync_Template();
-$sync_plugin         = new Sync_Plugin();

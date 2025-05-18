@@ -1,9 +1,9 @@
 {
   "environment": "staging",
-  "last_commit_message": "feat: Add deployed check link to environment comment for easier access to deployment settings  ",
-  "generated_at": "2025-05-18T13:02:36.283201Z",
-  "updated_at": "2025-05-18T13:02:36.283201Z",
-  "workflow_run_id": "15096209012",
+  "last_commit_message": "Add template management functions for registration, activation, and retrieval  - Implemented sync_register_template and sync_register_template_group for template and group registration. - Added sync_activate_template and sync_deactivate_template for managing template activation status. - Created sync_delete_template for deleting templates or groups. - Introduced sync_get_templates and sync_get_template_groups for fetching templates and groups. - Added sync_is_template_active to check the activation status of a template. - Implemented sync_get_template_data and sync_update_template_data for retrieving and updating template configuration data.  ",
+  "generated_at": "2025-05-18T18:27:17.107983Z",
+  "updated_at": "2025-05-18T18:27:17.107983Z",
+  "workflow_run_id": "15098816096",
   "total_prs": 1,
   "data": [
     {
@@ -15,15 +15,15 @@
       "pr_number": 38,
       "pr_status": "open",
       "pr_created_at": "2025-05-17T10:19:38Z",
-      "pr_updated_at": "2025-05-18T13:02:08Z",
+      "pr_updated_at": "2025-05-18T18:26:39Z",
       "pr_author": "shubkb07",
       "pr_labels": [],
       "pr_draft": false,
       "pr_mergeable": true,
-      "commit_count": 20,
-      "files_changed": 5,
-      "additions": 862,
-      "deletions": 59,
+      "commit_count": 22,
+      "files_changed": 8,
+      "additions": 3020,
+      "deletions": 67,
       "commits": [
         "feat: Add constructor and create_template method to Sync_Template class",
         "feat: Update caching keys for Composer and NPM to include target branch and month",
@@ -44,7 +44,9 @@
         "Remove: Test Development Json for local view.",
         "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes",
         "feat: Add delay before creating environment link comment to improve user experience",
-        "feat: Add deployed check link to environment comment for easier access to deployment settings"
+        "feat: Add deployed check link to environment comment for easier access to deployment settings",
+        "Update: Refactor -  Change development setting view page to plugins class\n\nSo everything be in one place.",
+        "Add template management functions for registration, activation, and retrieval\n\n- Implemented sync_register_template and sync_register_template_group for template and group registration.\n- Added sync_activate_template and sync_deactivate_template for managing template activation status.\n- Created sync_delete_template for deleting templates or groups.\n- Introduced sync_get_templates and sync_get_template_groups for fetching templates and groups.\n- Added sync_is_template_active to check the activation status of a template.\n- Implemented sync_get_template_data and sync_update_template_data for retrieving and updating template configuration data."
       ]
     }
   ]
