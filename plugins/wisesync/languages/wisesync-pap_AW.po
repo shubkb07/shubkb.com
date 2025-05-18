@@ -34,16 +34,6 @@ msgstr ""
 msgid "Shubham Kumar Bansal <shub@shubkb.com>"
 msgstr ""
 
-#: includes/blocks/class-cookie-banner-block.php:209
-#: blocks/build/cookie-banner/index.js:1
-#: blocks/src/cookie-banner/edit.js:394
-msgid "Cookie Settings"
-msgstr ""
-
-#: includes/blocks/class-cookie-banner-block.php:210
-msgid "Close"
-msgstr ""
-
 #: includes/functions/block.php:26
 msgid "Sync Blocks"
 msgstr ""
@@ -62,4 +52,396 @@ msgstr ""
 #: blocks/src/cookie-banner/block.json
 msgctxt "block description"
 msgid "All compliant cookie consent banner with customizable settings"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:83
+msgid "Bad Request"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:96
+msgid "Unauthorized"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:109
+msgid "Forbidden"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:122
+msgid "Not Found"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:135
+msgid "Internal Server Error"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:148
+msgid "Unexpected Error"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:208
+msgid "Unauthorized access"
+msgstr ""
+
+#: includes/classes/class-sync-ajax.php:212
+msgid "Invalid nonce"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:33
+msgid "Sync Development Settings"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:66
+msgid "Development Settings"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:70
+msgid "Environment Information"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:74
+msgid "Environment"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:75
+#: includes/classes/class-sync-plugin.php:142
+#: includes/classes/class-sync-plugin.php:144
+msgid "Not specified"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:78
+msgid "Last Commit Message"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:79
+#: includes/classes/class-sync-plugin.php:83
+#: includes/classes/class-sync-plugin.php:87
+#: includes/classes/class-sync-plugin.php:91
+#: includes/classes/class-sync-plugin.php:125
+#: includes/classes/class-sync-plugin.php:149
+#: includes/classes/class-sync-plugin.php:153
+msgid "Not available"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:82
+msgid "Generated At"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:86
+#: includes/classes/class-sync-plugin.php:152
+msgid "Updated At"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:90
+msgid "Workflow Run ID"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:94
+msgid "Total PRs"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:104
+msgid "Pull Requests"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:119
+msgid "Untitled PR"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:124
+msgid "PR Number"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:128
+#: includes/classes/class-sync-template.php:1254
+msgid "Status"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:131
+#: includes/classes/class-sync-plugin.php:137
+#: includes/classes/class-sync-plugin.php:173
+msgid "Unknown"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:136
+msgid "Author"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:140
+msgid "Branch"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:148
+msgid "Created At"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:156
+#: includes/classes/class-sync-plugin.php:197
+msgid "Commits"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:160
+msgid "Files Changed"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:164
+msgid "Changes"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:172
+msgid "Draft"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:173
+msgid "Yes"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:173
+msgid "No"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:177
+msgid "PR URL"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:187
+#: blocks/build/cookie-banner/index.js:1
+#: blocks/src/cookie-banner/edit.js:276
+#: blocks/src/cookie-banner/edit.js:292
+#: blocks/src/cookie-banner/edit.js:308
+#: blocks/src/cookie-banner/edit.js:324
+#: blocks/src/cookie-banner/edit.js:340
+msgid "Description"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:211
+msgid "Labels"
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:224
+msgid "No pull request data available."
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:232
+msgid "Error: Invalid JSON format in development settings file."
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:239
+msgid "Error: Unable to read development settings file."
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:246
+msgid "Development settings file not found."
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:266
+msgid "Please verify that the path to the MU-Plugin load file is correct in your <code>wp-config.php</code>."
+msgstr ""
+
+#. translators: %1$s: filename, %2$s: folder name
+#: includes/classes/class-sync-plugin.php:272
+#: includes/classes/class-sync-plugin.php:279
+#, php-format
+msgid "Edit %1$s inside your %2$s folder."
+msgstr ""
+
+#. translators: %1$s: variable name, %2$s: path
+#: includes/classes/class-sync-plugin.php:288
+#, php-format
+msgid "Ensure %1$s is pointing to %2$s."
+msgstr ""
+
+#: includes/classes/class-sync-plugin.php:298
+msgid "Mu-Plugin Load Error"
+msgstr ""
+
+#. translators: %s is the name of the field that is required.
+#: includes/classes/class-sync-settings.php:1083
+#, php-format
+msgid "Field \"%s\" is required."
+msgstr ""
+
+#. translators: %s is the name of the field that is invalid.
+#: includes/classes/class-sync-settings.php:1097
+#, php-format
+msgid "Field \"%s\" is invalid."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:1542
+#: includes/classes/class-sync-settings.php:1599
+msgid "Invalid settings array."
+msgstr ""
+
+#. translators: Tab heading for Site Health navigation.
+#: includes/classes/class-sync-site-health.php:48
+msgctxt "Site Health"
+msgid "Sync"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:92
+msgid "Good"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:96
+msgid "Recommended"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:100
+msgid "Critical"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:104
+msgid "Should be improved"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:163
+msgid "Sync Info"
+msgstr ""
+
+#: includes/classes/class-sync-site-health.php:239
+msgid "Copy Logs"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:110
+msgid "Templates"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:111
+msgid "Sync Templates"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:131
+msgid "Template Groups"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:132
+msgid "Sync Template Groups"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1114
+msgid "Template Type"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1124
+msgid "Template Status"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1134
+msgid "Template Configuration"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1144
+msgid "Group Templates"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1162
+msgid "Template Type:"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1164
+msgid "Select Type"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1184
+msgid "Status:"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1186
+#: includes/classes/class-sync-template.php:1276
+msgid "Active"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1188
+#: includes/classes/class-sync-template.php:1278
+msgid "Inactive"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1194
+msgid "Deactivate"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1198
+msgid "Activate"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1204
+msgid "Are you sure you want to activate this template?"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1209
+msgid "Are you sure you want to deactivate this template?"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1227
+msgid "Template Configuration (JSON):"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1231
+msgid "Enter the template configuration in JSON format. This will define how the template behaves when activated."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1252
+msgid "Template"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1253
+msgid "Type"
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1286
+msgid "No templates in this group."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1352
+#: includes/classes/class-sync-template.php:1388
+msgid "Invalid nonce."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1357
+#: includes/classes/class-sync-template.php:1393
+msgid "You do not have permission to perform this action."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1362
+#: includes/classes/class-sync-template.php:1398
+msgid "Invalid template ID."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1859
+msgid "Template data must be an array."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1863
+msgid "Invalid template type."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1870
+msgid "Post type template requires post_type and args fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1876
+msgid "Taxonomy template requires taxonomy, object_type, and args fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1882
+msgid "Meta box template requires id, title, and callback fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1888
+msgid "User role template requires role and display_name fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1895
+msgid "Theme template requires slug and content fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1901
+msgid "Shortcode template requires tag and callback fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1907
+msgid "Block pattern template requires name and content fields."
+msgstr ""
+
+#: includes/classes/class-sync-template.php:1913
+msgid "Block style template requires block_name and style_properties fields."
 msgstr ""

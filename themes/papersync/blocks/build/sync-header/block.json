@@ -1,0 +1,45 @@
+{
+  "$schema": "./../../../../../schema-block.json",
+  "apiVersion": 3,
+  "name": "sync/cookie-banner",
+  "version": "1.0.0",
+  "title": "Cookie Banner",
+  "category": "anfco-blocks",
+  "icon": "awards",
+  "description": "Award slider block.",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "posts": {
+      "type": "array",
+      "default": []
+    },
+    "searchTitle": {
+      "type": "string"
+    },
+    "items": {
+      "type": "number",
+      "default": 4
+    },
+    "postType": {
+      "type": "string",
+      "default": "post"
+    },
+    "order": {
+      "type": "string",
+      "default": "asc"
+    }
+  },
+  "textdomain": "anfco",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "viewScript": "anfco-award-slider",
+  "style": "anfco-award-slider-style",
+  "example": {
+    "viewportWidth": 1440,
+    "attributes": {
+      "items": 4
+    }
+  }
+}
