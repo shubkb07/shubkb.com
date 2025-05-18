@@ -1,28 +1,28 @@
 {
   "environment": "staging",
-  "last_commit_message": "Remove: Test Development Json for local view.  ",
-  "generated_at": "2025-05-18T10:56:29.601229Z",
-  "updated_at": "2025-05-18T10:56:29.601229Z",
-  "workflow_run_id": "15095204585",
+  "last_commit_message": "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes  ",
+  "generated_at": "2025-05-18T12:55:12.904943Z",
+  "updated_at": "2025-05-18T12:55:12.904943Z",
+  "workflow_run_id": "15096144527",
   "total_prs": 1,
   "data": [
     {
       "pr_title": "Adding Template Class and Its Wrapper Funtions",
-      "pr_desc": "# \ud83d\ude80 Pull Request Template\r\n\r\n## Description\r\n\r\nPlease include a summary of the change and what issue is fixed or feature is added.\r\n\r\nFixes: # (link issue number if applicable)\r\n\r\n## Type of change\r\n\r\n- [ ] Bug fix\r\n- [ ] New feature\r\n- [ ] Breaking change\r\n- [ ] Documentation update\r\n\r\n## Related Plugins or Themes\r\n\r\nList any themes/plugins affected.\r\n\r\n## Screenshots (if UI changes)\r\n\r\n_Please attach screenshots/gifs if relevant._\r\n\r\n## Checklist\r\n\r\n- [ ] I have tested the code on my local WordPress.\r\n- [ ] I have followed WordPress PHPCS rules.\r\n- [ ] I have added tests or explained why not applicable.\r\n- [ ] My code follows the plugin\u2019s coding style.\r\n\r\n---\r\n\r\nThanks for contributing to **WiseSync**! \u2764\ufe0f\r\n",
+      "pr_desc": "Creating Template Class for easy pre-structure ability, which can be shared too.\r\n\r\n## Description\r\n\r\nCreate a class that can take template based on pre structure and store them as post, and in options table, it store post ID, which templates are active, i can make it is to load data only required,\r\n\r\nFixes: #2 \r\n\r\n## Type of change\r\n\r\n- [ ] Bug fix\r\n- [x] New feature\r\n- [ ] Breaking change\r\n- [ ] Documentation update\r\n\r\n## Related Plugins or Themes\r\n\r\n- WiseSync Plugin\r\n\r\n## Screenshots (if UI changes)\r\n(Pending...)\r\n\r\n_Please attach screenshots/gifs if relevant._\r\n\r\n## Checklist\r\n\r\n- [ ] I have tested the code on my local WordPress.\r\n- [ ] I have followed WordPress PHPCS rules.\r\n- [ ] I have added tests or explained why not applicable.\r\n- [ ] My code follows the plugin\u2019s coding style.\r\n\r\n---\r\n\r\nThanks for contributing to **WiseSync**! \u2764\ufe0f\r\n",
       "pr_head": "feat/plugin-template",
       "pr_base": "dev",
       "pr_url": "https://github.com/shubkb07/sync-web/pull/38",
       "pr_number": 38,
       "pr_status": "open",
       "pr_created_at": "2025-05-17T10:19:38Z",
-      "pr_updated_at": "2025-05-18T10:55:57Z",
+      "pr_updated_at": "2025-05-18T12:54:30Z",
       "pr_author": "shubkb07",
       "pr_labels": [],
       "pr_draft": false,
       "pr_mergeable": true,
-      "commit_count": 17,
+      "commit_count": 18,
       "files_changed": 5,
-      "additions": 858,
+      "additions": 856,
       "deletions": 59,
       "commits": [
         "feat: Add constructor and create_template method to Sync_Template class",
@@ -41,7 +41,8 @@
         "feat: Enhance developer settings view with detailed PR information and error handling for JSON file",
         "feat: Add detailed PR information retrieval including file changes, additions, and deletions",
         "fix: Clean up whitespace in build-and-deploy workflow for improved readability",
-        "Remove: Test Development Json for local view."
+        "Remove: Test Development Json for local view.",
+        "feat: Refactor comment deletion logic to remove all previous environment comments instead of limiting to 5 pushes"
       ]
     }
   ]
