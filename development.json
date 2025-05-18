@@ -1,9 +1,9 @@
 {
   "environment": "staging",
-  "last_commit_message": "feat: Enhance developer settings view with detailed PR information and error handling for JSON file  ",
-  "generated_at": "2025-05-18T10:25:13.217664Z",
-  "updated_at": "2025-05-18T10:25:13.217664Z",
-  "workflow_run_id": "15094964007",
+  "last_commit_message": "fix: Clean up whitespace in build-and-deploy workflow for improved readability  ",
+  "generated_at": "2025-05-18T10:47:43.970520Z",
+  "updated_at": "2025-05-18T10:47:43.970520Z",
+  "workflow_run_id": "15095145227",
   "total_prs": 1,
   "data": [
     {
@@ -15,15 +15,15 @@
       "pr_number": 38,
       "pr_status": "open",
       "pr_created_at": "2025-05-17T10:19:38Z",
-      "pr_updated_at": "2025-05-18T10:24:41Z",
+      "pr_updated_at": "2025-05-18T10:47:07Z",
       "pr_author": "shubkb07",
       "pr_labels": [],
       "pr_draft": false,
-      "pr_mergeable": null,
-      "commit_count": 14,
-      "files_changed": 0,
-      "additions": 0,
-      "deletions": 0,
+      "pr_mergeable": true,
+      "commit_count": 16,
+      "files_changed": 6,
+      "additions": 936,
+      "deletions": 59,
       "commits": [
         "feat: Add constructor and create_template method to Sync_Template class",
         "feat: Update caching keys for Composer and NPM to include target branch and month",
@@ -38,7 +38,9 @@
         "feat: Add cache IDs for Composer and Node.js steps to improve caching efficiency",
         "fix: Update cache keys for Composer and Node.js to remove date dependency for improved consistency",
         "feat: Add developer settings functionality and enhance PR data generation with additional metadata",
-        "feat: Enhance developer settings view with detailed PR information and error handling for JSON file"
+        "feat: Enhance developer settings view with detailed PR information and error handling for JSON file",
+        "feat: Add detailed PR information retrieval including file changes, additions, and deletions",
+        "fix: Clean up whitespace in build-and-deploy workflow for improved readability"
       ]
     }
   ]
