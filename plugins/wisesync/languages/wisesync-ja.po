@@ -107,20 +107,32 @@ msgstr ""
 msgid "Mu-Plugin Load Error"
 msgstr ""
 
+#: includes/classes/class-sync-settings.php:795
+msgid "Sync Development Settings"
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:825
+msgid "No development settings found."
+msgstr ""
+
+#: includes/classes/class-sync-settings.php:828
+msgid "Development settings file not found."
+msgstr ""
+
 #. translators: %s is the name of the field that is required.
-#: includes/classes/class-sync-settings.php:1071
+#: includes/classes/class-sync-settings.php:1135
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
 #. translators: %s is the name of the field that is invalid.
-#: includes/classes/class-sync-settings.php:1085
+#: includes/classes/class-sync-settings.php:1149
 #, php-format
 msgid "Field \"%s\" is invalid."
 msgstr ""
 
-#: includes/classes/class-sync-settings.php:1499
-#: includes/classes/class-sync-settings.php:1556
+#: includes/classes/class-sync-settings.php:1594
+#: includes/classes/class-sync-settings.php:1651
 msgid "Invalid settings array."
 msgstr ""
 
