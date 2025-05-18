@@ -81,6 +81,11 @@ jobs:
             echo "env_name=development" >> $GITHUB_OUTPUT
           fi
 
+      - name: Wait before creating comment
+        run: |
+          echo "Waiting 15 seconds before creating comment..."
+          sleep 15
+
       - name: Create environment link comment
         uses: peter-evans/create-or-update-comment@v2
         with:
