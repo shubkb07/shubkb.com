@@ -83,13 +83,13 @@ function sync_generate_admin_notice( $message, $title = '', $status = 'success',
  *
  * @param string     $menu_slug Menu slug.
  * @param string     $menu_name Menu name.
- * @param int        $position Menu position.
  * @param bool|array $create_sync_menu Create sync menu.
+ * @param int        $position Menu position.
  * @param string     $settings_level Settings level.
  *
  * @since 1.0.0
  */
-function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $create_sync_menu = true, $settings_level = 'site' ) {
+function sync_add_wp_settings_menu( $menu_slug, $menu_name, $create_sync_menu, $position = 100, $settings_level = 'site' ) {
 
 	/**
 	 * Sync Settings Class
@@ -98,7 +98,7 @@ function sync_add_wp_settings_menu( $menu_slug, $menu_name, $position = 100, $cr
 	 */
 	global $sync_settings;
 
-	$sync_settings->add_wp_menu( $menu_slug, $menu_name, $position, $create_sync_menu, $settings_level );
+	$sync_settings->add_wp_menu( $menu_slug, $menu_name, $create_sync_menu, $position, $settings_level );
 }
 
 /**
