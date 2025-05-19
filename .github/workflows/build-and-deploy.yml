@@ -11,12 +11,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build_and_deploy:
-    name: 🔧 Build & 🚀 Deploy
+  build_deploy_and_release:
+    name: 🔧 Build, 🚀 Deploy & 📦 Release
     runs-on: ubuntu-latest
     if: ${{ !endsWith(github.ref, '-build') }}
-    outputs:
-      commit_message: ${{ steps.last_commit.outputs.message }}
 
     steps:
       - name: 🏁 Start Build & Deploy v1.2
@@ -112,24 +110,28 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - name: ♻️ Cache Composer
+        id: composer-cache-dir
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
       - name: ♻️ Cache Composer Deps
+        id: composer-cache
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.composer_deps_changed == 'true'
         uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache-dir.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          key: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-${{ env.TARGET_BRANCH }}-
 
       - name: ♻️ Cache NPM
+        id: node-modules-cache
         if: steps.changes.outputs.build_required == 'true' || steps.changes.outputs.npm_deps_changed == 'true'
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: node-modules-${{ runner.os }}-
+          key: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: node-modules-${{ runner.os }}-${{ env.TARGET_BRANCH }}-
 
       - name: 📥 Composer Install
         if: (steps.changes.outputs.composer_deps_changed == 'true') || (steps.changes.outputs.build_required == 'true' && steps.composer-cache.outputs.cache-hit != 'true')
@@ -156,7 +158,7 @@ jobs:
         run: npm run build:linux
 
       - name: 🔧 Lint & Fix Assets
-        if: steps.changes.outputs.build_required == 'true'
+        if: env.CURRENT_BRANCH == 'master' && steps.changes.outputs.build_required == 'true'
         run: npm run lint:fix
 
       - name: 🧹 Clean Up Build Artifacts
@@ -193,6 +195,218 @@ jobs:
           while IFS= read -r theme; do
             cp -r themes/$theme deploy/themes/ || true
           done < changed_themes.txt
+
+      - name: 📊 Generate PR Data JSON for Development/Staging
+        if: env.TARGET_BRANCH == 'dev-build' || env.TARGET_BRANCH == 'develop-build' 
+        run: |
+          # Install jq for JSON processing
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+          # Set environment based on TARGET_BRANCH
+          if [ "$TARGET_BRANCH" = "dev-build" ]; then
+            ENVIRONMENT="development"
+            FILTER_BRANCH="dev"
+            # For dev-build, we'll only include PRs with head branch as dev
+            FILTER_TYPE="include"
+          else
+            ENVIRONMENT="staging"
+            # For develop-build, exclude PRs with head branch as master or dev
+            FILTER_TYPE="exclude"
+            FILTER_BRANCH="master,dev"
+          fi
+
+          # Create a Python script to generate the development.json file
+          cat > generate-pr-data.py << 'EOF'
+          import json
+          import os
+          import subprocess
+          import sys
+          from datetime import datetime
+
+          # Configuration from environment variables
+          environment = os.environ.get('ENVIRONMENT', 'unknown')
+          filter_type = os.environ.get('FILTER_TYPE', 'exclude')
+          filter_branches = os.environ.get('FILTER_BRANCH', '').split(',')
+          last_commit_message = os.environ.get('LAST_COMMIT_MESSAGE', '')
+          repo = os.environ.get('GITHUB_REPOSITORY', '')
+          token = os.environ.get('GITHUB_TOKEN', '')
+          workflow_run_id = os.environ.get('GITHUB_RUN_ID', '')
+
+          def run_command(cmd):
+              try:
+                  result = subprocess.run(cmd, shell=True, check=True, capture_output=True, text=True)
+                  return result.stdout.strip()
+              except subprocess.CalledProcessError as e:
+                  print(f"Error executing command: {cmd}")
+                  print(f"Error details: {e.stderr}")
+                  return None
+
+          def get_pr_details(pr_number):
+              """Get detailed PR information including file changes, additions, deletions"""
+              try:
+                  pr_detail_cmd = f'curl -s -H "Authorization: token {token}" "https://api.github.com/repos/{repo}/pulls/{pr_number}"'
+                  pr_detail_output = run_command(pr_detail_cmd)
+                 
+                  if pr_detail_output:
+                      pr_details = json.loads(pr_detail_output)
+                      return {
+                          'changed_files': pr_details.get('changed_files', 0),
+                          'additions': pr_details.get('additions', 0),
+                          'deletions': pr_details.get('deletions', 0),
+                          'mergeable': pr_details.get('mergeable', None)
+                      }
+              except Exception as e:
+                  print(f"Error fetching PR details for #{pr_number}: {e}")
+             
+              return {
+                  'changed_files': 0,
+                  'additions': 0,
+                  'deletions': 0,
+                  'mergeable': None
+              }
+
+          def get_pr_data():
+              try:
+                  # Get open PRs
+                  pr_cmd = f'curl -s -H "Authorization: token {token}" "https://api.github.com/repos/{repo}/pulls?state=open"'
+                  pr_output = run_command(pr_cmd)
+                 
+                  if not pr_output:
+                      print("No output from GitHub API when fetching PRs")
+                      return []
+                 
+                  try:
+                      pr_list = json.loads(pr_output)
+                      if not isinstance(pr_list, list):
+                          print(f"Expected list but got: {type(pr_list)}")
+                          print(f"API Response: {pr_output[:200]}...")  # Print first 200 chars for debugging
+                          return []
+                  except json.JSONDecodeError as e:
+                      print(f"Failed to parse PR list JSON: {e}")
+                      print(f"API Response: {pr_output[:200]}...")
+                      return []
+                 
+                  # Filter PRs based on branch criteria
+                  filtered_prs = []
+                  for pr in pr_list:
+                      head_ref = pr.get('head', {}).get('ref', '')
+                     
+                      # Apply filter logic
+                      if filter_type == 'include':
+                          # Include only PRs with specific head branch
+                          if head_ref in filter_branches:
+                              filtered_prs.append(pr)
+                      else:  # exclude
+                          # Include all PRs except those with specified head branches
+                          if head_ref not in filter_branches:
+                              filtered_prs.append(pr)
+                 
+                  # Process each PR to get commits and detailed information
+                  results = []
+                  for pr in filtered_prs:
+                      pr_number = pr.get('number', '')
+                      commits_url = pr.get('commits_url', '')
+                     
+                      print(f"Processing PR #{pr_number}: {pr.get('title', '')}")
+                     
+                      # Get commits for this PR
+                      commits_cmd = f'curl -s -H "Authorization: token {token}" "{commits_url}"'
+                      commits_output = run_command(commits_cmd)
+                     
+                      if not commits_output:
+                          print(f"No output when fetching commits for PR #{pr_number}")
+                          commit_messages = ['Error fetching commits']
+                          commit_count = 0
+                      else:
+                          try:
+                              commits_data = json.loads(commits_output)
+                              if isinstance(commits_data, list):
+                                  commit_messages = [commit.get('commit', {}).get('message', '') for commit in commits_data]
+                                  commit_count = len(commits_data)
+                              else:
+                                  print(f"Expected list of commits but got: {type(commits_data)}")
+                                  commit_messages = ['Error: Invalid commits format']
+                                  commit_count = 0
+                          except json.JSONDecodeError:
+                              print(f"Failed to parse commits JSON for PR #{pr_number}")
+                              commit_messages = ['Error: Failed to parse commits']
+                              commit_count = 0
+                     
+                      # Get detailed PR information (files changed, additions, deletions)
+                      pr_details = get_pr_details(pr_number)
+                     
+                      # Extract PR labels
+                      pr_labels = [label.get('name', '') for label in pr.get('labels', [])]
+                     
+                      # Create PR entry with all requested fields
+                      pr_entry = {
+                          'pr_title': pr.get('title', ''),
+                          'pr_desc': pr.get('body', '') or '',
+                          'pr_head': pr.get('head', {}).get('ref', ''),
+                          'pr_base': pr.get('base', {}).get('ref', ''),
+                          'pr_url': pr.get('html_url', ''),
+                          'pr_number': pr.get('number', ''),
+                          'pr_status': pr.get('state', 'unknown'),
+                          'pr_created_at': pr.get('created_at', ''),
+                          'pr_updated_at': pr.get('updated_at', ''),
+                          'pr_author': pr.get('user', {}).get('login', ''),
+                          'pr_labels': pr_labels,
+                          'pr_draft': pr.get('draft', False),
+                          'pr_mergeable': pr_details['mergeable'],
+                          'commit_count': commit_count,
+                          'files_changed': pr_details['changed_files'],
+                          'additions': pr_details['additions'],
+                          'deletions': pr_details['deletions'],
+                          'commits': commit_messages
+                      }
+                     
+                      results.append(pr_entry)
+                 
+                  return results
+             
+              except Exception as e:
+                  print(f"Error fetching PRs: {e}")
+                  return []
+
+          # Generate JSON data
+          pr_data = get_pr_data()
+          current_time = datetime.utcnow().isoformat() + 'Z'
+         
+          json_data = {
+              'environment': environment,
+              'last_commit_message': last_commit_message,
+              'generated_at': current_time,
+              'updated_at': current_time,
+              'workflow_run_id': workflow_run_id,
+              'total_prs': len(pr_data),
+              'data': pr_data
+          }
+
+          # Write to file
+          with open('development.json', 'w') as f:
+              json.dump(json_data, f, indent=2)
+
+          print(f"Generated development.json with {len(pr_data)} PRs.")
+          EOF
+
+          # Make script executable
+          chmod +x generate-pr-data.py
+
+          # Run the script
+          cd deploy
+          export ENVIRONMENT="$ENVIRONMENT"
+          export FILTER_TYPE="$FILTER_TYPE"
+          export FILTER_BRANCH="$FILTER_BRANCH"
+          export LAST_COMMIT_MESSAGE="${{ steps.last_commit.outputs.message }}"
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          export GITHUB_RUN_ID="${{ github.run_id }}"
+          python3 ../generate-pr-data.py
+         
+          # Debug: Show the generated file
+          echo "Generated development.json file:"
+          ls -la development.json
+          cat development.json
 
       - name: 💌 Commit & Push to $TARGET_BRANCH
         run: |
@@ -269,20 +483,10 @@ jobs:
           git commit -m "Update from main repo: $(date +'%Y-%m-%d %H:%M:%S') – ${{ steps.last_commit.outputs.message }}" || echo "No changes for wordpress-sync"
           git push
 
-  release:
-    name: 📦 Parse & Create Releases
-    runs-on: ubuntu-latest
-    needs: build_and_deploy
-    if: ${{ startsWith(needs.build_and_deploy.outputs.commit_message, 'Release:') }}
-
-    steps:
-      - name: 📥 Checkout Main Repo
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 1
-
+      # Release steps (previously in the release job)
       - name: 🔍 Parse Release Information
         id: parse_release
+        if: startsWith(steps.last_commit.outputs.message, 'Release:')
         shell: bash
         run: |
           set -euo pipefail
@@ -385,7 +589,7 @@ jobs:
           echo "::endgroup::"
 
       - name: 🏷️ Create Release for Current Repo (sync-web)
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -400,7 +604,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
       
       - name: 🏷️ Create Release for WordPress Sync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
@@ -416,7 +620,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for WiseSync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
@@ -427,7 +631,7 @@ jobs:
           prerelease: ${{ contains(steps.parse_release.outputs.version, 'alpha') || contains(steps.parse_release.outputs.version, 'beta') }}
 
       - name: 🏷️ Create Release for PaperSync
-        if: steps.parse_release.outputs.is_valid == 'true'
+        if: startsWith(steps.last_commit.outputs.message, 'Release:') && steps.parse_release.outputs.is_valid == 'true'
         uses: softprops/action-gh-release@v2
         with:
           token: ${{ secrets.GH_PAT }}
