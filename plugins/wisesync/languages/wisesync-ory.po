@@ -445,3 +445,35 @@ msgstr ""
 #: includes/classes/class-sync-template.php:1913
 msgid "Block style template requires block_name and style_properties fields."
 msgstr ""
+
+#: includes/load/classes.php:37
+msgid "WiseSync Settings"
+msgstr ""
+
+#: includes/load/classes.php:51
+msgid "Sync Dashboard"
+msgstr ""
+
+#: includes/load/classes.php:61
+msgid "Sync Logs"
+msgstr ""
+
+#: includes/load/classes.php:62
+msgid "Sync Settings"
+msgstr ""
+
+#: includes/load/classes.php:65
+msgid "Sync Reports"
+msgstr ""
+
+#: includes/load/classes.php:70
+msgid "Advanced Sync"
+msgstr ""
+
+#: includes/load/classes.php:80
+msgid "Sync Tools"
+msgstr ""
+
+#: includes/load/classes.php:81
+msgid "Sync Diagnostics"
+msgstr ""

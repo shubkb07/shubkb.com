@@ -24,7 +24,6 @@ $sync_post           = new Sync_Post();
 $sync_user           = new Sync_User();
 $sync_query          = new Sync_Query();
 $sync_template       = new Sync_Template();
-<<<<<<< HEAD
 $sync_plugin         = new Sync_Plugin();
 
 
@@ -431,5 +430,3 @@ function sync_register_settings_tools( $content, $page_details ) {
 function default_show( $html_content, $page_details ) {
 	return 'Page Details' . wp_json_encode( $page_details );
 }
-=======
->>>>>>> a102ec8b82a389450556fc5055ea6a30715400aa
